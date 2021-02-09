@@ -1,0 +1,15 @@
+{
+  "name": "zoom-osc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "zoom-osc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ashley Green",
+  "manufacturer": "Liminal",
+	"product": "ZoomOSC",
+	"shortname": "zoomosc",
+	"description": "zoomOSC plugin for companion ",
+  "keywords":"zoom"
+}

@@ -1,1 +1,2 @@
-# companion-module-liminalet-zoomosc
+# companion-module-zoom-osc
+See HELP.md and LICENSE
