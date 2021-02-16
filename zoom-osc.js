@@ -23,6 +23,8 @@ function instance(system, id, config) {
 	var self = this;
 	//user data
 	self.user_data={};
+	//track selected users
+	self.user_selection_group={};
 	//contains data from connected ZoomOSC instance
 	self.zoomosc_client_data										 = [];
 	self.zoomosc_client_data.last_ping					 = 0;
@@ -398,6 +400,10 @@ var allInstanceActions=[];
 							id:ZOSC.keywords.ZOSC_MSG_PART_ME,
 							 label:'--Me--'
 						 },
+						 [ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION]:{
+							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
+							 label:'--Selection--'
+						 },
 						[ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME]:{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
 							 label: '--Specify Username--'
@@ -554,6 +560,16 @@ instance.prototype.action = function(action) {
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID:
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				userString=parseInt(action.options.userString);
+				break;
+		
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_PART_USERS+ZOSC_MSG_TARGET_PART_ZOOMID
+				action.options.user=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID
+				var stringSelection =[]
+				self.user_selection_group.forEach(function(key){
+					stringSelection.push(self.user_selection_group[key].zoomID)
+				});
+				userString = stringSelection.join('" "')
 				break;
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
