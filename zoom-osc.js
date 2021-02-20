@@ -23,8 +23,6 @@ function instance(system, id, config) {
 	var self = this;
 	//user data
 	self.user_data={};
-	//track selected users
-	self.user_selection_group={};
 	//contains data from connected ZoomOSC instance
 	self.zoomosc_client_data										 = [];
 	self.zoomosc_client_data.last_ping					 = 0;
@@ -133,7 +131,8 @@ instance.prototype.init_variables = function() {
 		{varName:'audioStatusText',		 varString:'audioStatus',			 varLabel:'Audio Status'},
 		{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
 		{varName:'handStatusText',			varString:'handStatus',				varLabel:'Hand Status'},
-		{varName:'activeSpeakerText',	 varString:'activeSpeaker',		 varLabel:'Active Speaker'}
+		{varName:'activeSpeakerText',	 varString:'activeSpeaker',		 varLabel:'Active Speaker'},
+		{varName:'selection',		 varString:'selection',						varLabel:'Selected'}
 	];
 
 function setVariablesForUser(sourceUser,userSourceList,variablesToPublishList){
@@ -679,6 +678,24 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 		}
 	}
+	else if('INTERNAL_ACTION' in thisMsg){
+		switch(thisMsg.INTERNAL_ACTION){
+			case "addSelection":
+				// add to self.user_selection_group
+				return;
+			case "removeSelection":
+				// remove from self.user_selection_group
+				return;
+			case "toggleSelection":
+				// add or remove from self.user_selection_group
+				return;
+			case "clearSelection":
+				self.user_selection_group = {};
+				return;
+			default:
+				break;
+		}
+	}
 
 };
 ////END ACTIONS
@@ -693,7 +710,8 @@ instance.prototype.init_feedbacks = function(){
 			{id:'videoStatus',	 label:'Video Status'},
 			{id:'audioStatus',	 label:'Audio Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
-			{id:'handStatus',		label:'Hand Raised Status'}
+			{id:'handStatus',		label:'Hand Raised Status'},
+			{id:'selectionStatus',		label:'Selected'}
 
 	];
 

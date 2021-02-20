@@ -15,6 +15,7 @@
 //each is ignored in C but is converted to a key in the js array (without the :
  USER_ACTION: //the message used by a user action (such as /zoom/userName/pin - action would be "pin"
  GENERAL_ACTION: //a general action - such as /zoom/clearPin where the action would be "clearPin"
+ INTERNAL_ACTION: //an action performed inside Companion or this module (such as modifying the selection group)
  MESSAGE: //a full OSC message - such as /zoom/update (message would be "/zoom/update"
  TITLE:
  ISPRO:
@@ -417,12 +418,15 @@ SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "list: options", DESCRIPTION: 
 }},
 SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select users for batch actions", MESSAGES: {
 
-    ZOSC_MSG_PART_LIST_ADD_SELECTION : {USER_ACTION:"addSelection", TITLE:"Add to Selection", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add user(s to selection group" },
+    ZOSC_MSG_PART_LIST_ADD_SELECTION : {INTERNAL_ACTION:"addSelection", TITLE:"Add to Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add user(s to selection group" },
 
-    ZOSC_MSG_PART_LIST_REMOVE_SELECTION : {USER_ACTION:"removeSelection", TITLE:"Remove from Selection", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from selection group" },
+    ZOSC_MSG_PART_LIST_REMOVE_SELECTION : {INTERNAL_ACTION:"removeSelection", TITLE:"Remove from Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from selection group" },
 
-    ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {USER_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
+    ZOSC_MSG_PART_LIST_TOGGLE_SELECTION : {INTERNAL_ACTION:"toggleSelection", TITLE:"Toggle Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
+
+    ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
    }},
+
 APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRIPTION: "Settings actions for user", MESSAGES: {
 
 
