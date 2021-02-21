@@ -132,7 +132,7 @@ instance.prototype.init_variables = function() {
 		{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
 		{varName:'handStatusText',			varString:'handStatus',				varLabel:'Hand Status'},
 		{varName:'activeSpeakerText',	 varString:'activeSpeaker',		 varLabel:'Active Speaker'},
-		{varName:'selection',		 varString:'selection',						varLabel:'Selected'}
+		{varName:'selected',		 varString:'selected',						varLabel:'Selected'}
 	];
 
 function setVariablesForUser(sourceUser,userSourceList,variablesToPublishList){
@@ -562,13 +562,21 @@ instance.prototype.action = function(action) {
 				break;
 		
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_PART_USERS+ZOSC_MSG_TARGET_PART_ZOOMID
-				action.options.user=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID
-				var stringSelection =[]
-				self.user_selection_group.forEach(function(key){
-					stringSelection.push(self.user_selection_group[key].zoomID)
-				});
-				userString = stringSelection.join('" "')
+				action.options.user=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+				var stringSelection = [];
+				for (let user in self.user_data){
+					if(self.user_data[user].selected){
+						stringSelection.push(user);
+					}
+				}
+				if (stringSelection.length > 1) {  // multiple users selected
+					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
+					userString = stringSelection.join(" ");
+				} else {  // single user
+					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
+					userString = parseInt(stringSelection[0])
+				}
+				self.log('info', "user selection ("+stringSelection.length + "): " + userString);
 				break;
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
@@ -636,11 +644,13 @@ instance.prototype.action = function(action) {
 if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+TARGET_TYPE+'/'+thisMsg.USER_ACTION;
 		//make user
-	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET){
+	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET||ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID){
 		args.push({type:'i',value:parseInt(userString)});
 	}
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
+	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
+		args.push({type:'i',value:parseInt(userString)});
 	}
 	else{
 		args.push({type:'s',value:userString});
@@ -679,22 +689,91 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		}
 	}
 	else if('INTERNAL_ACTION' in thisMsg){
+		self.log('info', "ZOSC Internal Action " + thisMsg.INTERNAL_ACTION)
+		selectedUser=null
+		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
+			for(let user in self.user_data){
+				//if(!(this_user.zoomID in self.user_data)) {}
+				switch (TARGET_TYPE){
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
+					//look for user with target position in userstring
+						break;
+
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
+					//look for user with gallery index in userstring
+					for (let user in self.user_data){
+
+						if(self.user_data[user].galleryIndex==userString){
+							selectedUser=user;
+						break;
+						}
+					}
+						break;
+
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
+					//look for user with gallery position in userString
+					for (let user in self.user_data){
+						if(self.user_data[user].galleryPosition==userString){
+							selectedUser=user;
+							break;
+						}
+					}
+					break;
+					case ZOSC.enums.ZOSC_MSG_PART_ME:
+						for (let user in self.user_data){
+							if(self.user_data[user].me){
+								selectedUser = user
+								break;
+							}
+						}
+						break;
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME:
+					//look for user with username in userstring
+					for (let user in self.user_data){
+						if(self.user_data[user].userName==userString){
+							sourceUser=user;
+							break;
+						}
+					}
+						break;
+
+					default:
+						break;
+				}
+		}
+	}
+
 		switch(thisMsg.INTERNAL_ACTION){
 			case "addSelection":
-				// add to self.user_selection_group
-				return;
+				self.user_data[selectedUser].selected = true;
+				self.log('info', "Add selection to " + self.user_data[selectedUser].userName)
+				break;
 			case "removeSelection":
-				// remove from self.user_selection_group
-				return;
+				self.user_data[selectedUser].selected = false;
+				self.log('info',"Remove selection from " + self.user_data[selectedUser].userName)
+				break;
 			case "toggleSelection":
-				// add or remove from self.user_selection_group
-				return;
+				self.user_data[selectedUser].selected = !(self.user_data[selectedUser].selected);
+				self.log('info',"Toggle selection " + self.user_data[selectedUser].userName)
+				break;
 			case "clearSelection":
-				self.user_selection_group = {};
-				return;
+				for (let user in self.user_data){
+					self.user_data[user].selected = false;
+				}
+				self.log('info',"Clear selection")
+				break;
 			default:
 				break;
 		}
+
+		var stringSelection = [];
+		for (let user in self.user_data){
+			if(self.user_data[user].selected){
+				stringSelection.push(user);
+			}
+		}
+		userString = stringSelection.join(" ");
+		self.log('info', "target selection" + userString);
 	}
 
 };
@@ -916,6 +995,7 @@ if(!self.disabled){
 					activeSpeaker:		0,
 					handStatus:			 0,
 					cameraDevices:		[]
+					//selected: false
 
 
 				};
