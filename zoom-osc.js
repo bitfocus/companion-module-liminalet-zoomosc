@@ -790,7 +790,7 @@ instance.prototype.init_feedbacks = function(){
 			{id:'audioStatus',	 label:'Audio Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
 			{id:'handStatus',		label:'Hand Raised Status'},
-			{id:'selectionStatus',		label:'Selected'}
+			{id:'selected',		label:'Selected'}
 
 	];
 
@@ -848,6 +848,8 @@ instance.prototype.init_feedbacks = function(){
 				var sourceUser;
 				var sourceProp;
 				switch(opts.user){
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
+						return; // not supported
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 					//look for user with target position in userstring
 						break;
@@ -994,8 +996,8 @@ if(!self.disabled){
 					spotlightStatus: 0,
 					activeSpeaker:		0,
 					handStatus:			 0,
-					cameraDevices:		[]
-					//selected: false
+					cameraDevices:		[],
+					selected: false
 
 
 				};
