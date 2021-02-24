@@ -7,12 +7,12 @@ var ZOSC=require('./zoscconstants');
 var debug;
 var log;
 
-const PING_TIME_ERR = 6000;
-const PING_TIMEOUT	= 1000;
+const PING_TIME_ERR = 15000;
+const PING_TIMEOUT	= 3000;
 //default network settings
-const DEF_TX_PORT	 = '9090';
-const DEF_TX_IP		 = '127.0.0.1';
-const DEF_RX_PORT	 = '1234';
+const DEF_TX_PORT	  = '9090';
+const DEF_TX_IP		  = '127.0.0.1';
+const DEF_RX_PORT	  = '1234';
 
 const ZOOM_MAX_GALLERY_SIZE_Y = 7;
 const ZOOM_MAX_GALLERY_SIZE_X = 7;
@@ -27,13 +27,13 @@ function instance(system, id, config) {
 	self.zoomosc_client_data										 = [];
 	self.zoomosc_client_data.last_ping					 = 0;
 	self.zoomosc_client_data.subscribeMode			 = 0;
-	self.zoomosc_client_data.galleryShape				= [0,0];
+	self.zoomosc_client_data.galleryShape				 = [0,0];
 	self.zoomosc_client_data.oldgalleryShape		 = [0,0];
 	self.zoomosc_client_data.activeSpeaker			 = "None";
-	self.zoomosc_client_data.zoomOSCVersion			= "Not Connected";
+	self.zoomosc_client_data.zoomOSCVersion			 = "Not Connected";
 	self.zoomosc_client_data.subscribeMode			 =	0;
-	self.zoomosc_client_data.galTrackMode				=	0;
-	self.zoomosc_client_data.callStatus					=	0;
+	self.zoomosc_client_data.galTrackMode				 =	0;
+	self.zoomosc_client_data.callStatus					 =	0;
 	self.zoomosc_client_data.numberOfTargets		 =	0;
 	self.zoomosc_client_data.numberOfUsersInCall =	0;
 
@@ -123,15 +123,24 @@ instance.prototype.init_variables = function() {
 	];
 	//variable name in user data, string to tag companion variable
 	var variablesToPublishList=[
-		{varName:'userName',						varString:'userName',					varLabel:"User Name"},
-		{varName:'galleryIndex',				varString:'galIndex',					varLabel:'Gallery Index'},
-		{varName:'roleText',						varString:'role',							varLabel:'Role'},
-		{varName:'onlineStatusText',		varString:'onlineStatus',			varLabel:'Online Status'},
-		{varName:'videoStatusText',		 varString:'videoStatus',			 varLabel:'Video Status'},
-		{varName:'audioStatusText',		 varString:'audioStatus',			 varLabel:'Audio Status'},
+		{varName:'index',						varString:'index',					 varLabel:"Target ID"},
+		{varName:'userName',						varString:'userName',					 varLabel:"User Name"},
+		{varName:'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
+		{varName:'roleText',						varString:'role',							 varLabel:'Role'},
+		{varName:'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
+		{varName:'videoStatusText',		  varString:'videoStatus',			 varLabel:'Video Status'},
+		{varName:'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
 		{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
-		{varName:'handStatusText',			varString:'handStatus',				varLabel:'Hand Status'},
-		{varName:'activeSpeakerText',	 varString:'activeSpeaker',		 varLabel:'Active Speaker'}
+		{varName:'handStatusText',			 varString:'handStatus',				 varLabel:'Hand Status'},
+		{varName:'activeSpeakerText',	   varString:'activeSpeaker',		 varLabel:'Active Speaker'},
+		{varName: 'currentCameraDevice', varString:'currentCameraDevice',     varLabel:"Camera Device",     isList:false},
+		{varName: 'currentMicDevice',    varString:'currentMicDevice',        varLabel:"Microphone Device", isList:false},
+		{varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice',    varLabel:"Speaker Device",    isList:false},
+		{varName: 'currentBackground',   varString:'currentBackground',       varLabel:"Background",        isList:false},
+		{varName: 'cameraDevices',      varString:'cameraDevices',     varLabel:"Camera Device",     isList:true},
+		{varName: 'micDevices',         varString:'micDevices',        varLabel:"Microphone Device", isList:true},
+		{varName: 'speakerDevices',     varString:'speakerDevices',    varLabel:"Speaker Device",    isList:true}
+		// {varName: 'backgrounds',        varString:'backgrounds',       varLabel:"Background",        isList:true}
 	];
 
 function setVariablesForUser(sourceUser,userSourceList,variablesToPublishList){
@@ -146,26 +155,55 @@ for(var variableToPublish in variablesToPublishList){
 		if(sourceUser[thisSource.varName]!=-1){
 			var thisVariable=variablesToPublishList[variableToPublish];
 			var thisVariableName=thisVariable.varName;
+			//if it is a device list, add each device
 
-			var thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
-			var thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
+				let listSize;
+				if(thisVariable.isList){
+					listSize=sourceUser[thisVariableName].length;
 
-			//clear all variables to '-' if not in a call
-			var thisVariableValue;
-			if(!self.zoomosc_client_data.callStatus){
-				thisVariableValue='-';
-			}else{
-				thisVariableValue=sourceUser[thisVariableName];
-			}
-
-					variables.push({
-						label:thisFormattedVarLabel,
-						name: thisFormattedVarName
-					});
-					self.setVariable( thisFormattedVarName, thisVariableValue);
+				}else{
+					listSize=1;
 				}
-			else{
-				// console.log("Variable not set");
+				//
+				for(let i=0;i<listSize;i++){
+								var thisFormattedVarLabel;
+								var thisFormattedVarName;
+								//if variable is a list add a number to each variable name and label
+								if(thisVariable.isList){
+									thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
+									thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
+								}else{
+									thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
+									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
+								}
+
+								//clear all variables to '-' if not in a call
+								var thisVariableValue;
+								if(!self.zoomosc_client_data.callStatus){
+									thisVariableValue='-';
+								}else{
+
+									//if this is a list, populate with the device name
+									if(thisVariable.isList){
+										thisVariableValue=sourceUser[thisVariableName][i].deviceName;
+									}else{
+										thisVariableValue=sourceUser[thisVariableName];
+									}
+
+								}
+
+								//if the variable has a value push and set it
+								if(thisVariableValue != null && thisVariableValue != undefined){
+									//push variable and set
+									variables.push({
+										label:thisFormattedVarLabel,
+										name: thisFormattedVarName
+									});
+									self.setVariable( thisFormattedVarName, thisVariableValue);
+								}
+
+				}
+
 			}
 		}
 	}
@@ -220,13 +258,13 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 
 //Client variables
 var clientdatalabels = {
-zoomOSCVersion:'ZoomOSC Version',
-subscribeMode:'Subscribe Mode',
-galTrackMode:'Gallery Tracking Mode',
-callStatus :'Call Status',
-numberOfTargets:'Number of Targets',
-numberOfUsersInCall: 'Number of Users in Call',
-activeSpeaker:'Active Speaker'
+	zoomOSCVersion:'ZoomOSC Version',
+	subscribeMode:'Subscribe Mode',
+	galTrackMode:'Gallery Tracking Mode',
+	callStatus :'Call Status',
+	numberOfTargets:'Number of Targets',
+	numberOfUsersInCall: 'Number of Users in Call',
+	activeSpeaker:'Active Speaker'
 };
 var clientVarVal=0;
 //
@@ -475,15 +513,18 @@ var allInstanceActions=[];
 			}
 
 			// split arguments
-		var argStr = thisGroup.ARGS;
-		var argsRaw = argStr.split(',');
-		var args = [];
+		let argStr = thisGroup.ARGS;
+		let argsRaw = argStr.split(',');
+		let args = [];
+
 		argsRaw.forEach(element => {
 			// console.log("arg is " + element)
-			var parts = element.split(':');
-			var types = parts[0].split('|');
+			let parts = element.split(':');
+			let types = parts[0].split('|');
 			args.push({types: types, name: parts[1]});
 		});
+
+		console.log('ARGS: '+ args);
 		//add arguments
 		for (let arg in args) {
 			switch(args[arg].types.toString()){
@@ -677,7 +718,10 @@ instance.prototype.init_feedbacks = function(){
 			{id:'videoStatus',	 label:'Video Status'},
 			{id:'audioStatus',	 label:'Audio Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
-			{id:'handStatus',		label:'Hand Raised Status'}
+			{id:'handStatus',		label:'Hand Raised Status'},
+			{id:'cameraDevice',label:'Current Camera Device'},
+			{id:'micDevice',label:'Current Mic Device'},
+			{id:'speakerDevice',label:'Current Speaker Device'}
 
 	];
 
@@ -844,19 +888,31 @@ if(!self.disabled){
 
 
 
+
+
 ////OSC LISTENER RECEIVE
 	//check for zoom messages here
 	self.listener.on("message", function(message) {
 
 				//HELPERS
+		function populateUserDevices(devMsgArgs,deviceType,){
+			let userZoomID      = devMsgArgs[3].value;
+			let devNumber       = devMsgArgs[4].value;
+			let devID           = devMsgArgs[6].value;
+			let devName         = devMsgArgs[7].value;
+			let isCurrentDev 		= devMsgArgs[8].value;
+			let devInfo         = {deviceId:devID,deviceName:devName,isCurrentDevice:isCurrentDev};
+			let currentUser     = self.user_data[userZoomID];
+			currentUser[deviceType][devNumber]=devInfo;
+		}
 		//pong message
 		function parsePongRecvMsg(msgArgs){
 			// self.log('debug', 'connected to zoom');
 			self.zoomosc_client_data.last_ping					 =	Date.now();
-			self.zoomosc_client_data.zoomOSCVersion			=	msgArgs[1].value;
+			self.zoomosc_client_data.zoomOSCVersion			 =	msgArgs[1].value;
 			self.zoomosc_client_data.subscribeMode			 =	msgArgs[2].value;
-			self.zoomosc_client_data.galTrackMode				=	msgArgs[3].value;
-			self.zoomosc_client_data.callStatus					=	msgArgs[4].value;
+			self.zoomosc_client_data.galTrackMode				 =	msgArgs[3].value;
+			self.zoomosc_client_data.callStatus					 =	msgArgs[4].value;
 			self.zoomosc_client_data.numberOfTargets		 =	msgArgs[5].value;
 			self.zoomosc_client_data.numberOfUsersInCall =	msgArgs[6].value;
 			// self.checkFeedbacks('sub_bg');
@@ -869,19 +925,22 @@ if(!self.disabled){
 
 				var this_user = {
 					index:						msgArgs[0].value,
-					userName:				 msgArgs[1].value,
-					galleryIndex:		 msgArgs[2].value,
-					zoomID:					 msgArgs[3].value,
+					userName:				  msgArgs[1].value,
+					galleryIndex:		  msgArgs[2].value,
+					zoomID:					  msgArgs[3].value,
 					participantCount: msgArgs[4].value,
 					listCount:				msgArgs[5].value,
-					role:						 msgArgs[6].value,
-					onlineStatus:		 msgArgs[7].value,
+					role:						  msgArgs[6].value,
+					onlineStatus:		  msgArgs[7].value,
 					videoStatus:			msgArgs[8].value,
 					audioStatus:			msgArgs[9].value,
-					spotlightStatus: 0,
+					spotlightStatus:  0,
 					activeSpeaker:		0,
-					handStatus:			 0,
-					cameraDevices:		[]
+					handStatus:			  0,
+					cameraDevices:		[],
+					micDevices:       [],
+					speakerDevices:   [],
+					backgrounds:      []
 
 
 				};
@@ -893,10 +952,10 @@ if(!self.disabled){
 				var handTextVals=['Down','Up'];
 				var activeSpeakerTextVals=['Inactive','Active'];
 				this_user.roleText						= roleTextVals[this_user.role];
-				this_user.videoStatusText		 = onOffTextVals[this_user.videoStatus];
-				this_user.audioStatusText		 = onOffTextVals[this_user.audioStatus];
+				this_user.videoStatusText		  = onOffTextVals[this_user.videoStatus];
+				this_user.audioStatusText		  = onOffTextVals[this_user.audioStatus];
 				this_user.onlineStatusText		= onlineTextVals[this_user.onlineStatus];
-				this_user.activeSpeakerText	 = activeSpeakerTextVals[this_user.activeSpeaker];
+				this_user.activeSpeakerText	  = activeSpeakerTextVals[this_user.activeSpeaker];
 				this_user.handStatusText			= handTextVals[this_user.handStatus];
 				this_user.spotlightStatusText = onOffTextVals[this_user.spotlightStatus];
 
@@ -1023,12 +1082,54 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					self.user_data[usrMsgUser].onlineStatusText='Offline';
 
 					break;
+					//add camera devices to users
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_CAMERA_DEVICE_LIST.MESSAGE:
-				console.log('Camera devices for: '+usrMsgUser+': '+json.stringify(message.args[4]));
-
+					console.log('Camera devices for: '+usrMsgUser+': '+JSON.stringify(message.args));
+					// console.log(message.args)
+					populateUserDevices(message.args,ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_CAMERA_DEVICE_LIST.MESSAGE);
+					// console.log("USERS: "+JSON.stringify(self.user_data));
 					break;
-				//Active speaker/spotlight
+				//WIP current camera device
+				// case ZOSC.outputLastPartMessages.ZOSC_MSG_PART_CAMERA_DEVICE.MESSAGE:
+				// 	console.log('current camera device for: '+usrMsgUser+': '+JSON.stringify(message.args));
+				// 	let devType=ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_CAMERA_DEVICE_LIST.MESSAGE;
+				// 	setCurrentDev(message.args,devType);
+				// 	function setCurrentDev(msgArgs,deviceType){
+				// 		let currentDevID  =  msgArgs[4];
+				// 		let currentUserID =  msgArgs[3];
+				// 		let userDevices = self.user_data[currentUserID][deviceType];
+				// 		for (let device in userDevices){
+				// 			if (userDevices[device].devID=currentDevID){
+				// 				userDevices[device].isCurrentDevice=1;
+				// 			}else{
+				// 				userDevices[device].isCurrentDevice=0;
+				// 			}
+				// 		}
+				//
+				// 	}
+				// break;
+				//add mic devices to users
 
+				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_MIC_DEVICE_LIST.MESSAGE:
+					console.log('Mic devices for: '+usrMsgUser);
+					populateUserDevices(message.args,ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_MIC_DEVICE_LIST.MESSAGE);
+					// console.log("USERS: "+JSON.stringify(self.user_data));
+					break;
+					//add speaker devices to users
+				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPEAKER_DEVICE_LIST.MESSAGE:
+					console.log('Speaker devices for: '+usrMsgUser);
+					populateUserDevices(message.args,ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPEAKER_DEVICE_LIST.MESSAGE);
+
+					// console.log("USERS: "+JSON.stringify(self.user_data));
+					break;
+				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_BACKGROUND_LIST.MESSAGE:
+					console.log('backgrounds for: '+usrMsgUser);
+					populateUserDevices(message.args,ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_BACKGROUND_LIST.MESSAGE);
+
+					// console.log("USERS: "+JSON.stringify(self.user_data));
+					break;
+
+				//Active speaker/spotlight
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_ACTIVE_SPEAKER.MESSAGE:
 					console.log("active speaker");
 					var speakerZoomID=message.args[3].value;
@@ -1125,7 +1226,9 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 		default:
 			console.log("zoom message not matched");
 			break;
+
 	}
+
 console.log(message.address.toString());
 	//match outputFullMessages
 	switch(message.address.toString()){
@@ -1144,8 +1247,13 @@ console.log(message.address.toString());
 
 
 });
+
 }
+
+
 };
+
+
 
 // PING
 instance.prototype.init_ping = function() {
@@ -1176,9 +1284,10 @@ instance.prototype.init_ping = function() {
 				else{
 		// self.getAllFeedbacks();
 		var timesinceping = Date.now() - self.zoomosc_client_data.last_ping;
-		//Send ping if last ping sent too long ago
+		//has ping been sent?
 		if (self.zoomosc_client_data.last_ping > 0) {
-			if (timesinceping > PING_TIME_ERR - PING_TIMEOUT) {
+			//Send ping if last ping sent too long ago
+			if (timesinceping > PING_TIMEOUT) {
 			pingOSC();
 			}
 		}
@@ -1223,8 +1332,8 @@ instance.prototype.init_presets = function () {
 	// Generate Audio Preset
 	let instanceLabel=self.config.label;
 	//gallery position presets
-for(let y=0;y<3;y++){
-	for(let x=0;x<5;x++){
+for(let y=0;y<4;y++){
+	for(let x=0;x<8;x++){
 
 		//Audio presets
 		presets.push({
