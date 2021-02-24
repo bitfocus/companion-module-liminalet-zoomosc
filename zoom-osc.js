@@ -562,20 +562,20 @@ instance.prototype.action = function(action) {
 				break;
 		
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
-				var stringSelection = [];
+				var selectionZoomIDs = [];
 				for (let user in self.user_data){
 					if(self.user_data[user].selected){
-						stringSelection.push(user);
+						selectionZoomIDs.push(user);
 					}
 				}
-				if (stringSelection.length > 1) {  // multiple users selected
+				if (selectionZoomIDs.length > 1) {  // multiple users selected
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
-					userString = stringSelection;
+					userString = selectionZoomIDs;
 				} else {  // single user
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
-					userString = parseInt(stringSelection[0])
+					userString = parseInt(selectionZoomIDs[0])
 				}
-				self.log('debug', "user selection ("+stringSelection.length + "): " + userString);
+				//self.log('debug', "user selection ("+selectionZoomIDs.length + "): " + userString);
 				break;
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
@@ -649,9 +649,8 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
 	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
-		self.log('debug', "stringSelectiion: ")
-		stringSelection.forEach(id => args.push({type:'i',value:parseInt(id)}))
-		self.log('debug', "stringSelectiion: " + stringSelection + ", args: " + JSON.stringify(args))
+		selectionZoomIDs.forEach(id => args.push({type:'i',value:parseInt(id)}))
+		//self.log('debug', "selectionZoomIDs: " + selectionZoomIDs + ", args: " + JSON.stringify(args))
 	}
 	else{
 		args.push({type:'s',value:userString});
@@ -664,7 +663,6 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	console.log('sending osc');
 	console.log(path);
 	console.log(JSON.stringify(args));
-	self.log('debug',JSON.stringify(args));
 
 	self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 
@@ -690,12 +688,10 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 		}
 	}
-	else if('INTERNAL_ACTION' in thisMsg){
-		self.log('debug', "ZOSC Internal Action " + thisMsg.INTERNAL_ACTION)
+	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
 		selectedUser=null
 		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
 			for(let user in self.user_data){
-				//if(!(this_user.zoomID in self.user_data)) {}
 				switch (TARGET_TYPE){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 					//look for user with target position in userstring
@@ -704,7 +700,6 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
 					//look for user with gallery index in userstring
 					for (let user in self.user_data){
-
 						if(self.user_data[user].galleryIndex==userString){
 							selectedUser=user;
 						break;
@@ -768,14 +763,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				break;
 		}
 
-		var stringSelection = [];
-		for (let user in self.user_data){
-			if(self.user_data[user].selected){
-				stringSelection.push(user);
-			}
-		}
-		userString = stringSelection.join(" ");
-		self.log('debug', "target selection" + userString);
+		self.checkFeedbacks('selected')
 	}
 
 };
