@@ -36,6 +36,7 @@ function instance(system, id, config) {
 	self.zoomosc_client_data.callStatus					=	0;
 	self.zoomosc_client_data.numberOfTargets		 =	0;
 	self.zoomosc_client_data.numberOfUsersInCall =	0;
+	self.zoomosc_client_data.listIndexOffset = 0;
 
 
 	self.disabled=false;
@@ -119,7 +120,9 @@ instance.prototype.init_variables = function() {
 		{varName:'userName',						varString:'user',							varLabel:''},
 		{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
 		{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
-		{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'}
+		{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
+		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}
+
 	];
 	//variable name in user data, string to tag companion variable
 	var variablesToPublishList=[
@@ -210,9 +213,11 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 
 	//add new variables from list of users
 	if(Object.keys(self.user_data).length>0){
+		var i =self.zoomosc_client_data.listIndexOffset;
 		for (let user in self.user_data) {
 			var this_user = self.user_data[user];
-
+			this_user.listIndex = i++;
+			console.log("setting variables for user ", this_user);
 			setVariablesForUser(this_user,userSourceList,variablesToPublishList);
 
 		}
@@ -226,13 +231,18 @@ galTrackMode:'Gallery Tracking Mode',
 callStatus :'Call Status',
 numberOfTargets:'Number of Targets',
 numberOfUsersInCall: 'Number of Users in Call',
-activeSpeaker:'Active Speaker'
+activeSpeaker:'Active Speaker',
+listIndexOffset:'Current List Index Offset'
+
 };
 var clientVarVal=0;
 //
 for(let clientVar in clientdatalabels){
 	//ZoomOSC Version
 	switch(clientVar){
+		case 'listIndexOffset':
+			clientVarVal = self.zoomosc_client_data.listIndexOffset;
+			break;
 		case 'zoomOSCVersion':
 		case 'callStatus':
 		case 'numberOfTargets':
@@ -295,10 +305,10 @@ for(let clientVar in clientdatalabels){
 			name:	'client_'+clientVar
 		});
 
-	self.setVariable('client_'+clientVar,clientVarVal);
+	   self.setVariable('client_'+clientVar,clientVarVal);
 	}
 
-self.setVariableDefinitions(variables);
+  self.setVariableDefinitions(variables);
 };
 
 
@@ -397,6 +407,10 @@ var allInstanceActions=[];
 						[ZOSC.keywords.ZOSC_MSG_PART_ME]:{
 							id:ZOSC.keywords.ZOSC_MSG_PART_ME,
 							 label:'--Me--'
+						 },
+						["listIndex"]:{
+							id:"listIndex",
+							 label: '--List Index--'
 						 },
 						[ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME]:{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
@@ -526,6 +540,26 @@ var allInstanceActions=[];
 
 	}
 //set actions in ui
+	allInstanceActions["listIndexOffset"] = {
+		id:		 "listIndexOffset",
+		label:	"List Index Offset",
+		options:[
+			{
+				type:'dropdown',
+				label:'offset type',
+				id:'offsetType',
+				choices:[{label:'To index', id: 'toIndex'}, {id: 'increase', label:'increase by'}, {id: 'decrease', label: 'decrease by'}],
+				default:'toIndex'
+			}, {
+				type: 'number',
+				label: "value",
+				id: "value",
+				min:0,
+				max:1000,
+				default:1
+			}
+		]
+	};
 	self.system.emit('instance_actions', self.id,allInstanceActions);
 
 };
@@ -535,11 +569,31 @@ instance.prototype.action = function(action) {
 	var self = this;
 	var args = [];
 	var path = null;
+	console.log("action", action);
+
+	if (action.action == 'listIndexOffset')
+	{
+		console.log("GOT LIST INDEX OFFSET" + action.options.offsetType);
+		switch (action.options.offsetType) {
+			case 'toIndex':
+				self.zoomosc_client_data.listIndexOffset = Math.max(0, parseInt(action.options.value));
+				break;
+			case 'increase':
+				self.zoomosc_client_data.listIndexOffset = Math.max(0, self.zoomosc_client_data.listIndexOffset + parseInt(action.options.value));
+				break;
+			case 'decrease':
+				self.zoomosc_client_data.listIndexOffset = Math.max(0, self.zoomosc_client_data.listIndexOffset - parseInt(action.options.value));
+				break;
+
+		}
+		self.init_variables();
+		return;
+	}
 
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=null;
-	console.log("SWITCH: "+action.options);
+	console.log("SWITCH: ",action.options);
 	switch(action.options.user){
 
 		case ZOSC.keywords.ZOSC_MSG_PART_ME:
@@ -571,7 +625,21 @@ instance.prototype.action = function(action) {
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION;
 				userString=action.options.userString;
 				break;
+		case "listIndex":
+				TARGET_TYPE="listIndex";
+				//switch to this so we spoof a zoomID message
+				var index = parseInt(action.options.userString);
+				index += self.zoomosc_client_data.listIndexOffset;
 
+				var users = Object.keys(self.user_data);
+				if (users.length > index)
+				{
+						userString= parseInt(self.user_data[users[index]].zoomID);
+				} else {
+					userString = 0;
+				}
+
+				break;
 		default:
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
 				userString = action.options.user;
@@ -588,11 +656,11 @@ instance.prototype.action = function(action) {
 		console.log("ARG: "+arg);
 
 		console.log("ARG: "+JSON.stringify(action.options));
-		if(arg!='message'&&arg!='user'&&arg!='userString'&&action.options[arg].length>0){
+		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].length>0){
 			console.log("IS ARG: "+arg);
 			var thisArg=action.options[arg];
 			if(!isNaN(thisArg)){
-			thisArg=parseInt(thisArg);
+				thisArg=parseInt(thisArg);
 			}
 			var oscArgType;
 	//set osc type from js type
@@ -619,9 +687,11 @@ instance.prototype.action = function(action) {
 
 //handle user actions
 if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
-	path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+TARGET_TYPE+'/'+thisMsg.USER_ACTION;
+	var targetType = TARGET_TYPE;
+	if (targetType == "listIndex") targetType = ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+	path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+targetType+'/'+thisMsg.USER_ACTION;
 		//make user
-	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET){
+	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET||TARGET_TYPE == "listIndex"){
 		args.push({type:'i',value:parseInt(userString)});
 	}
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
