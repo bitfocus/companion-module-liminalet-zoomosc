@@ -562,7 +562,6 @@ instance.prototype.action = function(action) {
 				break;
 		
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
-				action.options.user=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				var stringSelection = [];
 				for (let user in self.user_data){
 					if(self.user_data[user].selected){
