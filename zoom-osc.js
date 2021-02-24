@@ -571,12 +571,12 @@ instance.prototype.action = function(action) {
 				}
 				if (stringSelection.length > 1) {  // multiple users selected
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
-					userString = stringSelection.join(" ");
+					userString = stringSelection;
 				} else {  // single user
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
 					userString = parseInt(stringSelection[0])
 				}
-				self.log('info', "user selection ("+stringSelection.length + "): " + userString);
+				self.log('debug', "user selection ("+stringSelection.length + "): " + userString);
 				break;
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
@@ -644,13 +644,15 @@ instance.prototype.action = function(action) {
 if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+TARGET_TYPE+'/'+thisMsg.USER_ACTION;
 		//make user
-	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET||ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID){
+	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID){
 		args.push({type:'i',value:parseInt(userString)});
 	}
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
 	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
-		args.push({type:'i',value:parseInt(userString)});
+		self.log('debug', "stringSelectiion: ")
+		stringSelection.forEach(id => args.push({type:'i',value:parseInt(id)}))
+		self.log('debug', "stringSelectiion: " + stringSelection + ", args: " + JSON.stringify(args))
 	}
 	else{
 		args.push({type:'s',value:userString});
@@ -663,6 +665,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	console.log('sending osc');
 	console.log(path);
 	console.log(JSON.stringify(args));
+	self.log('debug',JSON.stringify(args));
 
 	self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 
@@ -689,7 +692,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		}
 	}
 	else if('INTERNAL_ACTION' in thisMsg){
-		self.log('info', "ZOSC Internal Action " + thisMsg.INTERNAL_ACTION)
+		self.log('debug', "ZOSC Internal Action " + thisMsg.INTERNAL_ACTION)
 		selectedUser=null
 		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
 			for(let user in self.user_data){
@@ -746,21 +749,21 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		switch(thisMsg.INTERNAL_ACTION){
 			case "addSelection":
 				self.user_data[selectedUser].selected = true;
-				self.log('info', "Add selection to " + self.user_data[selectedUser].userName)
+				self.log('debug', "Add selection to " + self.user_data[selectedUser].userName)
 				break;
 			case "removeSelection":
 				self.user_data[selectedUser].selected = false;
-				self.log('info',"Remove selection from " + self.user_data[selectedUser].userName)
+				self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName)
 				break;
 			case "toggleSelection":
 				self.user_data[selectedUser].selected = !(self.user_data[selectedUser].selected);
-				self.log('info',"Toggle selection " + self.user_data[selectedUser].userName)
+				self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName)
 				break;
 			case "clearSelection":
 				for (let user in self.user_data){
 					self.user_data[user].selected = false;
 				}
-				self.log('info',"Clear selection")
+				self.log('debug',"Clear selection")
 				break;
 			default:
 				break;
@@ -773,7 +776,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			}
 		}
 		userString = stringSelection.join(" ");
-		self.log('info', "target selection" + userString);
+		self.log('debug', "target selection" + userString);
 	}
 
 };
