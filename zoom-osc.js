@@ -763,7 +763,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				break;
 		}
 
-		self.checkFeedbacks('selected')
+		this.checkFeedbacks();
 	}
 
 };
