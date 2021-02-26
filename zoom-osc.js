@@ -800,6 +800,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 		}
 	}
+	//TODO: finding a user needs to be a function as this code is repeated 3 times
 	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
 		selectedUser=null;
 		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
@@ -807,6 +808,12 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				switch (TARGET_TYPE){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 					//look for user with target position in userstring
+					for (let user in self.user_data){
+						if(self.user_data[user].index==parseInt(userString)){
+							selectedUser=user;
+						break;
+						}
+					}
 						break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
@@ -840,17 +847,24 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					//look for user with username in userstring
 					for (let user in self.user_data){
 						if(self.user_data[user].userName==userString){
-							sourceUser=user;
+							selectedUser=user;
 							break;
 						}
 					}
 						break;
 
 					default:
+					//user isnt a target type
+					for (let user in self.user_data){
+						if(self.user_data[user].userName==opts.user){
+							selectedUser=user;
+							break;
+						}
 						break;
 				}
 		}
 	}
+}
 
 		switch(thisMsg.INTERNAL_ACTION){
 			case "addSelection":
@@ -1009,8 +1023,8 @@ instance.prototype.init_feedbacks = function(){
 
 					default:
 					//user user selected in dropdown
-					console.log("USER NOT A TARGET type");
-					console.log(opts.user);
+					// console.log("USER NOT A TARGET type");
+					// console.log(opts.user);
 
 					for (let user in self.user_data){
 						if(self.user_data[user].userName==opts.user){
@@ -1182,7 +1196,7 @@ if(!self.disabled){
 
 		}
 
-console.log("Received OSC Message: "+ JSON.stringify(message));
+// console.log("Received OSC Message: "+ JSON.stringify(message));
 //list messages for users/me
 var recvMsg=message.address.toString().split('/');
 var zoomPart=recvMsg[1];
@@ -1199,21 +1213,21 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 		/*falls through*/
 		//User
 		case ZOSC.keywords.ZOSC_MSG_PART_USER:
-			console.log("user/me MESSAGE RECEIVED");
+			// console.log("user/me MESSAGE RECEIVED");
 			// Info: sending OSC message /zoomosc/me/videoOff -1 "squirrel" 1 16780288
 			var usrMsgUser=message.args[3].value;
 			//type of user message
 			switch(usrMsgTypePart){
 				//List Received
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_LIST.MESSAGE:
-					console.log("LIST RECEIVED");
+					// console.log("LIST RECEIVED");
 					//test user name for no user
 					// let userNameToTest= message.args[1].value;
 					let userZoomID=		 message.args[3].value;
 					let userOnlineStatus= message.args[7].value;
 
 					if(userOnlineStatus==0){
-						console.log("DELETE OFFLINE USER");
+						// console.log("DELETE OFFLINE USER");
 						delete self.user_data[userZoomID];
 					}
 					else{
