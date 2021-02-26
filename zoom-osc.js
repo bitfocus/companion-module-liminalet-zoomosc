@@ -135,7 +135,7 @@ instance.prototype.init_variables = function() {
 		{varName:'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
 		{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
 		{varName:'handStatusText',			 varString:'handStatus',				 varLabel:'Hand Status'},
-		{varName:'activeSpeakerText',	   varString:'activeSpeaker',		 varLabel:'Active Speaker'},
+		{varName:'activeSpeakerText',	   varString:'activeSpeaker',		        varLabel:'Active Speaker'},
 		{varName: 'currentCameraDevice', varString:'currentCameraDevice',     varLabel:"Camera Device",     isList:false},
 		{varName: 'currentMicDevice',    varString:'currentMicDevice',        varLabel:"Microphone Device", isList:false},
 		{varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice',    varLabel:"Speaker Device",    isList:false},
@@ -238,7 +238,7 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			//if gallery position is not in our gallery set blank values for variables
 				else{
 					//set variables as blank for gallery position
-						for (i=0;i<variablesToPublishList.length;i++){
+						for (let i=0;i<variablesToPublishList.length;i++){
 							let thisFormattedVarName=variablesToPublishList[i].varString+'_galPos_'+y+','+x;
 							// thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName]
 							self.setVariable( thisFormattedVarName,'-');
@@ -519,7 +519,7 @@ var allInstanceActions=[];
 						},
 						{
 							type:'textinput',
-							label:'User String',
+							label:'User Identifier',
 							id:'userString'
 						}
 					]
@@ -538,7 +538,7 @@ var allInstanceActions=[];
 			args.push({types: types, name: parts[1]});
 		});
 
-		console.log('ARGS: '+ args);
+		// console.log('ARGS: '+ args);
 		//add arguments
 		for (let arg in args) {
 			switch(args[arg].types.toString()){
@@ -610,11 +610,11 @@ instance.prototype.action = function(action) {
 	var self = this;
 	var args = [];
 	var path = null;
-	console.log("action", action);
+	// console.log("action", action);
 
 	if (action.action == 'listIndexOffset')
 	{
-		console.log("GOT LIST INDEX OFFSET" + action.options.offsetType);
+		// console.log("GOT LIST INDEX OFFSET" + action.options.offsetType);
 		switch (action.options.offsetType) {
 			case 'toIndex':
 				self.zoomosc_client_data.listIndexOffset = Math.max(0, parseInt(action.options.value));
@@ -634,7 +634,7 @@ instance.prototype.action = function(action) {
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=null;
-	console.log("SWITCH: ",action.options);
+	// console.log("SWITCH: ",action.options);
 	switch(action.options.user){
 
 		case ZOSC.keywords.ZOSC_MSG_PART_ME:
@@ -850,7 +850,14 @@ instance.prototype.init_feedbacks = function(){
 				var sourceProp;
 				switch(opts.user){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
+
 					//look for user with target position in userstring
+					for(let user in self.user_data){
+						if(self.user_data[user].index==parseInt(opts.userString)){
+							sourceUser=user;
+							break;
+						}
+					}
 						break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
@@ -862,7 +869,7 @@ instance.prototype.init_feedbacks = function(){
 						break;
 						}
 					}
-						break;
+					break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
 					//look for user with gallery position in userString
@@ -896,7 +903,18 @@ instance.prototype.init_feedbacks = function(){
 
 					default:
 					//user user selected in dropdown
-					sourceUser=opts.user;
+					console.log("USER NOT A TARGET type");
+					console.log(opts.user);
+
+					for (let user in self.user_data){
+						if(self.user_data[user].userName==opts.user){
+							sourceUser=user;
+							break;
+						}
+					}
+
+
+
 						break;
 				}
 				//match property to value
