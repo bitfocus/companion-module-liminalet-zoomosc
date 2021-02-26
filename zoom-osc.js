@@ -239,7 +239,7 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			//if gallery position is not in our gallery set blank values for variables
 				else{
 					//set variables as blank for gallery position
-						for (i=0;i<variablesToPublishList.length;i++){
+						for (let i=0;i<variablesToPublishList.length;i++){
 							let thisFormattedVarName=variablesToPublishList[i].varString+'_galPos_'+y+','+x;
 							// thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName]
 							self.setVariable( thisFormattedVarName,'-');
@@ -524,7 +524,7 @@ var allInstanceActions=[];
 						},
 						{
 							type:'textinput',
-							label:'User String',
+							label:'User Identifier',
 							id:'userString'
 						}
 					]
@@ -543,7 +543,7 @@ var allInstanceActions=[];
 			args.push({types: types, name: parts[1]});
 		});
 
-		console.log('ARGS: '+ args);
+		// console.log('ARGS: '+ args);
 		//add arguments
 		for (let arg in args) {
 			switch(args[arg].types.toString()){
@@ -615,11 +615,11 @@ instance.prototype.action = function(action) {
 	var self = this;
 	var args = [];
 	var path = null;
-	console.log("action", action);
+	// console.log("action", action);
 
 	if (action.action == 'listIndexOffset')
 	{
-		console.log("GOT LIST INDEX OFFSET" + action.options.offsetType);
+		// console.log("GOT LIST INDEX OFFSET" + action.options.offsetType);
 		switch (action.options.offsetType) {
 			case 'toIndex':
 				self.zoomosc_client_data.listIndexOffset = Math.max(0, parseInt(action.options.value));
@@ -639,7 +639,8 @@ instance.prototype.action = function(action) {
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=null;
-	console.log("SWITCH: ",action.options);
+	var selectionZoomIDs = [];
+	// console.log("SWITCH: ",action.options);
 	switch(action.options.user){
 
 		case ZOSC.keywords.ZOSC_MSG_PART_ME:
@@ -655,20 +656,20 @@ instance.prototype.action = function(action) {
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				userString=parseInt(action.options.userString);
 				break;
-		
+
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
-				var selectionZoomIDs = [];
+			//add selected user to selection list
 				for (let user in self.user_data){
 					if(self.user_data[user].selected){
 						selectionZoomIDs.push(user);
 					}
 				}
 				if (selectionZoomIDs.length > 1) {  // multiple users selected
-					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
+					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 					userString = selectionZoomIDs;
 				} else {  // single user
-					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;	
-					userString = parseInt(selectionZoomIDs[0])
+					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+					userString = parseInt(selectionZoomIDs[0]);
 				}
 				//self.log('debug', "user selection ("+selectionZoomIDs.length + "): " + userString);
 				break;
@@ -760,7 +761,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
 	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
-		selectionZoomIDs.forEach(id => args.push({type:'i',value:parseInt(id)}))
+		selectionZoomIDs.forEach(id => args.push({type:'i',value:parseInt(id)}));
 		//self.log('debug', "selectionZoomIDs: " + selectionZoomIDs + ", args: " + JSON.stringify(args))
 	}
 	else{
@@ -800,7 +801,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		}
 	}
 	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
-		selectedUser=null
+		selectedUser=null;
 		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
 			for(let user in self.user_data){
 				switch (TARGET_TYPE){
@@ -830,7 +831,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					case ZOSC.enums.ZOSC_MSG_PART_ME:
 						for (let user in self.user_data){
 							if(self.user_data[user].me){
-								selectedUser = user
+								selectedUser = user;
 								break;
 							}
 						}
@@ -854,21 +855,21 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		switch(thisMsg.INTERNAL_ACTION){
 			case "addSelection":
 				self.user_data[selectedUser].selected = true;
-				self.log('debug', "Add selection to " + self.user_data[selectedUser].userName)
+				self.log('debug', "Add selection to " + self.user_data[selectedUser].userName);
 				break;
 			case "removeSelection":
 				self.user_data[selectedUser].selected = false;
-				self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName)
+				self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName);
 				break;
 			case "toggleSelection":
 				self.user_data[selectedUser].selected = !(self.user_data[selectedUser].selected);
-				self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName)
+				self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName);
 				break;
 			case "clearSelection":
 				for (let user in self.user_data){
 					self.user_data[user].selected = false;
 				}
-				self.log('debug',"Clear selection")
+				self.log('debug',"Clear selection");
 				break;
 			default:
 				break;
@@ -955,7 +956,14 @@ instance.prototype.init_feedbacks = function(){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 						return; // not supported
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
+
 					//look for user with target position in userstring
+					for(let user in self.user_data){
+						if(self.user_data[user].index==parseInt(opts.userString)){
+							sourceUser=user;
+							break;
+						}
+					}
 						break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
@@ -967,7 +975,7 @@ instance.prototype.init_feedbacks = function(){
 						break;
 						}
 					}
-						break;
+					break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
 					//look for user with gallery position in userString
@@ -1001,7 +1009,18 @@ instance.prototype.init_feedbacks = function(){
 
 					default:
 					//user user selected in dropdown
-					sourceUser=opts.user;
+					console.log("USER NOT A TARGET type");
+					console.log(opts.user);
+
+					for (let user in self.user_data){
+						if(self.user_data[user].userName==opts.user){
+							sourceUser=user;
+							break;
+						}
+					}
+
+
+
 						break;
 				}
 				//match property to value
