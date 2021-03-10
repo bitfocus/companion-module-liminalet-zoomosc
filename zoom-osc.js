@@ -19,7 +19,7 @@ const ZOOM_MAX_GALLERY_SIZE_X = 7;
 
 function instance(system, id, config) {
 	console.log("INSTANCE");
-	this.userList={};
+	this.userList=[];
 	var self = this;
 	//user data
 	self.user_data={};
@@ -117,33 +117,33 @@ instance.prototype.init_variables = function() {
 	// self.log('debug',"USERS: "+JSON.stringify(self.user_data));
 
 	var userSourceList=[
-		{varName:'userName',						varString:'user',							varLabel:''},
+		{varName:'userName',					 varString:'user',						varLabel:''},
 		{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
-		{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
+		{varName:'galleryIndex',			 varString:'galInd',						varLabel:'Gallery Index'},
 		{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
-		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}
+		{varName:'listIndex',		       varString:'listIndex',						varLabel:'List Index'}
 
 	];
 	//variable name in user data, string to tag companion variable
 	var variablesToPublishList=[
-		{varName:'index',						varString:'index',					 varLabel:"Target ID"},
-		{varName:'userName',						varString:'userName',					 varLabel:"User Name"},
-		{varName:'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
-		{varName:'roleText',						varString:'role',							 varLabel:'Role'},
-		{varName:'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
-		{varName:'videoStatusText',		  varString:'videoStatus',			 varLabel:'Video Status'},
-		{varName:'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
-		{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
-		{varName:'handStatusText',			 varString:'handStatus',				 varLabel:'Hand Status'},
-		{varName:'activeSpeakerText',	   varString:'activeSpeaker',		 varLabel:'Active Speaker'},
-		{varName:'selected',		 varString:'selected',						varLabel:'Selected'},
-		{varName: 'currentCameraDevice', varString:'currentCameraDevice',     varLabel:"Camera Device",     isList:false},
-		{varName: 'currentMicDevice',    varString:'currentMicDevice',        varLabel:"Microphone Device", isList:false},
-		{varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice',    varLabel:"Speaker Device",    isList:false},
-		{varName: 'currentBackground',   varString:'currentBackground',       varLabel:"Background",        isList:false},
-		{varName: 'cameraDevices',      varString:'cameraDevices',     varLabel:"Camera Device",     isList:true},
-		{varName: 'micDevices',         varString:'micDevices',        varLabel:"Microphone Device", isList:true},
-		{varName: 'speakerDevices',     varString:'speakerDevices',    varLabel:"Speaker Device",    isList:true}
+		{varName:'index',						     varString:'index',					       varLabel:"Target ID"},
+		{varName:'userName',						 varString:'userName',					   varLabel:"User Name"},
+		{varName:'galleryIndex',				 varString:'galIndex',					   varLabel:'Gallery Index'},
+		{varName:'roleText',						 varString:'role',							   varLabel:'Role'},
+		{varName:'onlineStatusText',		 varString:'onlineStatus',			   varLabel:'Online Status'},
+		{varName:'videoStatusText',		   varString:'videoStatus',			     varLabel:'Video Status'},
+		{varName:'audioStatusText',		   varString:'audioStatus',			     varLabel:'Audio Status'},
+		{varName:'spotlightStatusText',  varString:'spotlightStatus',	     varLabel:'Spotlight Status'},
+		{varName:'handStatusText',			 varString:'handStatus',			 	   varLabel:'Hand Status'},
+		{varName:'activeSpeakerText',	   varString:'activeSpeaker',		     varLabel:'Active Speaker'},
+		{varName:'selected',		         varString:'selected',					   varLabel:'Selected'},
+		{varName: 'currentCameraDevice', varString:'currentCameraDevice',  varLabel:"Camera Device",     isList:false},
+		{varName: 'currentMicDevice',    varString:'currentMicDevice',     varLabel:"Microphone Device", isList:false},
+		{varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice', varLabel:"Speaker Device",    isList:false},
+		{varName: 'currentBackground',   varString:'currentBackground',    varLabel:"Background",        isList:false},
+		{varName: 'cameraDevices',       varString:'cameraDevices',        varLabel:"Camera Device",     isList:true},
+		{varName: 'micDevices',          varString:'micDevices',           varLabel:"Microphone Device", isList:true},
+		{varName: 'speakerDevices',      varString:'speakerDevices',       varLabel:"Speaker Device",    isList:true}
 		// {varName: 'backgrounds',        varString:'backgrounds',       varLabel:"Background",        isList:true}
 	];
 
@@ -428,38 +428,58 @@ instance.prototype.destroy = function() {
 instance.prototype.actions = function(system) {
 var self = this;
 var allInstanceActions=[];
+this.groupTypesList=[
+	//Single User
+	{id:'singleuser',label:'Single User'},
+	//No Users
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL,                label:'All'},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED,            label:'Tracked'},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_PANELISTS,          label:'Panelists'},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_ATTENDEES,          label:'Attendees'},
+	//Multiple user strings:
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS,              label:'Users'},
+	//Exclude Multiple user strings:
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_EXCEPT,           label:'Except'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ALL_EXCEPT,       label:'All Except'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_TRACKED_EXCEPT,   label:'Tracked Except'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT, label:'Panelists Except'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT, label:'Attendees Except'}
+
+]
 
 //get list of users
- this.userList={
-						[ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET]:{
+ this.userList=[
+						{
 								id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET,
 							 label:'--Target Index--'
 						 },
-						[ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX]:{
+						{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX,
 							 label:'--Gallery Index--'
 						 },
-						[ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION]:{
+						{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
 							 label: '--Gallery Position--'
 						 },
-						[ZOSC.keywords.ZOSC_MSG_PART_ME]:{
+						{
 							id:ZOSC.keywords.ZOSC_MSG_PART_ME,
 							 label:'--Me--'
 						 },
-						 [ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION]:{
+						 {
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
 							 label:'--Selection--'
 						 },
-						["listIndex"]:{
+						 {
 							id:"listIndex",
 							 label: '--List Index--'
 						 },
-						[ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME]:{
+			{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
 							 label: '--Specify Username--'
 						 }
-						};
+					 ]
+
+
 	//loop through user data to get usernames
 	if(Object.keys(self.user_data).length>0){
 		// console.log("USERS EXIST");
@@ -485,6 +505,8 @@ var allInstanceActions=[];
 			newAction.label = thisAction.TITLE;
 			groupActions.push(newAction);
 		}
+		console.log('group actions:'+JSON.stringify(groupActions));
+
 		var newGroup={};
 		//app action group has different interface
 		if(userActionGroup=='APP_ACTION_GROUP'){
@@ -514,6 +536,13 @@ var allInstanceActions=[];
 							id:'message',
 							choices:groupActions,
 							default:groupActions[0].id
+						},
+						{
+							type:'dropdown',
+							label:'User Group Type',
+							id:'groupType',
+							choices:this.groupTypesList,
+							default:this.groupTypesList[0].id
 						},
 						{
 							type:'dropdown',
@@ -636,6 +665,21 @@ instance.prototype.action = function(action) {
 		return;
 	}
 
+	var GROUP_TYPE = null;
+	let currentGroupType=action.options.groupType;
+	switch(currentGroupType){
+
+
+		//Single User
+		case 'singleuser':
+			console.log("SINGLE USER");
+			GROUP_TYPE = null;
+			break;
+
+			default:
+			console.log("GROUP TYPE: "+ currentGroupType )
+			break;
+	}
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=null;
@@ -720,7 +764,7 @@ instance.prototype.action = function(action) {
 		console.log("ARG: "+arg);
 
 		console.log("ARG: "+JSON.stringify(action.options));
-		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].length>0){
+		if(arg!='message' && arg!='user' && arg!='userString' && arg!='groupType' &&action.options[arg].length>0){
 			console.log("IS ARG: "+arg);
 			var thisArg=action.options[arg];
 			if(!isNaN(thisArg)){
@@ -1551,7 +1595,7 @@ for(let y=0;y<4;y++){
 			bank: {
 				style: 'text',
 				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Audio',
-				size: 'Auto',
+				size: 'auto',
 				color: '16777215',
 				bgcolor: self.rgb(0,100+(y*30),0)
 			},
@@ -1596,7 +1640,7 @@ for(let y=0;y<4;y++){
 			bank: {
 				style: 'text',
 				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Video',
-				size: 'Auto',
+				size: 'auto',
 				color: '16777215',
 				bgcolor: self.rgb(0,100+(y*30),0)
 			},
@@ -1641,7 +1685,7 @@ for(let y=0;y<4;y++){
 			bank: {
 				style: 'text',
 				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Spotlight',
-				size: 'Auto',
+				size: 'auto',
 				color: '16777215',
 				bgcolor: self.rgb(0,100+(y*30),0)
 			},
@@ -1686,7 +1730,7 @@ for(let y=0;y<4;y++){
 			bank: {
 				style: 'text',
 				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Pin',
-				size: 'Auto',
+				size: 'auto',
 				color: '16777215',
 				bgcolor: self.rgb(0,100+(y*30),0)
 			},

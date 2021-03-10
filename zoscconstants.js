@@ -28,9 +28,9 @@
  ARG_COUNT:
  IS_VALUE_SOURCE: //whether a feedback message contains a value
  IS_LIST_SOURCE: //whether a feedback message contains a list source
- LIST_SOURCE: //the name of a list source for a setter (should link to IS_LIST_SOURCE's message 
+ LIST_SOURCE: //the name of a list source for a setter (should link to IS_LIST_SOURCE's message
  LIST_GET: //the getter to retrieve a list
- IS_DUPEL: //the list source is a duple (ID, Name 
+ IS_DUPEL: //the list source is a duple (ID, Name
  VALUE_GET: //the getter to retrieve a current value
  VALUE_SOURCE: //the incoming message containing the value for this item
 
@@ -51,7 +51,7 @@
      STR_DEF string
 //endif
 
- : {x, ...   : x 
+ : {x, ...   : x
 
 
 //ifndef NS_INLINE
@@ -136,10 +136,10 @@ NS_INLINE ZOSCFullMessageMatch : {const char *message, const char *title, bool i
 "*/
 
 /**
- Create an action which will be run on the last part of an OSC (non user  message (/zoom/../ACTION 
+ Create an action which will be run on the last part of an OSC (non user  message (/zoom/../ACTION
 
- @param messagePart The OSC message part to be matched (case insensitive 
- @param title The title of the message (human readable 
+ @param messagePart The OSC message part to be matched (case insensitive
+ @param title The title of the message (human readable
  @param isPro An action that requires a pro license to function
  @param isNDI An Action that only functions with zoomNDI
  @param requireCoHost The hostMode required for the action to be run
@@ -159,7 +159,7 @@ NS_INLINE ZOSCLastPartMessageMatch : {const char *messagePart, const char* title
 //
 
 //else
- : {a, b, c, d, e, f, g  : {a, b, c, d, e, false, false, 1, f, g 
+ : {a, b, c, d, e, f, g  : {a, b, c, d, e, false, false, 1, f, g
 //endif
 
 
@@ -177,16 +177,16 @@ NS_INLINE ZOSCLastPartMessageMatch : {const char *messagePart, const char* title
 // ZOSCUserLastPartMessageMatch;
 "*/
 /**
- Create a struct for an action on the final part of a user OSC message (/zoom/../../PART 
+ Create a struct for an action on the final part of a user OSC message (/zoom/../../PART
 
- @param messagePart The OSC message part to be matched (case insensitive 
- @param title The title of the message (human readable 
+ @param messagePart The OSC message part to be matched (case insensitive
+ @param title The title of the message (human readable
  @param isPro An action that requires a pro license to function
  @param isNDI An Action that only functions with zoomNDI
  @param requireCoHost The hostMode required for the action to be run
  @param mustForward Whether the action must be forwarded (by chat or similar  to act on a remote user
- @param preferForward Whether the action prefers to forward to a remote user (but can act locally if required 
- @param maxGroupSize The maximum group size that the action can act on (or -1 for infinite 
+ @param preferForward Whether the action prefers to forward to a remote user (but can act locally if required
+ @param maxGroupSize The maximum group size that the action can act on (or -1 for infinite
  @param description The (human readable  description of the message
  @return A completed struct
  */
@@ -205,7 +205,7 @@ NS_INLINE ZOSCUserLastPartMessageMatch : {const char *messagePart, const char* t
     return m;
 //
 
- : {a, b, c, d, e, f, g, h, i, j, ...  : {a, b, c, d, e, f, g, h, i, j 
+ : {a, b, c, d, e, f, g, h, i, j, ...  : {a, b, c, d, e, f, g, h, i, j
 
 "*/
 
@@ -230,7 +230,7 @@ var keywords = {
  ZOSC_MSG_GROUP_PART_PANELISTS  : "panelists" ,
  ZOSC_MSG_GROUP_PART_ATTENDEES  : "attendees" ,
 
-//users takes multiple args similar to Except (below 
+//users takes multiple args similar to Except (below
  ZOSC_MSG_GROUP_PART_USERS  : "users" ,
 
 //except messages MUST end with Except
@@ -265,7 +265,7 @@ PIN_GROUP : { TITLE:"pins", ARGS: "", DESCRIPTION: "Select user to pin/upPin", M
  ZOSC_MSG_PART_TOGGLE_PIN2 : {USER_ACTION:"togglePin2", TITLE:"Toggle Pin screen 2", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Toggle Pin selected user from screen 2" }
 
 }},
-REMOTE_PIN_GROUP : { TITLE:"remote pins", ARGS: "userString:userToPin", DESCRIPTION: "Select user to pin/upPin on remote device", MESSAGES: {
+REMOTE_PIN_GROUP : { TITLE:"remote pins", ARGS: "string:Username to Pin", DESCRIPTION: "Select user to pin/upPin on remote device", MESSAGES: {
 //SCREEN 1 REMOTE PIN MESSAGES
 //**NOTE THAT REMOTE PIN MESSAGES SHOULD NOT FORWARD AS THEY NEED TO BE SWIZZLED LOCALLY BEFORE BEING SENT ON..**
  ZOSC_MSG_PART_REMOTE_PIN : {USER_ACTION:"remotePin", TITLE:"Pin screen 1 on remote client", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Pin a single user to screen 1, unpinning others first on a remote client. Takes one additional final string argument with the userName of the user to pin" },
@@ -328,7 +328,7 @@ HAND_GROUP : { TITLE:"Raise/lower hand actions", ARGS: "", DESCRIPTION: "raise/l
  ZOSC_MSG_PART_RAISEHAND : {USER_ACTION:"raiseHand", TITLE:"Raise Hand", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Raise selected user('s  hand(s " },
  ZOSC_MSG_PART_LOWERHAND : {USER_ACTION:"lowerHand", TITLE:"Lower Hand", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Lower selected user('s  hand(s " },
  ZOSC_MSG_PART_TOGGLE_HAND : {USER_ACTION:"toggleHand", TITLE:"Toggle Hand", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Toggle selected user('s  hand(s " },
- ZOSC_MSG_LOWER_ALL_HANDS : {MESSAGE:"/zoom/lowerAllHands", TITLE:"Lower all hands", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Lower all users hands" 
+ ZOSC_MSG_LOWER_ALL_HANDS : {MESSAGE:"/zoom/lowerAllHands", TITLE:"Lower all hands", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Lower all users hands"
 
 }
 
@@ -510,7 +510,7 @@ WINDOW_FRAME_ACTION_GROUP : { TITLE:"Meeting window frame", ARGS: "int:x or widt
 }
 }
 
-; 
+;
 
 
 
@@ -524,16 +524,16 @@ var outputFullMessages = {
  1 - string current zoomOSC version
  2 - the current subscribe mode
  3 - the current galTrack mode
- 4 - the status of the client (0 : not in call, 1 : call in progress 
+ 4 - the status of the client (0 : not in call, 1 : call in progress
  5 - the number of users in participant_list
  6 - the number of users on the call
  */
  ZOSC_MSG_SEND_PONG : {MESSAGE: "/zoomosc/pong", DESCRIPTION: "replying to a 'ping' message" },
 /**
  user output messages all take the following form for their initial arguments, they may then optionally have additional arguments following
- 0 - index in participant list (or -1 if not there 
+ 0 - index in participant list (or -1 if not there
  1 - the user's username
- 2 - the user's index in the gallery (or -1 if not there 
+ 2 - the user's index in the gallery (or -1 if not there
  3 - the user's zoom user ID
  */
  ZOSC_MSG_SEND_GALORDER : {MESSAGE: "/zoomosc/galleryOrder", DESCRIPTION: "sending the current gallery order" },
@@ -545,10 +545,10 @@ var outputFullMessages = {
  ZOSC_MSG_SEND_CHATCONTROL_GOODBYE : {MESSAGE: "/zoom/goodbye", TITLE: "Goodbye", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0,  DESCRIPTION: "controlled client alerting users that it can no longer be controlled" }
 
 
-//list message arguments are: (first 4 mirror normal emission 
+//list message arguments are: (first 4 mirror normal emission
 //0 - current index
 //1 - User name
-//2 - gallery index (or -1 if not there 
+//2 - gallery index (or -1 if not there
 //3 - zoomID
 
 //4 - total participant list size
@@ -566,7 +566,7 @@ var outputLastPartMessages = {
 //Following messages all send user info with the arguments
 //0 - current index
 //1 - User name
-//2 - gallery index (or -1 if not there 
+//2 - gallery index (or -1 if not there
 //3 - zoomID
 
  ZOSC_MSG_SEND_PART_LIST : {MESSAGE: "list", DESCRIPTION: "sending list of user status's" },
