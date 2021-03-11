@@ -429,6 +429,7 @@ instance.prototype.actions = function(system) {
 var self = this;
 var allInstanceActions=[];
 this.groupTypesList=[
+
 	//Single User
 	{id:'singleuser',label:'Single User'},
 	//No Users
@@ -446,6 +447,7 @@ this.groupTypesList=[
 	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT, label:'Attendees Except'}
 
 ]
+
 
 //get list of users
  this.userList=[
@@ -473,7 +475,7 @@ this.groupTypesList=[
 							id:"listIndex",
 							 label: '--List Index--'
 						 },
-			{
+						 {
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
 							 label: '--Specify Username--'
 						 }
@@ -645,7 +647,7 @@ instance.prototype.action = function(action) {
 	var args = [];
 	var path = null;
 	// console.log("action", action);
-
+console.log("userlist:"+JSON.stringify(this.userList));
 	if (action.action == 'listIndexOffset')
 	{
 		// console.log("GOT LIST INDEX OFFSET" + action.options.offsetType);
@@ -668,8 +670,6 @@ instance.prototype.action = function(action) {
 	var GROUP_TYPE = null;
 	let currentGroupType=action.options.groupType;
 	switch(currentGroupType){
-
-
 		//Single User
 		case 'singleuser':
 			console.log("SINGLE USER");
@@ -678,6 +678,7 @@ instance.prototype.action = function(action) {
 
 			default:
 			console.log("GROUP TYPE: "+ currentGroupType )
+			GROUP_TYPE=currentGroupType;
 			break;
 	}
 	//set target type
@@ -1188,7 +1189,7 @@ if(!self.disabled){
 					audioStatus:			msgArgs[9].value,
 					spotlightStatus:  0,
 					activeSpeaker:		0,
-					selected: false,
+					selected:     false,
 					handStatus:			  0,
 					cameraDevices:		[],
 					micDevices:       [],
@@ -1551,10 +1552,10 @@ instance.prototype.init_ping = function() {
 		//Set Status to Error in config if ping not responded to
 		if (timesinceping > PING_TIME_ERR) {
 			self.zoomosc_client_data.state = 'offline';
-			self.zoomosc_client_data.zoomOSCVersion			=	"Not Connected";
+			self.zoomosc_client_data.zoomOSCVersion			 =	"Not Connected";
 			self.zoomosc_client_data.subscribeMode			 =	0;
-			self.zoomosc_client_data.galTrackMode				=	0;
-			self.zoomosc_client_data.callStatus					=	0;
+			self.zoomosc_client_data.galTrackMode				 =	0;
+			self.zoomosc_client_data.callStatus					 =	0;
 			self.zoomosc_client_data.numberOfTargets		 =	0;
 			self.zoomosc_client_data.numberOfUsersInCall =	0;
 			self.status(self.STATUS_ERROR);
