@@ -1020,7 +1020,16 @@ instance.prototype.init_feedbacks = function(){
 						}
 					}
 						break;
-
+						//list index
+						case 'listIndex':
+						//look for user with username in userstring
+						for (let user in self.user_data){
+							if(self.user_data[user].listIndex==opts.userString){
+								sourceUser=user;
+								break;
+							}
+						}
+							break;
 					default:
 					//user user selected in dropdown
 					// console.log("USER NOT A TARGET type");
