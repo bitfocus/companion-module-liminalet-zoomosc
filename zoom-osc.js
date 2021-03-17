@@ -666,19 +666,40 @@ console.log("userlist:"+JSON.stringify(this.userList));
 		self.init_variables();
 		return;
 	}
-
+//set group type
 	var GROUP_TYPE = null;
+	var USER_GROUPS = null;
+	var MULTI_USER = null;
 	let currentGroupType=action.options.groupType;
 	switch(currentGroupType){
 		//Single User
 		case 'singleuser':
 			console.log("SINGLE USER");
 			GROUP_TYPE = null;
+			USER_GROUPS = true;
+			MULTI_USER = false;
 			break;
-
+			//these groups take no target type
+		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL:
+		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED:
+		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_PANELISTS:
+		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ATTENDEES:
+		GROUP_TYPE =currentGroupType;
+		USER_GROUPS = false;
+		MULTI_USER = false;
+			break;
+		//These groups take a list of users
+		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS:
+		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_EXCEPT:
+		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ALL_EXCEPT:
+		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_TRACKED_EXCEPT:
+		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT:
+		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT:
+		GROUP_TYPE = currentGroupType;
+		USER_GROUPS = true;
+		MULTI_USER = true
+			break;
 			default:
-			console.log("GROUP TYPE: "+ currentGroupType )
-			GROUP_TYPE=currentGroupType;
 			break;
 	}
 	//set target type
@@ -686,6 +707,10 @@ console.log("userlist:"+JSON.stringify(this.userList));
 	var userString=null;
 	var selectionZoomIDs = [];
 	// console.log("SWITCH: ",action.options);
+	splitUserString=action.options.userString.split(',');
+	for (let i in splitUserString)
+	console.log("Split string: "+splitUserString[i]);
+	
 	switch(action.options.user){
 
 		case ZOSC.keywords.ZOSC_MSG_PART_ME:
@@ -701,7 +726,7 @@ console.log("userlist:"+JSON.stringify(this.userList));
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				userString=parseInt(action.options.userString);
 				break;
-
+//Selection targeting
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 			//add selected user to selection list
 				for (let user in self.user_data){
@@ -758,7 +783,7 @@ console.log("userlist:"+JSON.stringify(this.userList));
 
 	var thisGroup=ZOSC.actions[action.action];
 	var thisMsg=thisGroup.MESSAGES[action.options.message];
-	// /zoom/[TARGET_TYPE]/[message]
+	// /zoom/[GROUP_TYPE]/[TARGET_TYPE]/[message]
 	function pushOscArgs(){
 	// add args
 	for (let arg in action.options){
@@ -793,12 +818,20 @@ console.log("userlist:"+JSON.stringify(this.userList));
 
 	}
 }
-
+//build path
 //handle user actions
 if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	var targetType = TARGET_TYPE;
-	if (targetType == "listIndex") targetType = ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
-	path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+targetType+'/'+thisMsg.USER_ACTION;
+	//List Index uses ZoomID
+	if (targetType == "listIndex"){
+		targetType = ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+	}
+	//if a group is selected add to path
+	if(GROUP_TYPE!=null){
+		path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+GROUP_TYPE+'/'+targetType+'/'+thisMsg.USER_ACTION;
+	}else{
+		path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+targetType+'/'+thisMsg.USER_ACTION;
+	}
 		//make user
 	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID||TARGET_TYPE == "listIndex"){
 		args.push({type:'i',value:parseInt(userString)});
