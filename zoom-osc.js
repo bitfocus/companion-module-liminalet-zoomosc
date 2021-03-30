@@ -170,41 +170,41 @@ for(var variableToPublish in variablesToPublishList){
 				}
 				//
 				for(let i=0;i<listSize;i++){
-								var thisFormattedVarLabel;
-								var thisFormattedVarName;
-								//if variable is a list add a number to each variable name and label
-								if(thisVariable.isList){
-									thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
-									thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								}else{
-									thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
-									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								}
+					var thisFormattedVarLabel;
+					var thisFormattedVarName;
+					//if variable is a list add a number to each variable name and label
+					if(thisVariable.isList){
+						thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
+						thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
+					}else{
+						thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
+						thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
+					}
 
-								//clear all variables to '-' if not in a call
-								var thisVariableValue;
-								if(!self.zoomosc_client_data.callStatus){
-									thisVariableValue='-';
-								}else{
+					//clear all variables to '-' if not in a call
+					var thisVariableValue;
+					if(!self.zoomosc_client_data.callStatus){
+						thisVariableValue='-';
+					}else{
 
-									//if this is a list, populate with the device name
-									if(thisVariable.isList){
-										thisVariableValue=sourceUser[thisVariableName][i].deviceName;
-									}else{
-										thisVariableValue=sourceUser[thisVariableName];
-									}
+						//if this is a list, populate with the device name
+						if(thisVariable.isList){
+							thisVariableValue=sourceUser[thisVariableName][i].deviceName;
+						}else{
+							thisVariableValue=sourceUser[thisVariableName];
+						}
 
-								}
+					}
 
-								//if the variable has a value push and set it
-								if(thisVariableValue != null && thisVariableValue != undefined){
-									//push variable and set
-									variables.push({
-										label:thisFormattedVarLabel,
-										name: thisFormattedVarName
-									});
-									self.setVariable( thisFormattedVarName, thisVariableValue);
-								}
+					//if the variable has a value push and set it
+					if(thisVariableValue != null && thisVariableValue != undefined){
+						//push variable and set
+						variables.push({
+							label:thisFormattedVarLabel,
+							name: thisFormattedVarName
+						});
+						self.setVariable( thisFormattedVarName, thisVariableValue);
+					}
 
 				}
 
@@ -264,15 +264,14 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 
 //Client variables
 var clientdatalabels = {
-zoomOSCVersion:'ZoomOSC Version',
-subscribeMode:'Subscribe Mode',
-galTrackMode:'Gallery Tracking Mode',
-callStatus :'Call Status',
-numberOfTargets:'Number of Targets',
-numberOfUsersInCall: 'Number of Users in Call',
-activeSpeaker:'Active Speaker',
-listIndexOffset:'Current List Index Offset'
-
+	zoomOSCVersion:'ZoomOSC Version',
+	subscribeMode:'Subscribe Mode',
+	galTrackMode:'Gallery Tracking Mode',
+	callStatus :'Call Status',
+	numberOfTargets:'Number of Targets',
+	numberOfUsersInCall: 'Number of Users in Call',
+	activeSpeaker:'Active Speaker',
+	listIndexOffset:'Current List Index Offset'
 };
 var clientVarVal=0;
 //
@@ -450,38 +449,39 @@ this.groupTypesList=[
 
 
 //get list of users
- this.userList=[
-						{
-								id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET,
-							 label:'--Target Index--'
-						 },
-						{
-							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX,
-							 label:'--Gallery Index--'
-						 },
-						{
-							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-							 label: '--Gallery Position--'
-						 },
-						{
-							id:ZOSC.keywords.ZOSC_MSG_PART_ME,
-							 label:'--Me--'
-						 },
-						 {
-							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
-							 label:'--Selection--'
-						 },
-						 {
-							id:"listIndex",
-							 label: '--List Index--'
-						 },
-						 {
-							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
-							 label: '--Specify Username--'
-						 }
-					 ]
-
-
+//add target types to user list
+ this.userList=
+ [
+	{
+			id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET,
+		 label:'--Target Index--'
+	 },
+	{
+		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX,
+		 label:'--Gallery Index--'
+	 },
+	{
+		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
+		 label: '--Gallery Position--'
+	 },
+	{
+		id:ZOSC.keywords.ZOSC_MSG_PART_ME,
+		 label:'--Me--'
+	 },
+	 {
+		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
+		 label:'--Selection--'
+	 },
+	 {
+		id:"listIndex",
+		 label: '--List Index--'
+	 },
+	 {
+		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
+		 label: '--Specify Username--'
+	 }
+ ]
+	//add existing users to userlist
 	//loop through user data to get usernames
 	if(Object.keys(self.user_data).length>0){
 		// console.log("USERS EXIST");
@@ -670,6 +670,7 @@ console.log("userlist:"+JSON.stringify(this.userList));
 	var GROUP_TYPE = null;
 	var USER_GROUPS = null;
 	var MULTI_USER = null;
+	var HAS_TARGET = null;
 	let currentGroupType=action.options.groupType;
 	switch(currentGroupType){
 		//Single User
@@ -678,15 +679,17 @@ console.log("userlist:"+JSON.stringify(this.userList));
 			GROUP_TYPE = null;
 			USER_GROUPS = true;
 			MULTI_USER = false;
+			HAS_TARGET = true;
 			break;
-			//these groups take no target type
+		//these groups take no target type
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL:
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED:
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_PANELISTS:
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ATTENDEES:
-		GROUP_TYPE =currentGroupType;
-		USER_GROUPS = false;
-		MULTI_USER = false;
+			GROUP_TYPE =currentGroupType;
+			USER_GROUPS = false;
+			MULTI_USER = false;
+			HAS_TARGET = false;
 			break;
 		//These groups take a list of users
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS:
@@ -695,38 +698,80 @@ console.log("userlist:"+JSON.stringify(this.userList));
 		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_TRACKED_EXCEPT:
 		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT:
 		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT:
-		GROUP_TYPE = currentGroupType;
-		USER_GROUPS = true;
-		MULTI_USER = true
+			GROUP_TYPE = currentGroupType;
+			USER_GROUPS = true;
+			MULTI_USER = true
+			HAS_TARGET = true;
 			break;
+
 			default:
 			break;
 	}
 	//set target type
 	var TARGET_TYPE=null;
-	var userString=null;
+	var userString=[];
 	var selectionZoomIDs = [];
 	// console.log("SWITCH: ",action.options);
-	splitUserString=action.options.userString.split(',');
-	for (let i in splitUserString)
-	console.log("Split string: "+splitUserString[i]);
-	
+	splitUserString=extractAllText(action.options.userString);
+	console.log('splituserstring: '+splitUserString[0]);
+	//get strings in quotes
+	function extractAllText(str){
+  const re = /"(.*?)"/g;
+  const result = [];
+  let current;
+  while (current = re.exec(str)) {
+    result.push(current.pop());
+  }
+  return result.length > 0
+    ? result
+    : [str];
+}
+
 	switch(action.options.user){
 
 		case ZOSC.keywords.ZOSC_MSG_PART_ME:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_PART_ME;
-				break;
-
+			TARGET_TYPE=action.options.user;
+			break;
+		//integer target types
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX;
-				userString=parseInt(action.options.userString);
-				break;
-
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
-				userString=parseInt(action.options.userString);
-				break;
-//Selection targeting
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
+			TARGET_TYPE=action.options.user;
+			//add list of targets
+			for(let i in splitUserString){
+				userString.push(parseInt(splitUserString[i]));
+			};
+		break;
+
+		//string target types
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME:
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
+			TARGET_TYPE=action.options.user;
+			for(let i in splitUserString){
+				userString.push(splitUserString[i]);
+			};
+			break;
+
+		//list index works internally
+		case "listIndex":
+			TARGET_TYPE="listIndex";
+			//switch to this so we spoof a zoomID message
+			for (let i in splitUserString){
+				var index = parseInt(action.options.userString);
+				index += self.zoomosc_client_data.listIndexOffset;
+
+				var users = Object.keys(self.user_data);
+				if (users.length > index)
+				{
+						userString.push(parseInt(self.user_data[users[index]].zoomID));
+				}
+				else {
+					userString = 0;
+				}
+			}
+			break;
+
+//Selection targeting (internal)
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 			//add selected user to selection list
 				for (let user in self.user_data){
@@ -744,46 +789,16 @@ console.log("userlist:"+JSON.stringify(this.userList));
 				//self.log('debug', "user selection ("+selectionZoomIDs.length + "): " + userString);
 				break;
 
-		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET;
-				userString=parseInt(action.options.userString);
-				console.log("TARGET: "+userString+ typeof userString);
-				break;
-
-		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
-				userString=action.options.userString;
-				break;
-
-		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
-				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION;
-				userString=action.options.userString;
-				break;
-		case "listIndex":
-				TARGET_TYPE="listIndex";
-				//switch to this so we spoof a zoomID message
-				var index = parseInt(action.options.userString);
-				index += self.zoomosc_client_data.listIndexOffset;
-
-				var users = Object.keys(self.user_data);
-				if (users.length > index)
-				{
-						userString= parseInt(self.user_data[users[index]].zoomID);
-				} else {
-					userString = 0;
-				}
-
-				break;
+		//username in dropdown is default
 		default:
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
 				userString = action.options.user;
 				break;
 }
 
-
 	var thisGroup=ZOSC.actions[action.action];
 	var thisMsg=thisGroup.MESSAGES[action.options.message];
-	// /zoom/[GROUP_TYPE]/[TARGET_TYPE]/[message]
+
 	function pushOscArgs(){
 	// add args
 	for (let arg in action.options){
@@ -801,13 +816,11 @@ console.log("userlist:"+JSON.stringify(this.userList));
 			switch(typeof thisArg){
 				case 'number':
 					oscArgType='i';
-					console.log("ARG IS NUMBER");
 					break;
 
 				case 'string':
 				case 'list':
 					oscArgType='s';
-					console.log("ARG IS STRING");
 					break;
 
 				default:
@@ -827,36 +840,56 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		targetType = ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 	}
 	//if a group is selected add to path
+
 	if(GROUP_TYPE!=null){
-		path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+GROUP_TYPE+'/'+targetType+'/'+thisMsg.USER_ACTION;
+		//if there is a group
+		if(HAS_TARGET){
+			path =	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+GROUP_TYPE+'/'+targetType+'/'+thisMsg.USER_ACTION;
+		}
+		else{
+			path =	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+GROUP_TYPE+'/'+thisMsg.USER_ACTION;
+		}
+
 	}else{
-		path=	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+targetType+'/'+thisMsg.USER_ACTION;
+		path =	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+targetType+'/'+thisMsg.USER_ACTION;
 	}
+	//add user arguments
 		//make user
 	if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET||TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID||TARGET_TYPE == "listIndex"){
-		args.push({type:'i',value:parseInt(userString)});
+		for (let i in userString){
+			args.push({type:'i',value:parseInt(userString[i])});
+		}
+
 	}
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
-	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
+	}
+	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
 		selectionZoomIDs.forEach(id => args.push({type:'i',value:parseInt(id)}));
 		//self.log('debug', "selectionZoomIDs: " + selectionZoomIDs + ", args: " + JSON.stringify(args))
 	}
 	else{
-		args.push({type:'s',value:userString});
+		//add users in userstring
+		if(HAS_TARGET){
+			for (let i in userString){
+				args.push({type:'s',value:userString});
+			}
+		}
 	}
-
+//add extra arguments
 
 	pushOscArgs();
 
-	debug('Sending OSC', self.config.host, self.config.port, path);
+	self.debug('Sending OSC', self.config.host, self.config.port, path);
 	console.log('sending osc');
 	console.log(path);
 	console.log(JSON.stringify(args));
-
+//send user message
 	self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 
 	}
+
+
 //General action messages just use the first part of the path
 	else if('MESSAGE' in thisMsg||'GENERAL_ACTION' in thisMsg){
 		if('MESSAGE' in thisMsg){
@@ -878,7 +911,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		self.system.emit('osc_send', self.config.host, self.config.port, path, args);
 		}
 	}
-	//TODO: finding a user needs to be a function as this code is repeated 3 times
+
 	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
 		selectedUser=null;
 		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
@@ -940,9 +973,9 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 						}
 						break;
 				}
+			}
 		}
 	}
-}
 
 		switch(thisMsg.INTERNAL_ACTION){
 			case "addSelection":
@@ -973,7 +1006,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 };
 ////END ACTIONS
 
-//Feedback defnitions
+//Feedback definitions
 instance.prototype.init_feedbacks = function(){
 	var self = this;
 	var userStatusProperties= [
