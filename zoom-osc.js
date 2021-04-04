@@ -673,14 +673,6 @@ console.log("userlist:"+JSON.stringify(this.userList));
 	var HAS_TARGET = null;
 	let currentGroupType=action.options.groupType;
 	switch(currentGroupType){
-		//Single User
-		case 'singleuser':
-			console.log("SINGLE USER");
-			GROUP_TYPE = null;
-			USER_GROUPS = true;
-			MULTI_USER = false;
-			HAS_TARGET = true;
-			break;
 		//these groups take no target type
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL:
 		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED:
@@ -703,8 +695,15 @@ console.log("userlist:"+JSON.stringify(this.userList));
 			MULTI_USER = true
 			HAS_TARGET = true;
 			break;
-
-			default:
+		
+		//Single User
+		case 'singleuser':
+		default:
+			console.log("SINGLE USER");
+			GROUP_TYPE = null;
+			USER_GROUPS = true;
+			MULTI_USER = false;
+			HAS_TARGET = true;
 			break;
 	}
 	//set target type
