@@ -853,6 +853,16 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					}
 						break;
 
+					case 'listIndex':
+						//look for user with username in userstring
+						for (let user in self.user_data){
+							if(self.user_data[user].listIndex==opts.userString){
+								selectedUser=user;
+								break;
+							}
+						}
+							break;
+
 					default:
 					//user isnt a target type
 					for (let user in self.user_data){
