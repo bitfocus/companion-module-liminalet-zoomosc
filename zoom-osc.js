@@ -853,16 +853,25 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					}
 						break;
 
-					case 'listIndex':
+					/*case 'listIndex':
 						//look for user with username in userstring
+						var userListIndex = parseInt(userString);
+						userListIndex += self.zoomosc_client_data.listIndexOffset;
+
+						if (Object.keys(self.user_data).length > userListIndex) {
+						selectedUser = self.user_data[Object.keys(self.user_data)[userListIndex]];
+						}
+						break;*/
+					
+					case 'listIndex':
 						for (let user in self.user_data){
-							if(self.user_data[user].listIndex==opts.userString){
+							if(self.user_data[user].userName==userString){
 								selectedUser=user;
 								break;
 							}
 						}
-							break;
-
+						break;
+						
 					default:
 					//user isnt a target type
 					for (let user in self.user_data){
