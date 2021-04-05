@@ -673,10 +673,11 @@ console.log("userlist:"+JSON.stringify(this.userList));
 		return;
 	}
 //set group type
-	var GROUP_TYPE = null;
-	var USER_GROUPS = null;
-	var MULTI_USER = null;
-	var HAS_TARGET = null;
+	var GROUP_TYPE = 'single';
+	var USER_GROUPS = true;
+	var MULTI_USER = false;
+	var HAS_TARGET = true;
+
 	//get grouptype from array by id
 	let currentGroupType=self.groupTypesList.find(x => x.id === action.options.groupType);
 	console.log("GROUP TYPE: "+JSON.stringify(currentGroupType));
@@ -991,16 +992,16 @@ instance.prototype.init_feedbacks = function(){
 	var self = this;
 	var userStatusProperties= [
 
-			{id:'role',					label:'User Role'},
-			{id:'onlineStatus',	label:'Online Status'},
+			{id:'role',					 label:'User Role'},
+			{id:'onlineStatus',	 label:'Online Status'},
 			{id:'videoStatus',	 label:'Video Status'},
 			{id:'audioStatus',	 label:'Audio Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
-			{id:'handStatus',		label:'Hand Raised Status'},
-			{id:'selected',		label:'Selected'},
-			{id:'cameraDevice',label:'Current Camera Device'},
-			{id:'micDevice',label:'Current Mic Device'},
-			{id:'speakerDevice',label:'Current Speaker Device'}
+			{id:'handStatus',		 label:'Hand Raised Status'},
+			{id:'selected',		   label:'Selected'},
+			{id:'cameraDevice',  label:'Current Camera Device'},
+			{id:'micDevice',     label:'Current Mic Device'},
+			{id:'speakerDevice', label:'Current Speaker Device'}
 
 	];
 
