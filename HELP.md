@@ -18,6 +18,7 @@ Specify IP and port for send and receive to ZoomOSC
     * $(zoomosc:vidStatus_galInd_0)
   * Targeting by Gallery Position ('0,0')
     * $(zoomosc:vidStatus_galPos_0,0)
+  * Targeting by Selection Group (available for actions only)
 
   *  **Available User Variables**
     * User Name             : userName             | example: $(zoomosc:userName_alice)
@@ -137,3 +138,16 @@ Specify IP and port for send and receive to ZoomOSC
   * Leave Meeting
   * End Meeting
   * Join Meeting
+
+**Internal Actions**
+
+* **Selection Actions**
+  * **Note on selection group usage** 
+    * To perform an action on the selection group, choose `--Selection--` uder the user dropdown of any ZoomOSC user action.
+    * Not all user actions can target groups of users. Check the ZoomOSC Log to for any single-user-only warnings.
+  * Add user to selection group
+  * Remove user from selection group
+  * Toggle user to/from selection group
+    * Adds user to selection group if not selected.
+    * Removes user from selection group if selected.
+  * Clear selection group
