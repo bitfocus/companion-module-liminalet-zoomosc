@@ -1,6 +1,6 @@
 {
 	"name": "liminalet-zoomosc",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"main": "zoom-osc.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
