@@ -22,7 +22,7 @@ Specify IP and port for send and receive to ZoomOSC
     * $(zoomosc:videoStatus_listIndex_0)
   * Targeting by Selection Group (available for actions only)
 
-  *  **Available User Variables**
+  * **Available User Variables**
     * User Name             : userName             | example: $(zoomosc:userName_alice)
     * Gallery Index         : galIndex             | example: $(zoomosc:galIndex_alice)
     * Role                  : role                 | example: $(zoomosc:role_alice)
