@@ -362,7 +362,7 @@ SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "int:screen", DESCRIPTI
 
  ZOSC_MSG_PART_START_AUDIOSHARE : {USER_ACTION:"startAudioShare", TITLE:"Start audio share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Start audio share for selected user " },
 
- ZOSC_MSG_PART_START_CAMERASHARE : {USER_ACTION:"startCameraShare", TITLE:"Start audio share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Start camera share for selected user " },
+ ZOSC_MSG_PART_START_CAMERASHARE : {USER_ACTION:"startCameraShare", TITLE:"Start camera share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Start camera share for selected user " },
 
  ZOSC_MSG_PART_SHARE_NEXT_CAMERA : {USER_ACTION:"shareNextCamera", TITLE:"Share next camera", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Share next camera" },
 
