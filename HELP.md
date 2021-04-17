@@ -154,6 +154,6 @@ These actions are used internally to the ZoomOSC Companion plugin and only avail
     * Removes user from selection group if selected.
   * Clear selection group
 
-  **List Index Actions**
+  * **List Index Actions**
   Target a user by their position in the list of users as reported by ZoomOSC. This allows you to list all users in the call and target actions at each user.
   Using "list offset" allows a set of user indexes to be assigned (such as 0, 1, 2, 3, 4) and to "page" these users by increasing the list index to 5, meaning that index 0 will become index 5 etc

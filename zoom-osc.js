@@ -1214,6 +1214,8 @@ var usrMsgTypePart=recvMsg[3];
  // /zoomosc/galleryShape 1 2
 //zoomosc message
 if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
+	//if valid osc received, reset ping counter
+	self.zoomosc_client_data.last_ping					 =	Date.now();
 	//target
 	switch(msgTypePart){
 		//Me
