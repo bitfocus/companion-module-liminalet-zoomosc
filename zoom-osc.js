@@ -690,7 +690,6 @@ instance.prototype.action = function(action) {
 				userString=action.options.userString;
 				break;
 		case "listIndex":
-				TARGET_TYPE="listIndex";
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				//switch to this so we spoof a zoomID message
 				var index = parseInt(action.options.userString);
@@ -1029,15 +1028,17 @@ instance.prototype.init_feedbacks = function(){
 					}
 						break;
 						//list index
-						case 'listIndex':
-						//look for user with username in userstring
-						for (let user in self.user_data){
-							if(self.user_data[user].listIndex==opts.userString){
-								sourceUser=user;
-								break;
-							}
+					case "listIndex":
+						var index = parseInt(opts.userString);
+						index += self.zoomosc_client_data.listIndexOffset;
+		
+						var users = Object.keys(self.user_data);
+						if (users.length > index) {
+							sourceUser= self.user_data[users[index]];
 						}
-							break;
+		
+						break;
+
 					default:
 					//user user selected in dropdown
 					// console.log("USER NOT A TARGET type");
