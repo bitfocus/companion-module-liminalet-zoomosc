@@ -691,6 +691,7 @@ instance.prototype.action = function(action) {
 				break;
 		case "listIndex":
 				TARGET_TYPE="listIndex";
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				//switch to this so we spoof a zoomID message
 				var index = parseInt(action.options.userString);
 				index += self.zoomosc_client_data.listIndexOffset;
@@ -804,7 +805,6 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
 		selectedUser=null;
 		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
-			for(let user in self.user_data){
 				switch (TARGET_TYPE){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 					//look for user with target position in userstring
@@ -814,6 +814,15 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 						break;
 						}
 					}
+						break;
+
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID:
+						for (let user in self.user_data){
+							if(self.user_data[user].zoomID==parseInt(userString)){
+								selectedUser=user;
+							break;
+							}}
+						self.log('debug', "Selection target listIndex " + userString + ", " + self.user_data[selectedUser]);
 						break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
@@ -852,36 +861,16 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 						}
 					}
 						break;
-
-					/*case 'listIndex':
-						//look for user with username in userstring
-						var userListIndex = parseInt(userString);
-						userListIndex += self.zoomosc_client_data.listIndexOffset;
-
-						if (Object.keys(self.user_data).length > userListIndex) {
-						selectedUser = self.user_data[Object.keys(self.user_data)[userListIndex]];
-						}
-						break;*/
-					
-					case 'listIndex':
-						for (let user in self.user_data){
-							if(self.user_data[user].userName==userString){
-								selectedUser=user;
-								break;
-							}
-						}
-						break;
 						
 					default:
 					//user isnt a target type
 					for (let user in self.user_data){
-						if(self.user_data[user].userName==opts.user){
+						if(self.user_data[user].userName==userString){
 							selectedUser=user;
 							break;
 						}
 						break;
 				}
-		}
 	}
 }
 
