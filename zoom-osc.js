@@ -699,9 +699,8 @@ instance.prototype.action = function(action) {
 				if (users.length > index)
 				{
 						userString= parseInt(self.user_data[users[index]].zoomID);
-				} else {
-					userString = 0;
-				}
+				} 
+				//else { userString = 0; }
 
 				break;
 		default:
@@ -1029,13 +1028,15 @@ instance.prototype.init_feedbacks = function(){
 						break;
 						//list index
 					case "listIndex":
-						var index = parseInt(opts.userString);
-						index += self.zoomosc_client_data.listIndexOffset;
-		
-						var users = Object.keys(self.user_data);
-						if (users.length > index) {
-							sourceUser= self.user_data[users[index]];
-						}
+						//look for user with specified index of user list
+						var temp_users = Object.keys(self.user_data);
+						var temp_index = parseInt(opts.userString);
+						temp_index += self.zoomosc_client_data.listIndexOffset;
+
+						if (temp_users.length > temp_index) {
+							sourceUser = temp_users[temp_index];
+						} 
+						//else { self.log('debug', 'Error in listIndex feedback, index: ' + temp_index + ', users length: ' + temp_users.length);}
 		
 						break;
 
