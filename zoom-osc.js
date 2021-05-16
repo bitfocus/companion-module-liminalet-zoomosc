@@ -445,7 +445,7 @@ this.groupTypesList=[
 	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT, label:'Panelists Except'},
 	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT, label:'Attendees Except'}
 
-]
+];
 
 
 //get list of users
@@ -480,7 +480,7 @@ this.groupTypesList=[
 		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
 		 label: '--Specify Username--'
 	 }
- ]
+ ];
 	//add existing users to userlist
 	//loop through user data to get usernames
 	if(Object.keys(self.user_data).length>0){
@@ -668,44 +668,15 @@ console.log("userlist:"+JSON.stringify(this.userList));
 	}
 //set group type
 	var GROUP_TYPE = null;
-	var USER_GROUPS = null;
-	var MULTI_USER = null;
-	var HAS_TARGET = null;
-	let currentGroupType=action.options.groupType;
-	switch(currentGroupType){
-		//these groups take no target type
-		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL:
-		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED:
-		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_PANELISTS:
-		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_ATTENDEES:
-			GROUP_TYPE =currentGroupType;
-			USER_GROUPS = false;
-			MULTI_USER = false;
-			HAS_TARGET = false;
-			break;
-		//These groups take a list of users
-		case ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS:
-		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_EXCEPT:
-		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ALL_EXCEPT:
-		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_TRACKED_EXCEPT:
-		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT:
-		case ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT:
-			GROUP_TYPE = currentGroupType;
-			USER_GROUPS = true;
-			MULTI_USER = true
-			HAS_TARGET = true;
-			break;
-		
-		//Single User
-		case 'singleuser':
-		default:
-			console.log("SINGLE USER");
-			GROUP_TYPE = null;
-			USER_GROUPS = true;
-			MULTI_USER = false;
-			HAS_TARGET = true;
-			break;
-	}
+	var USER_GROUPS = true;
+	var MULTI_USER = false;
+	var HAS_TARGET = true;
+
+	//get grouptype from array by id
+	let currentGroupType=self.groupTypesList.find(x => x.id === action.options.groupType);
+	console.log("GROUP TYPE: "+JSON.stringify(currentGroupType));
+	GROUP_TYPE=currentGroupType == undefined ? 'singleuser' : currentGroupType.id;
+	HAS_TARGET=currentGroupType == undefined ? 'singleuser' : currentGroupType.hasTarget;
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=[];
@@ -721,9 +692,7 @@ console.log("userlist:"+JSON.stringify(this.userList));
   while (current = re.exec(str)) {
     result.push(current.pop());
   }
-  return result.length > 0
-    ? result
-    : [str];
+  return result.length > 0 ? result : [str];
 }
 
 	switch(action.options.user){
@@ -739,7 +708,7 @@ console.log("userlist:"+JSON.stringify(this.userList));
 			//add list of targets
 			for(let i in splitUserString){
 				userString.push(parseInt(splitUserString[i]));
-			};
+			}
 		break;
 
 		//string target types
@@ -748,25 +717,23 @@ console.log("userlist:"+JSON.stringify(this.userList));
 			TARGET_TYPE=action.options.user;
 			for(let i in splitUserString){
 				userString.push(splitUserString[i]);
-			};
+			}
 			break;
 
 		//list index works internally
 		case "listIndex":
-			TARGET_TYPE="listIndex";
+			TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 			//switch to this so we spoof a zoomID message
 			for (let i in splitUserString){
 				var index = parseInt(action.options.userString);
 				index += self.zoomosc_client_data.listIndexOffset;
 
 				var users = Object.keys(self.user_data);
-				if (users.length > index)
-				{
+				if (users.length > index) {
 						userString.push(parseInt(self.user_data[users[index]].zoomID));
 				}
-				else {
-					userString = 0;
-				}
+				//else { userString = 0; }
+				//self.log('debug', 'listIndex targeting, index: ' + temp_index + ', users length: ' + temp_users.length);
 			}
 			break;
 
@@ -788,7 +755,37 @@ console.log("userlist:"+JSON.stringify(this.userList));
 				//self.log('debug', "user selection ("+selectionZoomIDs.length + "): " + userString);
 				break;
 
-		//username in dropdown is default
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET;
+				userString=parseInt(action.options.userString);
+				console.log("TARGET: "+userString+ typeof userString);
+				break;
+
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME:
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
+				userString=action.options.userString;
+				break;
+
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION;
+				userString=action.options.userString;
+				break;
+		case "listIndex":
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+				//switch to this so we spoof a zoomID message
+				var temp_index = parseInt(action.options.userString);
+				temp_index += self.zoomosc_client_data.listIndexOffset;
+
+				var temp_users = Object.keys(self.user_data);
+				if (temp_users.length > temp_index) {
+						userString= parseInt(self.user_data[temp_users[temp_index]].zoomID);
+				} else {
+					
+				}
+				//self.log('debug', 'listIndex targeting, index: ' + temp_index + ', users length: ' + temp_users.length);
+				//else { userString = 0; }
+
+				break;
 		default:
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
 				userString = action.options.user;
