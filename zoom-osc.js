@@ -756,8 +756,8 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
 	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
-		selectionZoomIDs.forEach(id => args.push({type:'i',value:parseInt(id)}));
-		//self.log('debug', "selectionZoomIDs: " + selectionZoomIDs + ", args: " + JSON.stringify(args))
+		self.selectionList.forEach(id => args.push({type:'i',value:parseInt(id)}));
+		//self.log('debug', "selectionList: " + self.selectionList + ", args: " + JSON.stringify(args));
 	}
 	else{
 		args.push({type:'s',value:userString});
