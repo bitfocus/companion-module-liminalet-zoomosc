@@ -966,6 +966,7 @@ instance.prototype.init_feedbacks = function(){
 			//handle feedback code
 			callback: (feedback,bank)=>{
 
+				if(!self.zoomosc_client_data.callStatus) return;
 				var opts=feedback.options;
 				//only attempt the feedback if user and property exists
 				if(opts.user!=undefined&& opts.prop!=undefined){
