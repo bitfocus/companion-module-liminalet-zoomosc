@@ -680,6 +680,7 @@ console.log("userlist:"+JSON.stringify(this.userList));
 
 	//get grouptype from array by id
 	let currentGroupType=self.groupTypesList.find(x => x.id === action.options.groupType);
+	if (currentGroupType === undefined) currentGroupType = self.groupTypesList[0]; //defaults to single user
 	console.log("GROUP TYPE: "+JSON.stringify(currentGroupType));
 	GROUP_TYPE=currentGroupType.id;
 	HAS_TARGET=currentGroupType.hasTarget;
