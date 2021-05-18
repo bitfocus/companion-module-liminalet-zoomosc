@@ -860,7 +860,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					default:
 					//user isnt a target type
 					for (let user in self.user_data){
-						if(self.user_data[user].userName==opts.user){
+						if(self.user_data[user].userName==userString){
 							selectedUser=user;
 							break;
 						}
