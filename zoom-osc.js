@@ -694,7 +694,6 @@ instance.prototype.action = function(action) {
 				userString=action.options.userString;
 				break;
 		case "listIndex":
-				TARGET_TYPE="listIndex";
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				//switch to this so we spoof a zoomID message
 				var index = parseInt(action.options.userString);
@@ -704,9 +703,8 @@ instance.prototype.action = function(action) {
 				if (users.length > index)
 				{
 						userString= parseInt(self.user_data[users[index]].zoomID);
-				} else {
-					userString = 0;
-				}
+				} 
+				//else { userString = 0; }
 
 				break;
 		default:
@@ -826,7 +824,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 								selectedUser=user;
 							break;
 							}}
-						self.log('debug', "Selection target listIndex " + userString + ", " + self.user_data[selectedUser]);
+						//self.log('debug', "Selection target listIndex " + userString + ", " + self.user_data[selectedUser]);
 						break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX:
@@ -881,21 +879,21 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		switch(thisMsg.INTERNAL_ACTION){
 			case "addSelection":
 				self.user_data[selectedUser].selected = true;
-				self.log('debug', "Add selection to " + self.user_data[selectedUser].userName);
+				//self.log('debug', "Add selection to " + self.user_data[selectedUser].userName);
 				break;
 			case "removeSelection":
 				self.user_data[selectedUser].selected = false;
-				self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName);
+				//self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName);
 				break;
 			case "toggleSelection":
 				self.user_data[selectedUser].selected = !(self.user_data[selectedUser].selected);
-				self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName);
+				//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName);
 				break;
 			case "clearSelection":
 				for (let user in self.user_data){
 					self.user_data[user].selected = false;
 				}
-				self.log('debug',"Clear selection");
+				//self.log('debug',"Clear selection");
 				break;
 			default:
 				break;
@@ -1035,15 +1033,19 @@ instance.prototype.init_feedbacks = function(){
 					}
 						break;
 						//list index
-						case 'listIndex':
-						//look for user with username in userstring
-						for (let user in self.user_data){
-							if(self.user_data[user].listIndex==opts.userString){
-								sourceUser=user;
-								break;
-							}
-						}
-							break;
+					case "listIndex":
+						//look for user with specified index of user list
+						var temp_users = Object.keys(self.user_data);
+						var temp_index = parseInt(opts.userString);
+						temp_index += self.zoomosc_client_data.listIndexOffset;
+
+						if (temp_users.length > temp_index) {
+							sourceUser = temp_users[temp_index];
+						} 
+						//else { self.log('debug', 'Error in listIndex feedback, index: ' + temp_index + ', users length: ' + temp_users.length);}
+		
+						break;
+
 					default:
 					//user user selected in dropdown
 					// console.log("USER NOT A TARGET type");
@@ -1617,6 +1619,51 @@ for(let y=0;y<4;y++){
 			}
 		]
 		});
+
+		presets.push({
+			category: 'List Index Audio',
+			label: 'List Index Audio '+(y*8+x),
+			bank: {
+				style: 'text',
+				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Audio',
+				size: 'Auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,100+(y*30),0)
+			},
+
+			//TOGGLE AUDIO
+			actions: [{
+				action: 'AV_GROUP',
+				options: {
+					message: 'ZOSC_MSG_PART_TOGGLE_MUTE',
+					user: 'listIndex',
+					userString:(y*8+x)
+				}
+			}],
+			feedbacks:[{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'audioStatus',
+					propertyValue:1,
+					bg:self.rgb(0,255,0)
+				}
+
+			},
+			{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'audioStatus',
+					propertyValue:0,
+					bg:self.rgb(255,0,0)
+				}
+
+			}
+		]
+		});
 		//Video Presets
 		presets.push({
 			category: 'Gallery Video',
@@ -1653,6 +1700,51 @@ for(let y=0;y<4;y++){
 				options:{
 					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
 					userString:y+','+x,
+					prop:'videoStatus',
+					propertyValue:0,
+					bg:self.rgb(255,0,0)
+				}
+
+			}
+		]
+		});
+
+		presets.push({
+			category: 'List Index Video',
+			label: 'List Index Video '+(y*8+x),
+			bank: {
+				style: 'text',
+				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Video',
+				size: 'Auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,100+(y*30),0)
+			},
+
+			//TOGGLE Video
+			actions: [{
+				action: 'AV_GROUP',
+				options: {
+					message: 'ZOSC_MSG_PART_TOGGLE_VIDEO',
+					user: 'listIndex',
+					userString:(y*8+x)
+				}
+			}],
+			feedbacks:[{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'videoStatus',
+					propertyValue:1,
+					bg:self.rgb(0,255,0)
+				}
+
+			},
+			{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
 					prop:'videoStatus',
 					propertyValue:0,
 					bg:self.rgb(255,0,0)
@@ -1707,6 +1799,51 @@ for(let y=0;y<4;y++){
 		]
 		});
 
+		presets.push({
+			category: 'List Index Spotlight',
+			label: 'List Index Spotlight '+(y*8+x),
+			bank: {
+				style: 'text',
+				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Spotlight',
+				size: 'Auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,100+(y*30),0)
+			},
+
+			//TOGGLE Spotlight
+			actions: [{
+				action: 'SPOTLIGHT_GROUP',
+				options: {
+					message: 'ZOSC_MSG_PART_TOGGLE_SPOT',
+					user: 'listIndex',
+					userString:(y*8+x)
+				}
+			}],
+			feedbacks:[{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'spotlightStatus',
+					propertyValue:1,
+					bg:self.rgb(0,255,0)
+				}
+
+			},
+			{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'spotlightStatus',
+					propertyValue:0,
+					bg:self.rgb(255,0,0)
+				}
+
+			}
+		]
+		});
+
 		//Pin Presets
 		presets.push({
 			category: 'Gallery Pin',
@@ -1729,6 +1866,118 @@ for(let y=0;y<4;y++){
 			}]
 
 
+		});
+
+		presets.push({
+			category: 'List Index Pin',
+			label: 'List Index Pin '+(y*8+x),
+			bank: {
+				style: 'text',
+				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Pin',
+				size: 'Auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,100+(y*30),0)
+			},
+
+			//TOGGLE Pin
+			actions: [{
+				action: 'PIN_GROUP',
+				options: {
+					message: 'ZOSC_MSG_PART_TOGGLE_PIN',
+					user: 'listIndex',
+					userString:(y*8+x)
+				}
+			}]
+		});
+
+		//Selection Presets
+		presets.push({
+			category: 'Gallery Selection',
+			label: 'Gallery Selection '+y+','+x,
+			bank: {
+				style: 'text',
+				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')',
+				size: 'Auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,100+(y*30),0)
+			},
+			//TOGGLE Selection
+			actions: [{
+				action: 'SELECTION_GROUP',
+				options: {
+					message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
+					user: 'galleryPosition',
+					userString:y+','+x
+				}
+			}],
+			feedbacks:[{
+				type:'user_status_fb',
+				options:{
+					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
+					userString:y+','+x,
+					prop:'selected',
+					propertyValue:1,
+					bg:self.rgb(0,255,0)
+				}
+
+			},
+			{
+				type:'user_status_fb',
+				options:{
+					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
+					userString:y+','+x,
+					prop:'selected',
+					propertyValue:0,
+					bg:self.rgb(255,0,0)
+				}
+
+			}
+		]
+		});
+
+		presets.push({
+			category: 'List Index Selection',
+			label: 'List Index Selection '+(y*8+x),
+			bank: {
+				style: 'text',
+				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')',
+				size: 'Auto',
+				color: '16777215',
+				bgcolor: self.rgb(0,100+(y*30),0)
+			},
+
+			//TOGGLE Selection
+			actions: [{
+				action: 'SELECTION_GROUP',
+				options: {
+					message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
+					user: 'listIndex',
+					userString:(y*8+x)
+				}
+			}],
+			feedbacks:[{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'selected',
+					propertyValue:1,
+					bg:self.rgb(0,255,0)
+				}
+
+			},
+			{
+				type:'user_status_fb',
+				options:{
+					user: 'listIndex',
+					userString:(y*8+x),
+					prop:'selected',
+					propertyValue:0,
+					bg:self.rgb(255,0,0)
+				}
+
+			}
+		]
 		});
 	}
 }
