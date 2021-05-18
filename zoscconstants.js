@@ -362,7 +362,7 @@ SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "int:screen", DESCRIPTI
 
  ZOSC_MSG_PART_START_AUDIOSHARE : {USER_ACTION:"startAudioShare", TITLE:"Start audio share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Start audio share for selected user " },
 
- ZOSC_MSG_PART_START_CAMERASHARE : {USER_ACTION:"startCameraShare", TITLE:"Start audio share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Start camera share for selected user " },
+ ZOSC_MSG_PART_START_CAMERASHARE : {USER_ACTION:"startCameraShare", TITLE:"Start camera share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Start camera share for selected user " },
 
  ZOSC_MSG_PART_SHARE_NEXT_CAMERA : {USER_ACTION:"shareNextCamera", TITLE:"Share next camera", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Share next camera" },
 
@@ -502,9 +502,9 @@ JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: "string:Meeting Number, string:M
 
 WINDOW_FRAME_ACTION_GROUP : { TITLE:"Meeting window frame", ARGS: "int:x or width, int y or height", DESCRIPTION: "Set meeting window size and position", MESSAGES: {
 
- ZOSC_MSG_PART_SET_WINDOW_POSITION : {USER_ACTION:"setWindowPosition", TITLE:"Set Winodw Position", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window position" },
+ ZOSC_MSG_PART_SET_WINDOW_POSITION : {USER_ACTION:"setWindowPosition", TITLE:"Set Window Position", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window position" },
 
- ZOSC_MSG_PART_SET_WINDOW_SIZE : {USER_ACTION:"setWindowSize", TITLE:"Set Winodw Size", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window size" }
+ ZOSC_MSG_PART_SET_WINDOW_SIZE : {USER_ACTION:"setWindowSize", TITLE:"Set Window Size", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window size" }
 
 }
 }
