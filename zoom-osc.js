@@ -37,6 +37,7 @@ function instance(system, id, config) {
 	self.zoomosc_client_data.numberOfTargets		 =	0;
 	self.zoomosc_client_data.numberOfUsersInCall =	0;
 	self.zoomosc_client_data.listIndexOffset = 0;
+	self.zoomosc_client_data.numberOfSelectedUsers = 0;
 
 
 	self.disabled=false;
@@ -271,7 +272,8 @@ callStatus :'Call Status',
 numberOfTargets:'Number of Targets',
 numberOfUsersInCall: 'Number of Users in Call',
 activeSpeaker:'Active Speaker',
-listIndexOffset:'Current List Index Offset'
+listIndexOffset:'Current List Index Offset',
+numberOfSelectedUsers:'Number of users in Selection group'
 
 };
 var clientVarVal=0;
@@ -289,7 +291,9 @@ for(let clientVar in clientdatalabels){
 		case 'activeSpeaker':
 			clientVarVal=self.zoomosc_client_data[clientVar];
 			break;
-
+		case 'numberOfSelectedUsers':
+			clientVarVal = self.zoomosc_client_data.callStatus ? self.zoomosc_client_data[clientVar] : 0;
+			break;
 		case 'subscribeMode':
 			switch(self.zoomosc_client_data[clientVar]){
 
@@ -888,7 +892,8 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			default:
 				break;
 		}
-
+		self.zoomosc_client_data.numberOfSelectedUsers = Object.values(self.user_data).reduce(function(acc, user) { return user.selected + acc; }, 0);
+		self.setVariable('client_numberOfSelectedUsers', self.zoomosc_client_data.numberOfSelectedUsers);
 		this.checkFeedbacks();
 	}
 
@@ -1200,6 +1205,8 @@ if(!self.disabled){
 					self.actions();
 
 				}
+
+				self.zoomosc_client_data.numberOfSelectedUsers = 0;
 
 				self.init_feedbacks();
 
@@ -1524,6 +1531,7 @@ instance.prototype.init_ping = function() {
 			self.zoomosc_client_data.callStatus					=	0;
 			self.zoomosc_client_data.numberOfTargets		 =	0;
 			self.zoomosc_client_data.numberOfUsersInCall =	0;
+			self.zoomosc_client_data.numberOfSelectedUsers = 0;
 			self.status(self.STATUS_ERROR);
 			self.init_variables();
 			// self.user_data={};
