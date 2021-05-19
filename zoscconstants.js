@@ -460,7 +460,7 @@ SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select us
    
     ZOSC_MSG_PART_SELECT_HAND_STATUS : {INTERNAL_ACTION:"addRaisedHandToSelection", TITLE:"Add users with raised hand to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all users with raised hands to selection group" },
 
-    ZOSC_MSG_PART_SELECT_SPOTLIGHT_STATUS : {INTERNAL_ACTION:"addSpotlitSelection", TITLE:"Add spotlit users to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all  currently spotlit users to selection group" },
+    ZOSC_MSG_PART_SELECT_SPOTLIGHT_STATUS : {INTERNAL_ACTION:"addSpotlitToSelection", TITLE:"Add spotlit users to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all  currently spotlit users to selection group" },
 }},
 
 APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRIPTION: "Settings actions for user", MESSAGES: {
