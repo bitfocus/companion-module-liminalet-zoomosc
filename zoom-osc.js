@@ -531,8 +531,33 @@ this.groupTypesList=[
 					}
 				]
 			};
-			}
-			else{
+		} else if (userActionGroup=='SELECTION_GROUP') {
+			newGroup={
+				id:		 thisGroup.TITLE,
+				label:	thisGroup.TITLE,
+				options:[
+					{
+						type:'dropdown',
+						label:'Message',
+						id:'message',
+						choices:groupActions,
+						default:groupActions[0].id
+					},
+					{
+						type:'dropdown',
+						label:'User',
+						id:'user',
+						choices:this.userList,
+						default:'me'
+					},
+					{
+						type:'textinput',
+						label:'User Identifier',
+						id:'userString'
+					}
+				]
+			};
+		} else {
 				newGroup={
 					id:		 thisGroup.TITLE,
 					label:	thisGroup.TITLE,
