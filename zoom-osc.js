@@ -899,7 +899,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			default:
 				break;
 		}
-		self.zoomosc_client_data.numberOfSelectedUsers = Object.values(self.user_data).reduce(function(acc, user) { return user.selected + acc; }, 0);
+		self.zoomosc_client_data.numberOfSelectedUsers = self.selectionList.length;
 		self.setVariable('client_numberOfSelectedUsers', self.zoomosc_client_data.numberOfSelectedUsers);
 		this.checkFeedbacks();
 	}
