@@ -896,36 +896,20 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				//self.log('debug',"Clear selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_AUDIO_STATUS.INTERNAL_ACTION:
-				for (let user in self.user_data){
-					if (self.user_data[user].audioStatus) {
-						self.user_data[user].selected = true;
-					}
-				}
-				self.log('debug',"Added unmuted users to selection");
+				self.user_data.forEach((e) => {e.selected = e.audioStatus || e.selected;});
+				//self.log('debug',"Added unmuted users to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_VIDEO_STATUS.INTERNAL_ACTION:
-				for (let user in self.user_data){
-					if (self.user_data[user].videoStatus) {
-						self.user_data[user].selected = true;
-					}
-				}
-				self.log('debug',"Added video-on users to selection");
+				self.user_data.forEach((e) => {e.selected = e.videoStatus || e.selected;});
+				//self.log('debug',"Added video-on users to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_HAND_STATUS.INTERNAL_ACTION:
-				for (let user in self.user_data){
-					if (self.user_data[user].handStatus) {
-						self.user_data[user].selected = true;
-					}
-				}
-				self.log('debug',"Added users with raised hands to selection");
+				self.user_data.forEach((e) => {e.selected = e.handStatus || e.selected;});
+				//self.log('debug',"Added users with raised hands to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_SPOTLIGHT_STATUS.INTERNAL_ACTION:
-				for (let user in self.user_data){
-					if (self.user_data[user].spotlightStatus) {
-						self.user_data[user].selected = true;
-					}
-				}
-				self.log('debug',"Added spotlit users to selection");
+				self.user_data.forEach((e) => {e.selected = e.spotlightStatus || e.selected;});
+				//self.log('debug',"Added spotlit users to selection");
 				break;
 			default:
 				break;
