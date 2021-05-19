@@ -430,20 +430,19 @@ var allInstanceActions=[];
 this.groupTypesList=[
 
 	//Single User
-	{id:'singleuser',label:'Single User'},
+	{id:'singleuser',                                         label:'Single User',      isGroupTarget:false, hasTarget:'single'},
 	//No Users
-	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL,                label:'All'},
-	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED,            label:'Tracked'},
-	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_PANELISTS,          label:'Panelists'},
-	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_ATTENDEES,          label:'Attendees'},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_ALL,                label:'All',              isGroupTarget:true,  hasTarget:false},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_TRACKED,            label:'Tracked',          isGroupTarget:true,  hasTarget:false},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_PANELISTS,          label:'Panelists',        isGroupTarget:true,  hasTarget:false},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_ATTENDEES,          label:'Attendees',        isGroupTarget:true,  hasTarget:false},
 	//Multiple user strings:
-	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS,              label:'Users'},
+	{id:ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS,              label:'Users',            isGroupTarget:true,  hasTarget:'multiple'},
 	//Exclude Multiple user strings:
-	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_EXCEPT,           label:'Except'},
-	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ALL_EXCEPT,       label:'All Except'},
-	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_TRACKED_EXCEPT,   label:'Tracked Except'},
-	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT, label:'Panelists Except'},
-	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT, label:'Attendees Except'}
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ALL_EXCEPT,       label:'All Except',       isGroupTarget:true,  hasTarget:'multiple'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_TRACKED_EXCEPT,   label:'Tracked Except',   isGroupTarget:true,  hasTarget:'multiple'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_PANELISTS_EXCEPT, label:'Panelists Except', isGroupTarget:true,  hasTarget:'multiple'},
+	{id:ZOSC.keywords.ZOSC_MSG_EXCLUDE_PART_ATTENDEES_EXCEPT, label:'Attendees Except', isGroupTarget:true,  hasTarget:'multiple'}
 
 ];
 
@@ -454,31 +453,38 @@ this.groupTypesList=[
  [
 	{
 			id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET,
-		 label:'--Target Index--'
+		 label:'--Target Index--',
+		targetArgType:'int'
 	 },
 	{
 		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALINDEX,
-		 label:'--Gallery Index--'
+		 label:'--Gallery Index--',
+		 targetArgType:'int'
 	 },
 	{
 		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-		 label: '--Gallery Position--'
+		 label: '--Gallery Position--',
+		 targetArgType:'string'
 	 },
 	{
 		id:ZOSC.keywords.ZOSC_MSG_PART_ME,
-		 label:'--Me--'
+		 label:'--Me--',
+		 targetArgType:false
 	 },
 	 {
 		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
-		 label:'--Selection--'
+		 label:'--Selection--',
+		 targetArgType:'int'
 	 },
 	 {
 		id:"listIndex",
-		 label: '--List Index--'
+		 label: '--List Index--',
+		 targetArgType:'int'
 	 },
 	 {
 		id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME,
-		 label: '--Specify Username--'
+		 label: '--Specify Username--',
+		 targetArgType:'string'
 	 }
  ];
 	//add existing users to userlist
@@ -667,16 +673,17 @@ console.log("userlist:"+JSON.stringify(this.userList));
 		return;
 	}
 //set group type
-	var GROUP_TYPE = null;
+	var GROUP_TYPE = 'single';
 	var USER_GROUPS = true;
 	var MULTI_USER = false;
 	var HAS_TARGET = true;
 
 	//get grouptype from array by id
 	let currentGroupType=self.groupTypesList.find(x => x.id === action.options.groupType);
+	if (currentGroupType === undefined) currentGroupType = self.groupTypesList[0]; //defaults to single user
 	console.log("GROUP TYPE: "+JSON.stringify(currentGroupType));
-	GROUP_TYPE=currentGroupType == undefined ? 'singleuser' : currentGroupType.id;
-	HAS_TARGET=currentGroupType == undefined ? 'singleuser' : currentGroupType.hasTarget;
+	GROUP_TYPE=currentGroupType.id;
+	HAS_TARGET=currentGroupType.hasTarget;
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=[];
@@ -827,6 +834,11 @@ console.log("userlist:"+JSON.stringify(this.userList));
 
 	}
 }
+
+//if a group is selected add to path
+// path should be: /zoom + /groupType + /targetType + /action
+//
+
 //build path
 //handle user actions
 if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
@@ -835,9 +847,9 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	if (targetType == "listIndex"){
 		targetType = ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 	}
-	//if a group is selected add to path
 
-	if(GROUP_TYPE!=null){
+
+	if(GROUP_TYPE!='singleuser'){
 		//if there is a group
 		if(HAS_TARGET){
 			path =	'/'+ZOSC.keywords.ZOSC_MSG_PART_ZOOM+'/'+GROUP_TYPE+'/'+targetType+'/'+thisMsg.USER_ACTION;
@@ -1007,16 +1019,16 @@ instance.prototype.init_feedbacks = function(){
 	var self = this;
 	var userStatusProperties= [
 
-			{id:'role',					label:'User Role'},
-			{id:'onlineStatus',	label:'Online Status'},
+			{id:'role',					 label:'User Role'},
+			{id:'onlineStatus',	 label:'Online Status'},
 			{id:'videoStatus',	 label:'Video Status'},
 			{id:'audioStatus',	 label:'Audio Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
-			{id:'handStatus',		label:'Hand Raised Status'},
-			{id:'selected',		label:'Selected'},
-			{id:'cameraDevice',label:'Current Camera Device'},
-			{id:'micDevice',label:'Current Mic Device'},
-			{id:'speakerDevice',label:'Current Speaker Device'}
+			{id:'handStatus',		 label:'Hand Raised Status'},
+			{id:'selected',		   label:'Selected'},
+			{id:'cameraDevice',  label:'Current Camera Device'},
+			{id:'micDevice',     label:'Current Mic Device'},
+			{id:'speakerDevice', label:'Current Speaker Device'}
 
 	];
 
