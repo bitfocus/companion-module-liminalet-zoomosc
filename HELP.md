@@ -18,8 +18,11 @@ Specify IP and port for send and receive to ZoomOSC
     * $(zoomosc:vidStatus_galInd_0)
   * Targeting by Gallery Position ('0,0')
     * $(zoomosc:vidStatus_galPos_0,0)
+  * Targeting by List Index (0)
+    * $(zoomosc:videoStatus_listIndex_0)
+  * Targeting by Selection Group (available for actions only)
 
-  *  **Available User Variables**
+  * **Available User Variables**
     * User Name             : userName             | example: $(zoomosc:userName_alice)
     * Gallery Index         : galIndex             | example: $(zoomosc:galIndex_alice)
     * Role                  : role                 | example: $(zoomosc:role_alice)
@@ -137,3 +140,20 @@ Specify IP and port for send and receive to ZoomOSC
   * Leave Meeting
   * End Meeting
   * Join Meeting
+
+**Internal Actions**
+These actions are used internally to the ZoomOSC Companion plugin and only available within it.
+* **Selection Actions**
+  * **Note on selection group usage**
+    * To perform an action on the selection group, choose `--Selection--` under the user dropdown of any ZoomOSC user action.
+    * Not all user actions can target groups of users. Check the ZoomOSC Log to for any single-user-only warnings.
+  * Add user to selection group
+  * Remove user from selection group
+  * Toggle user to/from selection group
+    * Adds user to selection group if not selected.
+    * Removes user from selection group if selected.
+  * Clear selection group
+
+  * **List Index Actions**
+  Target a user by their position in the list of users as reported by ZoomOSC. This allows you to list all users in the call and target actions at each user.
+  Using "list offset" allows a set of user indexes to be assigned (such as 0, 1, 2, 3, 4) and to "page" these users by increasing the list index to 5, meaning that index 0 will become index 5 etc
