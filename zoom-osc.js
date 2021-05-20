@@ -21,6 +21,7 @@ function instance(system, id, config) {
 	console.log("INSTANCE");
 	this.userList={};
 	this.selectionList=[];
+	this.favoritesList=[];
 	var self = this;
 	//user data
 	self.user_data={};
@@ -39,6 +40,7 @@ function instance(system, id, config) {
 	self.zoomosc_client_data.numberOfUsersInCall =	0;
 	self.zoomosc_client_data.listIndexOffset = 0;
 	self.zoomosc_client_data.numberOfSelectedUsers = 0;
+	self.zoomosc_client_data.numberOfFavoriteUsers = 0;
 
 
 	self.disabled=false;
@@ -123,7 +125,8 @@ instance.prototype.init_variables = function() {
 		{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
 		{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
 		{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
-		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}
+		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'},
+		{varName:'favoriteIndex',    varString:'favoriteIndex',					varLabel:'Favorite Index'}
 
 	];
 	//variable name in user data, string to tag companion variable
@@ -257,6 +260,9 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 		for (let user in self.user_data) {
 			var this_user = self.user_data[user];
 			this_user.listIndex = i++;
+			if (self.favoritesList.includes(this_user.zoomID)) {
+				this_user.favoriteIndex = self.favoritesList.indexOf(this_user.zoomID);
+			} else { this_user.favoriteIndex = -1; }
 			console.log("setting variables for user ", this_user);
 			setVariablesForUser(this_user,userSourceList,variablesToPublishList);
 
@@ -273,8 +279,8 @@ numberOfTargets:'Number of Targets',
 numberOfUsersInCall: 'Number of Users in Call',
 activeSpeaker:'Active Speaker',
 listIndexOffset:'Current List Index Offset',
-numberOfSelectedUsers:'Number of users in Selection group'
-
+numberOfSelectedUsers:'Number of users in Selection group',
+numberOfFavoriteUsers:'Number of favorite users'
 };
 var clientVarVal=0;
 //
@@ -292,6 +298,7 @@ for(let clientVar in clientdatalabels){
 			clientVarVal=self.zoomosc_client_data[clientVar];
 			break;
 		case 'numberOfSelectedUsers':
+		case 'numberOfFavoriteUsers':
 			clientVarVal = self.zoomosc_client_data.callStatus ? self.zoomosc_client_data[clientVar] : 0;
 			break;
 		case 'subscribeMode':
@@ -450,6 +457,10 @@ var allInstanceActions=[];
 						[ZOSC.keywords.ZOSC_MSG_PART_ME]:{
 							id:ZOSC.keywords.ZOSC_MSG_PART_ME,
 							 label:'--Me--'
+						 },
+						 [ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITE_INDEX]:{
+							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITE_INDEX,
+							 label:'--Favorite Index--'
 						 },
 						 [ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION]:{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
@@ -643,7 +654,6 @@ instance.prototype.action = function(action) {
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=null;
-	var selectionZoomIDs = [];
 	// console.log("SWITCH: ",action.options);
 	switch(action.options.user){
 
@@ -701,6 +711,13 @@ instance.prototype.action = function(action) {
 				} 
 				//else { userString = 0; }
 
+				break;
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITE_INDEX:
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+				//switch to this so we spoof a zoomID message
+				if (self.favoritesList.length > parseInt(action.options.userString)) {
+						userString= parseInt(self.favoritesList[parseInt(action.options.userString)]);
+				} 
 				break;
 		default:
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
@@ -801,7 +818,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	//TODO: finding a user needs to be a function as this code is repeated 3 times
 	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
 		selectedUser=null;
-		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
+		if(thisMsg.INTERNAL_ACTION!="clearSelection" && thisMsg.INTERNAL_ACTION!="clearFavorites") {
 				switch (TARGET_TYPE){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 					//look for user with target position in userstring
@@ -873,7 +890,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 
 		switch(thisMsg.INTERNAL_ACTION){
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_LIST_ADD_SELECTION.INTERNAL_ACTION:
-				addUserToSelectionList(selectedUser);
+				addUserToList(selectedUser, self.selectionList);
 				//self.log('debug', "Add selection to " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_LIST_REMOVE_SELECTION.INTERNAL_ACTION:
@@ -883,7 +900,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				//self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_LIST_TOGGLE_SELECTION.INTERNAL_ACTION:
-				if (!addUserToSelectionList(selectedUser)) {
+				if (!addUserToList(selectedUser, self.selectionList)) {
 					self.selectionList = self.selectionList.filter(function(e) { return e !== self.user_data[selectedUser].zoomID; });
 				}
 				//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
@@ -893,32 +910,67 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				//self.log('debug',"Clear selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_AUDIO_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.audioStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.audioStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added unmuted users to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_VIDEO_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.videoStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.videoStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added video-on users to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_HAND_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.handStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.handStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added users with raised hands to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_SPOTLIGHT_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.spotlightStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.spotlightStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added spotlit users to selection");
 				break;
+			
+
+			case ZOSC.actions.FAVORITE_GROUP.MESSAGES.ZOSC_MSG_PART_ADD_FAVORITE.INTERNAL_ACTION:
+				addUserToList(selectedUser, self.favoritesList);
+				//self.log('debug', "Add selection to " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
+				break;
+			case ZOSC.actions.FAVORITE_GROUP.MESSAGES.ZOSC_MSG_PART_REMOVE_FAVORITE.INTERNAL_ACTION:
+				if (self.favoritesList.includes(self.user_data[selectedUser].zoomID)) {
+					let temp_index = self.favoritesList.indexOf(selectedUser);
+					//self.variables.filter(a => "_favoriteList_"+temp_index in a.name).map(a => self.setVariable(a.name, '-'));
+					self.favoritesList[temp_index] = -1;
+				}
+				//self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
+				break;
+			case ZOSC.actions.FAVORITE_GROUP.MESSAGES.ZOSC_MSG_PART_TOGGLE_FAVORITE.INTERNAL_ACTION:
+				if (!addUserToList(selectedUser, self.favoritesList)) {
+					let temp_index = self.favoritesList.indexOf(selectedUser);
+					//self.variables.filter(a => "_favoriteList_"+temp_index in a.name).map(a => self.setVariable(a.name, '-'));
+					self.favoritesList[temp_index] = -1;
+				}
+				//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
+				break;
+			case ZOSC.actions.FAVORITE_GROUP.MESSAGES.ZOSC_MSG_PART_CLEAR_FAVORITES.INTERNAL_ACTION:
+				self.favoritesList = [];
+				//self.variables.filter(a => "_favoriteList_" in a.name).map(a => self.setVariable(a.name, '-'));
+
+				//self.log('debug',"Clear selection");
+				break;
 			default:
+				self.log("info", "INTERNAL_ACTION not handled: " + thisMsg.INTERNAL_ACTION);
 				break;
 		}
 		self.zoomosc_client_data.numberOfSelectedUsers = self.selectionList.length;
 		self.setVariable('client_numberOfSelectedUsers', self.zoomosc_client_data.numberOfSelectedUsers);
+		self.zoomosc_client_data.numberOfFavoriteUsers = self.favoritesList.length;
+		self.setVariable('client_numberOfFavoriteUsers', self.zoomosc_client_data.numberOfFavoriteUsers);
+
+		//self.log("debug", "user" + JSON.stringify(self.user_data[selectedUser]) + ", full fav list: " + JSON.stringify(self.favoritesList) + ", full sel list: " + JSON.stringify(self.selectionList));
+
 		this.checkFeedbacks();
 	}
 
-	function addUserToSelectionList(user) {
-		if (!self.selectionList.includes(self.user_data[user].zoomID)) {
-			self.selectionList.push(self.user_data[user].zoomID);
+	function addUserToList(user, list) {
+		if (!list.includes(self.user_data[user].zoomID)) {
+			list.push(self.user_data[user].zoomID);
+			return true;
 		} else return false;
 	}
 
@@ -938,6 +990,7 @@ instance.prototype.init_feedbacks = function(){
 			{id:'activeSpeaker', label:'Active Speaker Status'},
 			{id:'handStatus',		label:'Hand Raised Status'},
 			{id:'selected',		label:'Selected'},
+			{id:'favorite',		label:'Favorite'},
 			{id:'cameraDevice',label:'Current Camera Device'},
 			{id:'micDevice',label:'Current Mic Device'},
 			{id:'speakerDevice',label:'Current Speaker Device'}
@@ -1066,6 +1119,13 @@ instance.prototype.init_feedbacks = function(){
 		
 						break;
 
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITE_INDEX:
+						if (self.favoritesList.length > parseInt(opts.userString)) {
+							sourceUser= self.favoritesList[parseInt(opts.userString)];
+							//self.log("debug", JSON.stringify(sourceUser));
+						}
+						break;
+
 					default:
 					//user user selected in dropdown
 					// console.log("USER NOT A TARGET type");
@@ -1086,16 +1146,23 @@ instance.prototype.init_feedbacks = function(){
 				var userToFeedback=self.user_data[sourceUser];
 				if(userToFeedback!=undefined){
 				var propertyToFeedback=opts.prop;
-				var userPropVal= propertyToFeedback != 'selected' ? 
-					userToFeedback[propertyToFeedback] : 
-					self.selectionList.includes(userToFeedback.zoomID);
-				//
-					if (userPropVal==parseInt(opts.propertyValue)){
-						return{
-							color:feedback.options.fg,
-							bgcolor:feedback.options.bg
-						};
-					}
+				var userPropVal= null;
+				switch (propertyToFeedback) {
+					case 'selected':
+						userPropVal = self.selectionList.includes(userToFeedback.zoomID);
+						break;
+					case 'favorite':
+						userPropVal = self.favoritesList.includes(userToFeedback.zoomID);
+						break;
+					default:
+						userPropVal = userToFeedback[propertyToFeedback];
+				}
+				if (userPropVal==parseInt(opts.propertyValue)){
+					return{
+						color:feedback.options.fg,
+						bgcolor:feedback.options.bg
+					};
+				}
 				}
 			//check exists
 			}
@@ -1566,6 +1633,7 @@ instance.prototype.init_ping = function() {
 			self.zoomosc_client_data.numberOfTargets		 =	0;
 			self.zoomosc_client_data.numberOfUsersInCall =	0;
 			self.zoomosc_client_data.numberOfSelectedUsers = 0;
+			self.zoomosc_client_data.numberOfFavoriteUsers = 0;
 			self.status(self.STATUS_ERROR);
 			self.init_variables();
 			// self.user_data={};
