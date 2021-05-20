@@ -873,7 +873,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 
 		switch(thisMsg.INTERNAL_ACTION){
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_LIST_ADD_SELECTION.INTERNAL_ACTION:
-				addUserToSelectionList(selectedUser);
+				addUserToList(selectedUser, self.selectionList);
 				//self.log('debug', "Add selection to " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_LIST_REMOVE_SELECTION.INTERNAL_ACTION:
@@ -883,7 +883,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				//self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_LIST_TOGGLE_SELECTION.INTERNAL_ACTION:
-				if (!addUserToSelectionList(selectedUser)) {
+				if (!addUserToList(selectedUser, self.selectionList)) {
 					self.selectionList = self.selectionList.filter(function(e) { return e !== self.user_data[selectedUser].zoomID; });
 				}
 				//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName + ", full list: " + JSON.stringify(self.selectionList));
@@ -893,22 +893,23 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				//self.log('debug',"Clear selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_AUDIO_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.audioStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.audioStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added unmuted users to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_VIDEO_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.videoStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.videoStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added video-on users to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_HAND_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.handStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.handStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added users with raised hands to selection");
 				break;
 			case ZOSC.actions.SELECTION_GROUP.MESSAGES.ZOSC_MSG_PART_SELECT_SPOTLIGHT_STATUS.INTERNAL_ACTION:
-				self.user_data.forEach((e) => { if (e.spotlightStatus) addUserToSelectionList(selectedUser);});
+				self.user_data.forEach((e) => { if (e.spotlightStatus) addUserToList(selectedUser, self.selectionList);});
 				//self.log('debug',"Added spotlit users to selection");
 				break;
 			default:
+				self.log("info", "INTERNAL_ACTION not handled: " + thisMsg.INTERNAL_ACTION);
 				break;
 		}
 		self.zoomosc_client_data.numberOfSelectedUsers = self.selectionList.length;
@@ -916,9 +917,10 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		this.checkFeedbacks();
 	}
 
-	function addUserToSelectionList(user) {
-		if (!self.selectionList.includes(self.user_data[user].zoomID)) {
-			self.selectionList.push(self.user_data[user].zoomID);
+	function addUserToList(user, list) {
+		if (!list.includes(self.user_data[user].zoomID)) {
+			list.push(self.user_data[user].zoomID);
+			return true;
 		} else return false;
 	}
 
