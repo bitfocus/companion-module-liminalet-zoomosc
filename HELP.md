@@ -69,7 +69,7 @@ Specify IP and port for send and receive to ZoomOSC
   * Add Spotlit User
   * Un-spotlight User
   * Clear Spotlight
-*  **Audio/Video**
+* **Audio/Video**
   * Video On
   * Video Off
   * Mute Audio
