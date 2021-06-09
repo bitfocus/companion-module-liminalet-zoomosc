@@ -49,11 +49,6 @@ function instance(system, id, config) {
 	});
 	self.actions(); // export actions
 	self.init_presets();
-	self.addUpgradeScript(function() {
-		if (self.config.host !== undefined) {
-			self.config.old_host = self.config.host;
-		}
-	});
 
 //Subscribe to ZoomOSC
 	self.system.emit('osc_send',
@@ -69,6 +64,12 @@ function instance(system, id, config) {
 	);
 
 	return self;
+}
+
+instance.GetUpgradeScripts = function() {
+	return [
+		() => false, // placeholder script, that no cannot be removed
+	]
 }
 
 instance.prototype.updateConfig = function(config) {
