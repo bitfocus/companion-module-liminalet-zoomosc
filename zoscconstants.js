@@ -455,9 +455,9 @@ SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select us
     ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
    }},
 
-   BREAKOUT_ACTION_GROUP : { TITLE:"ZoomISO Actions", ARGS: "string:Pin Number", DESCRIPTION: "ZoomISO Specific Actions", MESSAGES: {
-     ZOSC_MSG_OUTPUT_ISO : {USER_ACTION:"/zoom/outputISO", TITLE:"Output ISO", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Output ISO feeds" }
-   }},
+ISO_ACTION_GROUP : { TITLE:"ZoomISO Actions", ARGS: "string:Pin Number", DESCRIPTION: "ZoomISO Specific Actions", MESSAGES: {
+ ZOSC_MSG_OUTPUT_ISO : {USER_ACTION:"/zoom/outputISO", TITLE:"Output ISO", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Output ISO feeds" }
+}},
 
 APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRIPTION: "Settings actions for user", MESSAGES: {
 
