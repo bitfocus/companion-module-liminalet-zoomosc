@@ -1571,6 +1571,8 @@ instance.prototype.init_ping = function() {
 
 //PRESETS
 instance.prototype.init_presets = function () {
+	const fs = require('fs');
+	const path = require('path');
 	var self = this;
 	var presets = [];
 
@@ -1653,21 +1655,27 @@ instance.prototype.init_presets = function () {
 				user_string: "targetID"
 			},
 		};
+	
+		var remove_instance_identifiers = function (obj) {
+			return obj.reduce((acc, value) => acc.concat(Object.keys(value).filter(
+				a => !["id", "label", "instance", "instance_id"].includes(a)).reduce(
+					(obj, key) => {
+						obj[key] = value[key];
+						return obj;
+					}, {})), []);
+		};
 
-	// $(zoomosc:userName_galPos_0,0)
-	// Generate Audio Preset
-	let instanceLabel=self.config.label;
-	//gallery position presets
 for(const [targetType_short, targetType] of Object.entries(preset_target_types)) {
 	for(const [preset_action_short, preset_action] of Object.entries(preset_actions)) {
-		for(let y=0;y<8;y++){
+		for(let y=0;y<7;y++){
 			for(let x=0;x<7;x++){
 				presets.push({
 					category: preset_action.preset_label+" by "+targetType.preset_label,
 					label: preset_action.preset_label+" by "+targetType.preset_label+" ("+targetType.getButtonNumber(x,y)+")",
 					bank: {
 						style: 'text',
-						text: '$('+instanceLabel+':userName_'+targetType.var_string+'_'+targetType.getButtonNumber(x,y)+')'+preset_action.button_label,
+						text: '$('+self.config.label+':userName_'+targetType.var_string+'_'+
+							  targetType.getButtonNumber(x,y)+')'+preset_action.button_label,
 						size: 'Auto',
 						color: self.rgb(255,255,255),
 						bgcolor: self.rgb(0,0,0)
@@ -1707,6 +1715,27 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 				]
 				});
 
+			}
+		}
+
+		var local_path_options = [
+			targetType_short+" "+preset_action_short,
+			'* '+preset_action_short,
+			targetType_short+' *', '*'];
+
+		for (let local_path of local_path_options) {
+			if (fs.existsSync(local_path = path.resolve(__dirname,'presets/'+local_path+'.companionconfig'))) {
+				let local_preset = JSON.parse(fs.readFileSync(local_path));
+				for(const [config_key, config_value] of (Object.entries(local_preset.config).filter(e => Object.keys(e[1]).length !== 0))) {
+					presets.push({
+						category: preset_action.preset_label+" by "+targetType.preset_label,
+						label: config_value.text,
+						bank: config_value,
+						actions: remove_instance_identifiers(local_preset.actions[config_key]),
+						release_actions: remove_instance_identifiers(local_preset.release_actions[config_key]),
+						feedbacks: remove_instance_identifiers(local_preset.feedbacks[config_key]),
+					});
+				}
 			}
 		}
 	}
