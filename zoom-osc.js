@@ -1662,50 +1662,50 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 	for(const [preset_action_short, preset_action] of Object.entries(preset_actions)) {
 		for(let y=0;y<8;y++){
 			for(let x=0;x<7;x++){
-		presets.push({
-			category: preset_action.preset_label+" by "+targetType.preset_label,
-			label: preset_action.preset_label+" by "+targetType.preset_label+" ("+targetType.getButtonNumber(x,y)+")",
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_'+targetType.var_string+'_'+targetType.getButtonNumber(x,y)+')'+preset_action.button_label,
-				size: 'Auto',
-				color: self.rgb(255,255,255),
-				bgcolor: self.rgb(0,0,0)
-			},
-			actions: [{
-				action: preset_action.action,
-				options: {
-					message: preset_action.message,
-					user: targetType.user_string,
-					userString:targetType.getButtonNumber(x,y)
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user:targetType.user_string,
-					userString:targetType.getButtonNumber(x,y),
-					prop:preset_action.prop,
-					propertyValue:1,
-					bg:self.rgb(0,100,0),
-					fg:self.rgb(255,255,255)
-				}
+				presets.push({
+					category: preset_action.preset_label+" by "+targetType.preset_label,
+					label: preset_action.preset_label+" by "+targetType.preset_label+" ("+targetType.getButtonNumber(x,y)+")",
+					bank: {
+						style: 'text',
+						text: '$('+instanceLabel+':userName_'+targetType.var_string+'_'+targetType.getButtonNumber(x,y)+')'+preset_action.button_label,
+						size: 'Auto',
+						color: self.rgb(255,255,255),
+						bgcolor: self.rgb(0,0,0)
+					},
+					actions: [{
+						action: preset_action.action,
+						options: {
+							message: preset_action.message,
+							user: targetType.user_string,
+							userString:targetType.getButtonNumber(x,y)
+						}
+					}],
+					feedbacks:[{
+						type:'user_status_fb',
+						options:{
+							user:targetType.user_string,
+							userString:targetType.getButtonNumber(x,y),
+							prop:preset_action.prop,
+							propertyValue:1,
+							bg:self.rgb(0,100,0),
+							fg:self.rgb(255,255,255)
+						}
 
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user:targetType.user_string,
-					userString:targetType.getButtonNumber(x,y),
-					prop:preset_action.prop,
-					propertyValue:0,
-					bg:self.rgb(100,0,0),
-					fg:self.rgb(255,255,255)
-				}
+					},
+					{
+						type:'user_status_fb',
+						options:{
+							user:targetType.user_string,
+							userString:targetType.getButtonNumber(x,y),
+							prop:preset_action.prop,
+							propertyValue:0,
+							bg:self.rgb(100,0,0),
+							fg:self.rgb(255,255,255)
+						}
 
-			}
-		]
-		});
+					}
+				]
+				});
 
 			}
 		}
