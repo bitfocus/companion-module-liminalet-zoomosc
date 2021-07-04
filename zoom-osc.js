@@ -1727,6 +1727,7 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 			if (fs.existsSync(local_path = path.resolve(__dirname,'presets/'+local_path+'.companionconfig'))) {
 				let local_preset = JSON.parse(fs.readFileSync(local_path));
 				for(const [config_key, config_value] of (Object.entries(local_preset.config).filter(e => Object.keys(e[1]).length !== 0))) {
+					//config_value.text = config_value.text.replaceAll("$(zoomosc", "$("+self.config.label);
 					presets.push({
 						category: preset_action.preset_label+" by "+targetType.preset_label,
 						label: config_value.text,
@@ -1740,7 +1741,23 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 		}
 	}
 }
-
+console.log("DEBUG Finding custom presets", fs.readdirSync(path.resolve(__dirname,'presets/')));
+fs.readdirSync(path.resolve(__dirname,'presets/')).forEach(file => {
+	if(path.basename(file).startsWith("Custom")) {
+		let local_preset = JSON.parse(fs.readFileSync(path.resolve(__dirname,'presets/'+file)));
+		for(const [config_key, config_value] of (Object.entries(local_preset.config).filter(e => Object.keys(e[1]).length !== 0))) {
+			//config_value.text = config_value.text.replaceAll("$(zoomosc", "$("+self.config.label);
+			presets.push({
+				category: local_preset.page.name,
+				label: config_value.text,
+				bank: config_value,
+				actions: remove_instance_identifiers(local_preset.actions[config_key]),
+				release_actions: remove_instance_identifiers(local_preset.release_actions[config_key]),
+				feedbacks: remove_instance_identifiers(local_preset.feedbacks[config_key]),
+			});
+		}
+	}
+});
 
 
 self.setPresetDefinitions(presets);
