@@ -223,6 +223,7 @@ var keywords = {
  ZOSC_MSG_TARGET_PART_USERNAME  : "userName" ,
  ZOSC_MSG_TARGET_PART_GALLERY_POSITION  : "galleryPosition" ,
  ZOSC_MSG_TARGET_PART_SELECTION  :  "selection",
+ ZOSC_MSG_TARGET_PART_FAVORITE_INDEX  :  "favoriteIndex",
 
 //message grouping types
  ZOSC_MSG_GROUP_PART_ALL  : "all" ,
@@ -453,7 +454,28 @@ SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select us
     ZOSC_MSG_PART_LIST_TOGGLE_SELECTION : {INTERNAL_ACTION:"toggleSelection", TITLE:"Toggle Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
 
     ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
-   }},
+   
+    ZOSC_MSG_PART_SELECT_AUDIO_STATUS : {INTERNAL_ACTION:"addUnmutedToSelection", TITLE:"Add unmuted users to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all unmuted users to selection group" },
+
+    ZOSC_MSG_PART_SELECT_VIDEO_STATUS : {INTERNAL_ACTION:"addVideoOnToSelection", TITLE:"Add video on users to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all users with video on to selection group" },
+   
+    ZOSC_MSG_PART_SELECT_HAND_STATUS : {INTERNAL_ACTION:"addRaisedHandToSelection", TITLE:"Add users with raised hand to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all users with raised hands to selection group" },
+
+    ZOSC_MSG_PART_SELECT_SPOTLIGHT_STATUS : {INTERNAL_ACTION:"addSpotlitSelection", TITLE:"Add spotlit users to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all currently spotlit users to selection group" },
+
+    ZOSC_MSG_PART_SELECT_FAVORITES : {INTERNAL_ACTION:"addFavoritesSelection", TITLE:"Add favorite users to selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add all favorite users to selection group" },
+}},
+
+FAVORITE_GROUP : { TITLE:"Favorites Actions", ARGS: "", DESCRIPTION: "Mark users as favorites for stable targeting", MESSAGES: {
+
+    ZOSC_MSG_PART_ADD_FAVORITE : {INTERNAL_ACTION:"addFavorite", TITLE:"Add to Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Mark user as Favorite and create favorite ID" },
+
+    ZOSC_MSG_PART_REMOVE_FAVORITE : {INTERNAL_ACTION:"removeFavorite", TITLE:"Remove from Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from favorites" },
+
+    ZOSC_MSG_PART_TOGGLE_FAVORITE : {INTERNAL_ACTION:"toggleFavorite", TITLE:"Toggle Favorite", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
+
+    ZOSC_MSG_PART_CLEAR_FAVORITES : {INTERNAL_ACTION:"clearFavorites", TITLE:"Clear Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users from favorites" },
+}},
 
 ISO_ACTION_GROUP : { TITLE:"ZoomISO Actions", ARGS: "string:Pin Number", DESCRIPTION: "ZoomISO Specific Actions", MESSAGES: {
  ZOSC_MSG_OUTPUT_ISO : {USER_ACTION:"/zoom/outputISO", TITLE:"Output ISO", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Output ISO feeds" }
@@ -566,7 +588,7 @@ var outputFullMessages = {
 //8 - video status
 //9 - audio status
 //10 - handRaise status
-}
+};
 var outputLastPartMessages = {
 
 
@@ -625,6 +647,6 @@ var outputLastPartMessages = {
 }
 ;
 
- if (module != undefined)  module.exports = {enums, keywords, actions,  outputLastPartMessages, outputFullMessages}
+ if (module != undefined)  module.exports = {enums, keywords, actions,  outputLastPartMessages, outputFullMessages};
 
 //endif /* ZOSCConstants_h */
