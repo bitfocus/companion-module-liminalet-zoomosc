@@ -336,7 +336,6 @@ HAND_GROUP : { TITLE:"Raise/lower hand actions", ARGS: "", DESCRIPTION: "raise/l
 ROLE_GROUP : { TITLE:"Role Actions", ARGS: "", DESCRIPTION: "Change role for user", MESSAGES: {
 
 //role changed
- ZOSC_MSG_PART_RENAME : {USER_ACTION:"rename", TITLE:"Rename user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Rename the selected user" },
  ZOSC_MSG_PART_MAKE_HOST : {USER_ACTION:"makeHost", TITLE:"Make user host", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Make selected user host" },
  ZOSC_MSG_PART_MAKE_CO_HOST : {USER_ACTION:"makeCoHost", TITLE:"Make co-host", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Make selected user co-host" },
  ZOSC_MSG_PART_REVOKE_CO_HOST : {USER_ACTION:"revokeCoHost", TITLE:"Revoke Co-Host", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Revoke co-host from selected user" },
@@ -346,13 +345,18 @@ ROLE_GROUP : { TITLE:"Role Actions", ARGS: "", DESCRIPTION: "Change role for use
  ZOSC_MSG_PART_EJECT : {USER_ACTION:"eject", TITLE:"Eject user(s ", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Eject selected user(s  from meeting" }
 
 }},
+RENAME_GROUP : { TITLE:"Rename Action", ARGS: "string: New Name", DESCRIPTION: "Change name (requires host or cohost)", MESSAGES: {
+
+ ZOSC_MSG_PART_RENAME : {USER_ACTION:"rename", TITLE:"Rename user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Rename the selected user" },
+
+}},
 BREAKOUT_GROUP : { TITLE:"Breakout Room Actions", ARGS: "", DESCRIPTION: "Breakout room actions", MESSAGES: {
 
  ZOSC_MSG_LIST_BREAKOUTS : {MESSAGE:"/zoom/listBreakouts", TITLE:"List breakout rooms", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "List all available breakout rooms" },
  ZOSC_MSG_LIST_CREATE_BREAKOUT : {MESSAGE:"/zoom/createBreakout", TITLE:"Create breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 1, DESCRIPTION: "Create new breakout room" }
 
 }},
-SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "int:screen", DESCRIPTION: "start/stop screenshare for user", MESSAGES: {
+SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "string:ID/name of screen or window", DESCRIPTION: "start/stop screenshare for user", MESSAGES: {
 //screenshare
  ZOSC_MSG_PART_SCREENSHARE : {USER_ACTION:"startScreenShare", TITLE:"Start screen share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Start screen share for selected user and sent screen" },
 
@@ -407,7 +411,7 @@ VIEW_GROUP : { TITLE:"App actions", ARGS: "", DESCRIPTION: "Change app  state fo
  ZOSC_MSG_PART_SET_DISABLE_COMPUTER_SOUND_WHEN_SHARING : {USER_ACTION:"disableComputerSoundWhenSharing", TITLE:"Disable share computer sound when sharing", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Disable share computerSoundWhenSharing" }
 
 }},
-SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "list: options", DESCRIPTION: "Settings actions for user", MESSAGES: {
+SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "string:Device ID or Index", DESCRIPTION: "Settings actions for user", MESSAGES: {
 
  ZOSC_MSG_PART_LIST_MIC_DEVICES : {USER_ACTION:"listMicDevices", TITLE:"List mic devices", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "List mic devices for user(s " },
  ZOSC_MSG_PART_SET_MIC_DEVICE : {USER_ACTION:"setMicDevice", TITLE:"Set mic device", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Set mic device for user(s ", LIST_SOURCE: "micDevices", LIST_GET: "listMicDevices", VALUE_GET: "getMicDevice", VALUE_SOURCE: "micDevice", IS_DUPEL: true },
@@ -501,7 +505,7 @@ ISO_ACTION_GROUP : { TITLE:"ZoomISO Actions", ARGS: "string:Pin Number", DESCRIP
   ZOSC_MSG_OUTPUT_ISO : {USER_ACTION:"/zoom/outputISO", TITLE:"Output ISO", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Output ISO feeds" }
 }},
 
-JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: "string:Meeting Number, string:Meeting password, string:Display name", DESCRIPTION: "Join a meeting in progress", MESSAGES: {
+JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: 'string:Meeting Number (No spaces), string:Meeting Password (insert single dash if no password), string:Display name', DESCRIPTION: "Join a meeting in progress", MESSAGES: {
 
  ZOSC_MSG_JOIN_MEETING : {MESSAGE:"/zoom/joinMeeting", TITLE:"Join Meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 3, DESCRIPTION: "Join Meeting" }
 

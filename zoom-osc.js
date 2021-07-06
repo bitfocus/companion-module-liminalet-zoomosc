@@ -551,12 +551,13 @@ var allInstanceActions=[];
 		// console.log('ARGS: '+ args);
 		//add arguments
 		for (let arg in args) {
-			switch(args[arg].types.toString()){
+			switch(args[arg].types.toString().trim()){
 				case 'string':
 				newGroup.options.push({
 					type: 'textinput',
 					label: args[arg].name,
-					id: args[arg].name
+					id: args[arg].name,
+					default: ""
 				});
 				break;
 
@@ -725,8 +726,8 @@ instance.prototype.action = function(action) {
 
 		console.log("ARG: "+JSON.stringify(action.options));
 		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].length>0){
-			console.log("IS ARG: "+arg);
 			var thisArg=action.options[arg];
+			console.log("IS ARG: "+arg+" ("+thisArg+")");
 			if(!isNaN(thisArg)){
 				thisArg=parseInt(thisArg);
 			}
@@ -734,8 +735,13 @@ instance.prototype.action = function(action) {
 	//set osc type from js type
 			switch(typeof thisArg){
 				case 'number':
+					if ((''+thisArg).replace('.','').length >=9) { //Filters for meeting IDs with 9 or more digits
+						oscArgType='s';
+						console.log("ARG IS PROBABLY A MEETING ID; SENDING AS STRING");
+					} else {
 					oscArgType='i';
 					console.log("ARG IS NUMBER");
+					}
 					break;
 
 				case 'string':
