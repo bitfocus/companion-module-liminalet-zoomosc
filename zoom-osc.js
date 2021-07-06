@@ -567,7 +567,7 @@ var allInstanceActions=[];
 					label: args[arg].name,
 					id: args[arg].name,
 					min:0,
-					max:1000,
+					max:Math.pow(2, 16),
 					default:1
 				});
 					break;
