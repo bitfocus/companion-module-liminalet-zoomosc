@@ -69,8 +69,10 @@ function instance(system, id, config) {
 instance.GetUpgradeScripts = function() {
 	return [
 		instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
-			'set_source': true,
-			'set_output': true,
+			'set_source': {
+				'bg': 'bgcolor',
+				'fg': 'fgcolor'
+			}
 			// List as many feedback types as you like
 		})
 	];
@@ -1598,7 +1600,7 @@ for(let y=0;y<4;y++){
 					propertyValue:1,
 				},
 				style:{
-					bg:self.rgb(0,255,0)
+					bgcolor:self.rgb(0,255,0)
 				}
 
 			},
@@ -1646,7 +1648,7 @@ for(let y=0;y<4;y++){
 					propertyValue:1,
 				},
 				style:{
-					bg:self.rgb(0,255,0)
+					bgcolor:self.rgb(0,255,0)
 				}
 
 			},
@@ -1693,7 +1695,7 @@ for(let y=0;y<4;y++){
 					propertyValue:1,
 				},
 				style:{
-					bg:self.rgb(0,255,0)
+					bgcolor:self.rgb(0,255,0)
 				}
 			},
 			{
