@@ -69,11 +69,7 @@ function instance(system, id, config) {
 instance.GetUpgradeScripts = function() {
 	return [
 		instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
-			'set_source': {
-				'bg': 'bgcolor',
-				'fg': 'fgcolor'
-			}
-			// List as many feedback types as you like
+			'user_status_fb': true
 		})
 	];
 };
