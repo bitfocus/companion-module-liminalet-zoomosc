@@ -722,10 +722,10 @@ instance.prototype.action = function(action) {
 	function pushOscArgs(){
 	// add args
 	for (let arg in action.options){
-		console.log("ARG: "+arg);
+		console.log("ARG: "+arg+", "+action.options[arg]);
 
-		console.log("ARG: "+JSON.stringify(action.options));
-		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].length>0){
+		console.log("ARG (length "+action.options[arg].toString().length+"): "+JSON.stringify(action.options));
+		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].toString().length>0){
 			var thisArg=action.options[arg];
 			console.log("IS ARG: "+arg+" ("+thisArg+")");
 			if(!isNaN(thisArg)){
