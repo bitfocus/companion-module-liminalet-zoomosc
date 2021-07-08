@@ -68,9 +68,11 @@ function instance(system, id, config) {
 
 instance.GetUpgradeScripts = function() {
 	return [
-		() => false, // placeholder script, that no cannot be removed
-	]
-}
+		instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
+			'user_status_fb': true
+		})
+	];
+};
 
 instance.prototype.updateConfig = function(config) {
 	console.log("updateConfig");
@@ -934,8 +936,13 @@ instance.prototype.init_feedbacks = function(){
 
 	var feedbacks={};
 		feedbacks.user_status_fb={
+			type: 'boolean',
 			label:'User Status Feedback',
 			description:'Map user status to button properties',
+			style:{
+				color: self.rgb(255,255,255),
+				bgcolor: self.rgb(0,0,0),
+			},
 			options:[
 				{
 					type:'dropdown',
@@ -963,29 +970,16 @@ instance.prototype.init_feedbacks = function(){
 					id:'propertyValue',
 					choices:[{id:1,label:"On"},{id:0,label:"Off"}],
 					default:1
-				},
-				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
-					default: self.rgb(255,255,255)
-				},
-				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
-					default: self.rgb(0,0,0)
 				}
 			],
 			//handle feedback code
 			callback: (feedback,bank)=>{
 
-				if(!self.zoomosc_client_data.callStatus) return;
+				if(!self.zoomosc_client_data.callStatus) return false;
 				var opts=feedback.options;
 				//only attempt the feedback if user and property exists
 				if(opts.user!=undefined&& opts.prop!=undefined){
 				var sourceUser;
-				var sourceProp;
 				switch(opts.user){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 						return; // not supported
@@ -1077,10 +1071,7 @@ instance.prototype.init_feedbacks = function(){
 				var userPropVal=userToFeedback[propertyToFeedback];
 				//
 					if (userPropVal==parseInt(opts.propertyValue)){
-						return{
-							color:feedback.options.fg,
-							bgcolor:feedback.options.bg
-						};
+						return true;
 					}
 				}
 			//check exists
