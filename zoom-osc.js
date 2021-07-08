@@ -940,8 +940,7 @@ instance.prototype.init_feedbacks = function(){
 			label:'User Status Feedback',
 			description:'Map user status to button properties',
 			style:{
-				color: self.rgb(255,255,255),
-				bgcolor: self.rgb(0,0,0),
+				bgcolor: self.rgb(0,0,0)
 			},
 			options:[
 				{
@@ -1686,8 +1685,9 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 							userString:targetType.getButtonNumber(x,y),
 							prop:preset_action.prop,
 							propertyValue:1,
-							bg:self.rgb(0,100,0),
-							fg:self.rgb(255,255,255)
+						},
+						style:{
+							bgcolor: self.rgb(0,100,0)
 						}
 
 					},
@@ -1698,8 +1698,9 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 							userString:targetType.getButtonNumber(x,y),
 							prop:preset_action.prop,
 							propertyValue:0,
-							bg:self.rgb(100,0,0),
-							fg:self.rgb(255,255,255)
+						},
+						style:{
+							bgcolor:self.rgb(100,0,0)
 						}
 
 					}
