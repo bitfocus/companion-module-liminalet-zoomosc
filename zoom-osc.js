@@ -1644,13 +1644,13 @@ instance.prototype.init_presets = function () {
 			},
 			"ListIndex" : {
 				preset_label: "List Index",
-				getButtonNumber: function (x, y) {return y*7+x;},
+				getButtonNumber: function (x, y) {return (x*7)+y;},
 				var_string: "listIndex",
 				user_string: "listIndex"
 			},
 			"TargetID" : {
 				preset_label: "Target ID",
-				getButtonNumber: function (x, y) {return y*7+x;},
+				getButtonNumber: function (x, y) {return (x*7)+y;},
 				var_string: "tgtID",
 				user_string: "targetID"
 			},
@@ -1667,8 +1667,8 @@ instance.prototype.init_presets = function () {
 
 for(const [targetType_short, targetType] of Object.entries(preset_target_types)) {
 	for(const [preset_action_short, preset_action] of Object.entries(preset_actions)) {
-		for(let y=0;y<7;y++){
-			for(let x=0;x<7;x++){
+		for(let x=0;x<7;x++){
+			for(let y=0;y<7;y++){
 				presets.push({
 					category: preset_action.preset_label+" by "+targetType.preset_label,
 					label: preset_action.preset_label+" by "+targetType.preset_label+" ("+targetType.getButtonNumber(x,y)+")",
