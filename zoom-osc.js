@@ -2,8 +2,9 @@
 var instance_skel = require('../../instance_skel');
 var OSC 					= require('osc');
 //API file
-var ZOSC=require('./zoscconstants');
-
+var ZOSC=require('./zoscconstants.js');
+//Icons file
+var ZOSC_ICONS=require('./zoscicons.js');
 var debug;
 var log;
 
@@ -1573,56 +1574,72 @@ instance.prototype.init_presets = function () {
 			button_label: "\\nAudio",
 			action: 'AV_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_MUTE',
-			prop:'audioStatus'
+			prop:'audioStatus',
+			enabled_icon: ZOSC_ICONS.MIC_ENABLED,
+			disabled_icon: ZOSC_ICONS.MIC_DISABLED
 			},
 		"Video": {
 			preset_label: "Video",
 			button_label: "\\nVideo",
 			action: 'AV_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_VIDEO',
-			prop:'videoStatus'
+			prop:'videoStatus',
+			enabled_icon: ZOSC_ICONS.CAMERA_ENABLED,
+			disabled_icon: ZOSC_ICONS.CAMERA_DISABLED
 			},
 		"Spotlight": {
 			preset_label: "Spotlight",
 			button_label: "\\nSpotlight",
 			action: 'SPOTLIGHT_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_SPOT',
-			prop:'spotlightStatus'
+			prop:'spotlightStatus',
+			enabled_icon: ZOSC_ICONS.SPOTLIGHT_ENABLED,
+			disabled_icon: ZOSC_ICONS.SPOTLIGHT_DISABLED
 			},
 		"Pin": {
 			preset_label: "Pin",
 			button_label: "\\nPin",
 			action: 'PIN_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_PIN',
-			prop:'pinStatus'
+			prop:'videoStatus', //TODO: change to pinStatus when implemented
+			enabled_icon: ZOSC_ICONS.PIN_ENABLED,
+			disabled_icon: null
 			},
 		"Single Selection": {
 			preset_label: "Single Selection",
 			button_label: "",
 			action: 'SELECTION_GROUP',
 			message: 'ZOSC_MSG_PART_LIST_SINGLE_SELECTION',
-			prop:'selected'
+			prop:'selected',
+			enabled_icon: null,
+			disabled_icon: null
 			},
 		"Multiple Selection": {
 			preset_label: "Multi-selection",
 			button_label: "",
 			action: 'SELECTION_GROUP',
 			message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
-			prop:'selected'
+			prop:'selected',
+			enabled_icon: null,
+			disabled_icon: null
 			},
 		"Select Favorites": {
 			preset_label: "Select Favorites",
 			button_label: "\\nFavorite",
 			action: 'FAVORITE_GROUP',
 			message: 'ZOSC_MSG_PART_LIST_TOGGLE_FAVORITE',
-			prop:'favorite'
+			prop:'favorite',
+			enabled_icon: ZOSC_ICONS.FAVORITE_ENABLED,
+			disabled_icon: ZOSC_ICONS.FAVORITE_DISABLED
 			},
 		"ZoomISO Output": {
 			preset_label: "ZoomISO Outputs",
 			button_label: "",
 			action: 'ISO_ACTION_GROUP',
 			message: 'ZOSC_MSG_OUTPUT_ISO',
-			prop:'videoStatus' //TODO: change to isoStatus when implemented
+			prop:'videoStatus', //TODO: change to isoStatus when implemented
+			enabled_icon: null,
+			disabled_icon: null
 			},
 		};
 
