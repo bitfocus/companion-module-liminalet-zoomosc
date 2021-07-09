@@ -68,6 +68,7 @@ function instance(system, id, config) {
 
 instance.GetUpgradeScripts = function() {
 	return [
+		() => false, // placeholder script, that not cannot be removed
 		instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
 			'user_status_fb': true
 		})
