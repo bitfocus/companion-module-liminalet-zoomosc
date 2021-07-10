@@ -494,7 +494,7 @@ ISO_ACTION_GROUP : { TITLE:"ZoomISO Actions", ARGS: "int:Custom Output Number", 
   ZOSC_MSG_OUTPUT_ISO : {USER_ACTION:"/zoom/outputISO", TITLE:"Output ISO", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Output ISO feeds" }
 }},
 
-JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: 'string:Meeting Number (No spaces), string:Meeting Password (insert single dash if no password), string:Display name', DESCRIPTION: "Join a meeting in progress", MESSAGES: {
+JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: 'string:Meeting Number, string:Meeting Password, string:Display name', DESCRIPTION: "Join a meeting in progress", MESSAGES: {
 
  ZOSC_MSG_JOIN_MEETING : {MESSAGE:"/zoom/joinMeeting", TITLE:"Join Meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 3, DESCRIPTION: "Join Meeting" }
 

@@ -721,27 +721,29 @@ instance.prototype.action = function(action) {
 	// /zoom/[TARGET_TYPE]/[message]
 	function pushOscArgs(){
 	// add args
-	for (let arg in action.options){
-		console.log("ARG: "+arg+", "+action.options[arg]);
 
-		console.log("ARG (length "+action.options[arg].toString().length+"): "+JSON.stringify(action.options));
-		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].toString().length>0){
+	let emptyArgAllowList = ['Meeting Password'];  // Send these args regardless of if they're empty
+	let argDisallowList = ['message', 'user', 'userString']; // Never send these args (processed in another block)
+
+	for (let arg in action.options){
+		console.log("ARG: " + arg + ", " + action.options[arg] + ", " + 
+			typeof action.options[arg] + ", " + JSON.stringify(action.options));
+
+		if(!argDisallowList.includes(arg) && (action.options[arg].toString().length>0 || emptyArgAllowList.includes(arg))){
 			var thisArg=action.options[arg];
-			console.log("IS ARG: "+arg+" ("+thisArg+")");
-			if(!isNaN(thisArg)){
+			if(!isNaN(thisArg) && thisArg !== ""){
 				thisArg=parseInt(thisArg);
 			}
+			if(arg.toString().toUpperCase().startsWith("MEETING NUMBER")) {
+				thisArg = thisArg.toString().replaceAll(' ','');
+			}
+			console.log("IS ARG: " + arg + " (" + thisArg + "), type " + typeof thisArg);
 			var oscArgType;
 	//set osc type from js type
 			switch(typeof thisArg){
 				case 'number':
-					if ((''+thisArg).replace('.','').length >=9) { //Filters for meeting IDs with 9 or more digits
-						oscArgType='s';
-						console.log("ARG IS PROBABLY A MEETING ID; SENDING AS STRING");
-					} else {
 					oscArgType='i';
 					console.log("ARG IS NUMBER");
-					}
 					break;
 
 				case 'string':
