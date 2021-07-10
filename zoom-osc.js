@@ -123,7 +123,8 @@ instance.prototype.init_variables = function() {
 		{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
 		{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
 		{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
-		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}
+		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'},
+        {varName:'me',              varString:'me',                     varLabel:'Me'}
 
 	];
 	//variable name in user data, string to tag companion variable
@@ -178,7 +179,10 @@ for(var variableToPublish in variablesToPublishList){
 								if(thisVariable.isList){
 									thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
 									thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								}else{
+								} else if (thisSource.varName == "me") {
+                                    thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel;
+									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString;
+                                } else {
 									thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
 									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
 								}
