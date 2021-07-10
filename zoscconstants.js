@@ -340,7 +340,7 @@ ROLE_GROUP : { TITLE:"Role Actions", ARGS: "", DESCRIPTION: "Change role for use
  ZOSC_MSG_PART_EJECT : {USER_ACTION:"eject", TITLE:"Eject user(s ", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Eject selected user(s  from meeting" }
 
 }},
-RENAME_GROUP : { TITLE:"Rename Action", ARGS: "string: New Name", DESCRIPTION: "Change name (requires host or cohost)", MESSAGES: {
+RENAME_GROUP : { TITLE:"Rename Action", ARGS: "string:New Name", DESCRIPTION: "Change name (requires host or cohost)", MESSAGES: {
 
  ZOSC_MSG_PART_RENAME : {USER_ACTION:"rename", TITLE:"Rename user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Rename the selected user" },
 
