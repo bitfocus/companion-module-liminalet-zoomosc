@@ -117,6 +117,11 @@ instance.prototype.userSourceList= [
 	{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
 	{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}];
 
+instance.prototype.galleryUserSourceList = [
+	{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
+	{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'}
+];
+
 //variable name in user data, string to tag companion variable
 instance.prototype.variablesToPublishList=[
 	{varName:'index',						varString:'index',					 varLabel:"Target ID"},
@@ -151,18 +156,21 @@ instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
 	}
 	self.variable_data[thisName] = thisValue;
 	//console.log("ZOSC: Updated var "+thisName+" to "+thisValue);
-}
+};
 
-instance.prototype.setVariablesForUser = function(sourceUser){
+instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList){
 	var self = this;
 	//user name in user data, string to tag companion variable
 
 //variables
-for(var variableToPublish in self.variablesToPublishList){
+for(var variableToPublish in variablesToPublishList){
 	// sources
-	for(var source in self.userSourceList){
-		var thisSource=self.userSourceList[source];
+	for(var source in userSourceList){
+		var thisSource=userSourceList[source];
 		//dont publish variables that are -1
+		if (thisSource.varName == 'listIndex') {
+			sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
+		}
 		if(sourceUser[thisSource.varName]!=-1){
 			var thisVariable=self.variablesToPublishList[variableToPublish];
 			var thisVariableName=thisVariable.varName;
@@ -215,7 +223,7 @@ for(var variableToPublish in self.variablesToPublishList){
 			}
 		}
 	}
-}
+};
 
 //Add Variables. Called after every received msg from zoomosc
 instance.prototype.init_variables = function() {
@@ -234,7 +242,7 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			for (x=0;x<ZOOM_MAX_GALLERY_SIZE_X;x++){
 				// check which user is in gallery position
 			for (let user in self.user_data){
-					if(self.user_data[user].zoomID==self.zoomosc_client_data.galleryOrder[userIndex]){
+					if(self.zoomosc_client_data.galleryOrder && self.user_data[user].zoomID==self.zoomosc_client_data.galleryOrder[userIndex]){
 						//add gallery position to self.user_data
 						self.user_data[user].galleryPosition=y.toString()+','+x.toString();
 						// self.user_data[user].galleryIndex=userIndex;
@@ -267,7 +275,7 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 		var i =self.zoomosc_client_data.listIndexOffset;
 		for (let user in self.user_data) {
 			var this_user = self.user_data[user];
-			this_user.listIndex = i++;
+			//this_user.listIndex = i++;
 			console.log("setting variables for user " + this_user.userName + ", zoomID: " + this_user.zoomID);
 			self.setVariablesForUser(this_user,self.userSourceList,self.variablesToPublishList);
 
@@ -1226,7 +1234,7 @@ if(!self.disabled){
 
 				self.zoomosc_client_data.numberOfSelectedUsers = 0;
 
-				self.setVariablesForUser(self.user_data[this_user.zoomID]);
+				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
 
 		}
 
@@ -1456,8 +1464,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				self.user_data[currentZoomID].galleryIndex=i;
 				console.log("user: "+self.user_data[currentZoomID].userName+" galindex: "+self.user_data[currentZoomID].galleryIndex);
 			}
-			for(let user in user_data){
-				if(user_data[user].onlineStatus==0){
+			for(let user in self.user_data){
+				if(self.user_data[user].onlineStatus==0){
 					console.log("DELETE OFFLINE USER");
 					delete self.user_data[user];
 				}
