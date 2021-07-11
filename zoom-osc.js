@@ -559,12 +559,13 @@ var allInstanceActions=[];
 		// console.log('ARGS: '+ args);
 		//add arguments
 		for (let arg in args) {
-			switch(args[arg].types.toString()){
+			switch(args[arg].types.toString().trim()){
 				case 'string':
 				newGroup.options.push({
 					type: 'textinput',
 					label: args[arg].name,
-					id: args[arg].name
+					id: args[arg].name,
+					default: ""
 				});
 				break;
 
@@ -574,7 +575,7 @@ var allInstanceActions=[];
 					label: args[arg].name,
 					id: args[arg].name,
 					min:0,
-					max:1000,
+					max:Math.pow(2, 16),
 					default:1
 				});
 					break;
@@ -728,16 +729,23 @@ instance.prototype.action = function(action) {
 	// /zoom/[TARGET_TYPE]/[message]
 	function pushOscArgs(){
 	// add args
-	for (let arg in action.options){
-		console.log("ARG: "+arg);
 
-		console.log("ARG: "+JSON.stringify(action.options));
-		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].length>0){
-			console.log("IS ARG: "+arg);
+	let emptyArgAllowList = ['Meeting Password'];  // Send these args regardless of if they're empty
+	let argDisallowList = ['message', 'user', 'userString']; // Never send these args (processed in another block)
+
+	for (let arg in action.options){
+		console.log("ARG: " + arg + ", " + action.options[arg] + ", " + 
+			typeof action.options[arg] + ", " + JSON.stringify(action.options));
+
+		if(!argDisallowList.includes(arg) && (action.options[arg].toString().length>0 || emptyArgAllowList.includes(arg))){
 			var thisArg=action.options[arg];
-			if(!isNaN(thisArg)){
+			if(!isNaN(thisArg) && thisArg !== ""){
 				thisArg=parseInt(thisArg);
 			}
+			if(arg.toString().toUpperCase().startsWith("MEETING NUMBER")) {
+				thisArg = thisArg.toString().replaceAll(' ','');
+			}
+			console.log("IS ARG: " + arg + " (" + thisArg + "), type " + typeof thisArg);
 			var oscArgType;
 	//set osc type from js type
 			switch(typeof thisArg){
