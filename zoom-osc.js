@@ -939,6 +939,7 @@ instance.prototype.init_feedbacks = function(){
 			{id:'onlineStatus',	label:'Online Status'},
 			{id:'videoStatus',	 label:'Video Status'},
 			{id:'audioStatus',	 label:'Audio Status'},
+			{id:'spotlightStatus', label:'Spotlight Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
 			{id:'handStatus',		label:'Hand Raised Status'},
 			{id:'selected',		label:'Selected'},
