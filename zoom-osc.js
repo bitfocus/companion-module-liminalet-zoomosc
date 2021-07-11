@@ -110,7 +110,7 @@ instance.prototype.init = function() {
 
 };
 
-self.userSourceList= [
+instance.prototype.userSourceList= [
 	{varName:'userName',						varString:'user',							varLabel:''},
 	{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
 	{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
@@ -118,7 +118,7 @@ self.userSourceList= [
 	{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}];
 
 //variable name in user data, string to tag companion variable
-self.variablesToPublishList=[
+instance.prototype.variablesToPublishList=[
 	{varName:'index',						varString:'index',					 varLabel:"Target ID"},
 	{varName:'userName',						varString:'userName',					 varLabel:"User Name"},
 	{varName:'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
@@ -142,7 +142,8 @@ self.variablesToPublishList=[
 
 
 
-self.setVariable = function(thisName, thisLabel, thisValue) {
+instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
+	var self = this;
 	if (thisValue == null || thisValue == undefined) return;
 	let thisDefinition = { label:thisLabel, name: thisName };
 	if (!self.variable_definitions.includes(thisDefinition)) {
@@ -152,7 +153,8 @@ self.setVariable = function(thisName, thisLabel, thisValue) {
 	//console.log("ZOSC: Updated var "+thisName+" to "+thisValue);
 }
 
-self.setVariablesForUser = function(sourceUser){
+instance.prototype.setVariablesForUser = function(sourceUser){
+	var self = this;
 	//user name in user data, string to tag companion variable
 
 //variables
@@ -204,7 +206,7 @@ for(var variableToPublish in self.variablesToPublishList){
 								//if the variable has a value push and set it
 								if(thisVariableValue != null && thisVariableValue != undefined){
 									//push variable and set
-									setVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue);
+									self.setVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue);
 									//self.setVariable( thisFormattedVarName, thisVariableValue);
 								}
 
@@ -248,8 +250,8 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			//if gallery position is not in our gallery set blank values for variables
 				else{
 					//set variables as blank for gallery position
-						for (let i=0;i<variablesToPublishList.length;i++){
-							let thisFormattedVarName=variablesToPublishList[i].varString+'_galPos_'+y+','+x;
+						for (let i=0;i<self.variablesToPublishList.length;i++){
+							let thisFormattedVarName=self.variablesToPublishList[i].varString+'_galPos_'+y+','+x;
 							// thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName]
 							//self.setVariable( thisFormattedVarName,'-');
 							self.variable_data.thisFormattedVarName = '-';
@@ -267,7 +269,7 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 			var this_user = self.user_data[user];
 			this_user.listIndex = i++;
 			console.log("setting variables for user " + this_user.userName + ", zoomID: " + this_user.zoomID);
-			self.setVariablesForUser(this_user,userSourceList,variablesToPublishList);
+			self.setVariablesForUser(this_user,self.userSourceList,self.variablesToPublishList);
 
 		}
 }
@@ -352,7 +354,7 @@ for(let clientVar in clientdatalabels){
 
 	}
 	//self.setVariable('client_'+clientVar,clientVarVal);
-	setVariable('client_'+clientVar, clientdatalabels[clientVar], clientVarVal);
+	self.setVariable('client_'+clientVar, clientdatalabels[clientVar], clientVarVal);
 	}
 
   self.setVariableDefinitions(self.variable_definitions);
