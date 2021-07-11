@@ -38,6 +38,8 @@ function instance(system, id, config) {
 	self.zoomosc_client_data.numberOfUsersInCall =	0;
 	self.zoomosc_client_data.listIndexOffset = 0;
 	self.zoomosc_client_data.numberOfSelectedUsers = 0;
+	self.variable_data = {};
+	self.variable_definitions = [];
 
 
 	self.disabled=false;
@@ -108,48 +110,60 @@ instance.prototype.init = function() {
 
 };
 
-//Add Variables. Called after every received msg from zoomosc
-instance.prototype.init_variables = function() {
+instance.prototype.userSourceList= [
+	{varName:'userName',						varString:'user',							varLabel:''},
+	{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
+	{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
+	{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
+	{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}];
 
+instance.prototype.galleryUserSourceList = [
+	{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
+	{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'}
+];
+
+//variable name in user data, string to tag companion variable
+instance.prototype.variablesToPublishList=[
+	{varName:'index',						varString:'index',					 varLabel:"Target ID"},
+	{varName:'userName',						varString:'userName',					 varLabel:"User Name"},
+	{varName:'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
+	{varName:'roleText',						varString:'role',							 varLabel:'Role'},
+	{varName:'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
+	{varName:'videoStatusText',		  varString:'videoStatus',			 varLabel:'Video Status'},
+	{varName:'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
+	{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
+	{varName:'handStatusText',			 varString:'handStatus',				 varLabel:'Hand Status'},
+	{varName:'activeSpeakerText',	   varString:'activeSpeaker',		 varLabel:'Active Speaker'},
+	{varName:'selected',		 varString:'selected',						varLabel:'Selected'},
+	{varName: 'currentCameraDevice', varString:'currentCameraDevice',     varLabel:"Camera Device",     isList:false},
+	{varName: 'currentMicDevice',    varString:'currentMicDevice',        varLabel:"Microphone Device", isList:false},
+	{varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice',    varLabel:"Speaker Device",    isList:false},
+	{varName: 'currentBackground',   varString:'currentBackground',       varLabel:"Background",        isList:false},
+	{varName: 'cameraDevices',      varString:'cameraDevices',     varLabel:"Camera Device",     isList:true},
+	{varName: 'micDevices',         varString:'micDevices',        varLabel:"Microphone Device", isList:true},
+	{varName: 'speakerDevices',     varString:'speakerDevices',    varLabel:"Speaker Device",    isList:true}
+	// {varName: 'backgrounds',        varString:'backgrounds',       varLabel:"Background",        isList:true}
+];
+
+
+
+instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
 	var self = this;
-	var variables= null;
-	variables = [];
-	//print list of users
-	// console.log("USERS: "+JSON.stringify(self.user_data));
-	// self.log('debug',"USERS: "+JSON.stringify(self.user_data));
+	if (thisValue == null || thisValue == undefined) return;
+	let thisDefinition = { label:thisLabel, name: thisName };
 
-	var userSourceList=[
-		{varName:'userName',						varString:'user',							varLabel:''},
-		{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
-		{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
-		{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
-		{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}
 
-	];
-	//variable name in user data, string to tag companion variable
-	var variablesToPublishList=[
-		{varName:'index',						varString:'index',					 varLabel:"Target ID"},
-		{varName:'userName',						varString:'userName',					 varLabel:"User Name"},
-		{varName:'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
-		{varName:'roleText',						varString:'role',							 varLabel:'Role'},
-		{varName:'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
-		{varName:'videoStatusText',		  varString:'videoStatus',			 varLabel:'Video Status'},
-		{varName:'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
-		{varName:'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
-		{varName:'handStatusText',			 varString:'handStatus',				 varLabel:'Hand Status'},
-		{varName:'activeSpeakerText',	   varString:'activeSpeaker',		 varLabel:'Active Speaker'},
-		{varName:'selected',		 varString:'selected',						varLabel:'Selected'},
-		{varName: 'currentCameraDevice', varString:'currentCameraDevice',     varLabel:"Camera Device",     isList:false},
-		{varName: 'currentMicDevice',    varString:'currentMicDevice',        varLabel:"Microphone Device", isList:false},
-		{varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice',    varLabel:"Speaker Device",    isList:false},
-		{varName: 'currentBackground',   varString:'currentBackground',       varLabel:"Background",        isList:false},
-		{varName: 'cameraDevices',      varString:'cameraDevices',     varLabel:"Camera Device",     isList:true},
-		{varName: 'micDevices',         varString:'micDevices',        varLabel:"Microphone Device", isList:true},
-		{varName: 'speakerDevices',     varString:'speakerDevices',    varLabel:"Speaker Device",    isList:true}
-		// {varName: 'backgrounds',        varString:'backgrounds',       varLabel:"Background",        isList:true}
-	];
+	if (!self.variable_definitions.some(e => e.name === thisName)) {
 
-function setVariablesForUser(sourceUser,userSourceList,variablesToPublishList){
+		console.log("Adding def: "+JSON.stringify(thisDefinition));
+		self.variable_definitions.push(thisDefinition);
+	}
+	self.variable_data[thisName] = thisValue;
+	//console.log("ZOSC: Updated var "+thisName+" to "+thisValue);
+};
+
+instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList){
+	var self = this;
 	//user name in user data, string to tag companion variable
 
 //variables
@@ -158,8 +172,11 @@ for(var variableToPublish in variablesToPublishList){
 	for(var source in userSourceList){
 		var thisSource=userSourceList[source];
 		//dont publish variables that are -1
+		if (thisSource.varName == 'listIndex') {
+			sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
+		}
 		if(sourceUser[thisSource.varName]!=-1){
-			var thisVariable=variablesToPublishList[variableToPublish];
+			var thisVariable=self.variablesToPublishList[variableToPublish];
 			var thisVariableName=thisVariable.varName;
 			//if it is a device list, add each device
 
@@ -201,11 +218,8 @@ for(var variableToPublish in variablesToPublishList){
 								//if the variable has a value push and set it
 								if(thisVariableValue != null && thisVariableValue != undefined){
 									//push variable and set
-									variables.push({
-										label:thisFormattedVarLabel,
-										name: thisFormattedVarName
-									});
-									self.setVariable( thisFormattedVarName, thisVariableValue);
+									self.setVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue);
+									//self.setVariable( thisFormattedVarName, thisVariableValue);
 								}
 
 				}
@@ -213,19 +227,26 @@ for(var variableToPublish in variablesToPublishList){
 			}
 		}
 	}
-}
+};
 
+//Add Variables. Called after every received msg from zoomosc
+instance.prototype.init_variables = function() {
 
+	var self = this;
+	//print list of users
+	// console.log("USERS: "+JSON.stringify(self.user_data));
+	// self.log('debug',"USERS: "+JSON.stringify(self.user_data));
 // GRID LAYOUT/calculate gallery position data
 	var numRows=self.zoomosc_client_data.galleryShape[0];
 	var numCols=self.zoomosc_client_data.galleryShape[1];
 
 	var userIndex=0;
+
 for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			for (x=0;x<ZOOM_MAX_GALLERY_SIZE_X;x++){
 				// check which user is in gallery position
 			for (let user in self.user_data){
-					if(self.user_data[user].zoomID==self.zoomosc_client_data.galleryOrder[userIndex]){
+					if(self.zoomosc_client_data.galleryOrder && self.user_data[user].zoomID==self.zoomosc_client_data.galleryOrder[userIndex]){
 						//add gallery position to self.user_data
 						self.user_data[user].galleryPosition=y.toString()+','+x.toString();
 						// self.user_data[user].galleryIndex=userIndex;
@@ -241,10 +262,11 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			//if gallery position is not in our gallery set blank values for variables
 				else{
 					//set variables as blank for gallery position
-						for (let i=0;i<variablesToPublishList.length;i++){
-							let thisFormattedVarName=variablesToPublishList[i].varString+'_galPos_'+y+','+x;
+						for (let i=0;i<self.variablesToPublishList.length;i++){
+							let thisFormattedVarName=self.variablesToPublishList[i].varString+'_galPos_'+y+','+x;
 							// thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName]
-							self.setVariable( thisFormattedVarName,'-');
+							//self.setVariable( thisFormattedVarName,'-');
+							self.variable_data.thisFormattedVarName = '-';
 						}
 				}
 		}
@@ -257,9 +279,9 @@ self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client
 		var i =self.zoomosc_client_data.listIndexOffset;
 		for (let user in self.user_data) {
 			var this_user = self.user_data[user];
-			this_user.listIndex = i++;
-			console.log("setting variables for user ", this_user);
-			setVariablesForUser(this_user,userSourceList,variablesToPublishList);
+			//this_user.listIndex = i++;
+			console.log("setting variables for user " + this_user.userName + ", zoomID: " + this_user.zoomID);
+			self.setVariablesForUser(this_user,self.userSourceList,self.variablesToPublishList);
 
 		}
 }
@@ -343,16 +365,12 @@ for(let clientVar in clientdatalabels){
 				break;
 
 	}
-
-		variables.push({
-			label: clientdatalabels[clientVar],
-			name:	'client_'+clientVar
-		});
-
-	   self.setVariable('client_'+clientVar,clientVarVal);
+	//self.setVariable('client_'+clientVar,clientVarVal);
+	self.setVariable('client_'+clientVar, clientdatalabels[clientVar], clientVarVal);
 	}
 
-  self.setVariableDefinitions(variables);
+  self.setVariableDefinitions(self.variable_definitions);
+  self.setVariables(self.variable_data);
 };
 
 
@@ -704,7 +722,7 @@ instance.prototype.action = function(action) {
 				if (users.length > index)
 				{
 						userString= parseInt(self.user_data[users[index]].zoomID);
-				} 
+				}
 				//else { userString = 0; }
 
 				break;
@@ -864,7 +882,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 						}
 					}
 						break;
-						
+
 					default:
 					//user isnt a target type
 					for (let user in self.user_data){
@@ -1042,9 +1060,9 @@ instance.prototype.init_feedbacks = function(){
 
 						if (temp_users.length > temp_index) {
 							sourceUser = temp_users[temp_index];
-						} 
+						}
 						//else { self.log('debug', 'Error in listIndex feedback, index: ' + temp_index + ', users length: ' + temp_users.length);}
-		
+
 						break;
 
 					default:
@@ -1220,7 +1238,7 @@ if(!self.disabled){
 
 				self.zoomosc_client_data.numberOfSelectedUsers = 0;
 
-				self.init_feedbacks();
+				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
 
 		}
 
@@ -1450,12 +1468,14 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				self.user_data[currentZoomID].galleryIndex=i;
 				console.log("user: "+self.user_data[currentZoomID].userName+" galindex: "+self.user_data[currentZoomID].galleryIndex);
 			}
-			for(let user in user_data){
-				if(user_data[user].onlineStatus==0){
+			for(let user in self.user_data){
+				if(self.user_data[user].onlineStatus==0){
 					console.log("DELETE OFFLINE USER");
 					delete self.user_data[user];
 				}
 			}
+
+			self.init_variables();
 
 			// console.log("Gallery Order Message Received: "+JSON.stringify(self.zoomosc_client_data.galleryOrder));
 			break;
@@ -1548,7 +1568,7 @@ instance.prototype.init_ping = function() {
 			self.init_variables();
 			// self.user_data={};
 
-			self.init_variables();
+			//self.init_variables();
 		}
 
 		//Set status to OK if ping is responded within limit
