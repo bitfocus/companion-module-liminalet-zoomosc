@@ -1471,6 +1471,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				}
 			}
 
+			self.init_variables();
+
 			// console.log("Gallery Order Message Received: "+JSON.stringify(self.zoomosc_client_data.galleryOrder));
 			break;
 
