@@ -81,7 +81,7 @@ Note: We recommend using the default port numbers below to get started, but othe
   * Add Spotlit User
   * Un-spotlight User
   * Clear Spotlight
-*  **Audio/Video**
+* **Audio/Video**
   * Video On
   * Video Off
   * Mute Audio
