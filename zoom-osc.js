@@ -151,7 +151,11 @@ instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
 	var self = this;
 	if (thisValue == null || thisValue == undefined) return;
 	let thisDefinition = { label:thisLabel, name: thisName };
-	if (!self.variable_definitions.includes(thisDefinition)) {
+
+
+	if (!self.variable_definitions.some(e => e.name === thisName)) {
+
+		console.log("Adding def: "+JSON.stringify(thisDefinition));
 		self.variable_definitions.push(thisDefinition);
 	}
 	self.variable_data[thisName] = thisValue;
@@ -718,7 +722,7 @@ instance.prototype.action = function(action) {
 				if (users.length > index)
 				{
 						userString= parseInt(self.user_data[users[index]].zoomID);
-				} 
+				}
 				//else { userString = 0; }
 
 				break;
@@ -878,7 +882,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 						}
 					}
 						break;
-						
+
 					default:
 					//user isnt a target type
 					for (let user in self.user_data){
@@ -1056,9 +1060,9 @@ instance.prototype.init_feedbacks = function(){
 
 						if (temp_users.length > temp_index) {
 							sourceUser = temp_users[temp_index];
-						} 
+						}
 						//else { self.log('debug', 'Error in listIndex feedback, index: ' + temp_index + ', users length: ' + temp_users.length);}
-		
+
 						break;
 
 					default:
