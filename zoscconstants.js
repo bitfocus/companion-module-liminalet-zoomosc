@@ -15,7 +15,6 @@
 //each is ignored in C but is converted to a key in the js array (without the :
  USER_ACTION: //the message used by a user action (such as /zoom/userName/pin - action would be "pin"
  GENERAL_ACTION: //a general action - such as /zoom/clearPin where the action would be "clearPin"
- INTERNAL_ACTION: //an action performed inside Companion or this module (such as modifying the selection group)
  MESSAGE: //a full OSC message - such as /zoom/update (message would be "/zoom/update"
  TITLE:
  ISPRO:
@@ -312,7 +311,7 @@ CHAT_GROUP : { TITLE:"Chat", ARGS: "string:Message to send", DESCRIPTION: "Set c
  ZOSC_MSG_CHAT_ALL : {MESSAGE:"/zoom/chatAll", TITLE:"Chat All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Chat Everyone" }
 
 }},
-REMOTE_CHAT_GROUP : { TITLE:"Remote chat", ARGS: "string: Target User, string: Message to send", DESCRIPTION: "Send message to user from remote user", MESSAGES: {
+REMOTE_CHAT_GROUP : { TITLE:"Remote chat", ARGS: "string:Target User,string:Message to send", DESCRIPTION: "Send message to user from remote user", MESSAGES: {
  ZOSC_MSG_PART_REMOTE_CHAT : {USER_ACTION:"remoteChat", TITLE:"Send Chat Message from remote user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Send chat message to selected user(s  from remote client" }
 
 }},
@@ -548,7 +547,7 @@ var outputFullMessages = {
 //8 - video status
 //9 - audio status
 //10 - handRaise status
-}
+};
 var outputLastPartMessages = {
 
 
@@ -607,6 +606,6 @@ var outputLastPartMessages = {
 }
 ;
 
- if (module != undefined)  module.exports = {enums, keywords, actions,  outputLastPartMessages, outputFullMessages}
+ if (module != undefined)  module.exports = {enums, keywords, actions,  outputLastPartMessages, outputFullMessages};
 
 //endif /* ZOSCConstants_h */
