@@ -222,7 +222,6 @@ var keywords = {
  ZOSC_MSG_TARGET_PART_TARGET  : "targetID" ,
  ZOSC_MSG_TARGET_PART_USERNAME  : "userName" ,
  ZOSC_MSG_TARGET_PART_GALLERY_POSITION  : "galleryPosition" ,
- ZOSC_MSG_TARGET_PART_SELECTION  :  "selection",
 
 //message grouping types
  ZOSC_MSG_GROUP_PART_ALL  : "all" ,
@@ -440,18 +439,6 @@ SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "string:Device ID or Index", D
  ZOSC_MSG_PART_GET_BACKGROUND : {USER_ACTION:"getBackground", TITLE:"Get Background", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Get current virtual background for user(s " }
 
 // ZOSC_MSG_PART_GET_VIDEO_FILTER : {USER_ACTION:"getVideoFilter", TITLE:"Get video filter", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Get current video filter for user(s " }
-}},
-SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select users for batch actions", MESSAGES: {
-
- ZOSC_MSG_PART_LIST_ADD_SELECTION : {INTERNAL_ACTION:"addSelection", TITLE:"Add to Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add user(s to selection group" },
-
- ZOSC_MSG_PART_LIST_REMOVE_SELECTION : {INTERNAL_ACTION:"removeSelection", TITLE:"Remove from Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from selection group" },
-
- ZOSC_MSG_PART_LIST_TOGGLE_SELECTION : {INTERNAL_ACTION:"toggleSelection", TITLE:"Toggle Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
-
- ZOSC_MSG_PART_LIST_SINGLE_SELECTION : {INTERNAL_ACTION:"singleSelection", TITLE:"Single Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user and toggles all other users off" },
-
- ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
 }},
 
 APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRIPTION: "Settings actions for user", MESSAGES: {
