@@ -149,12 +149,23 @@ instance.prototype.variablesToPublishList=[
 	// {varName: 'backgrounds',        varString:'backgrounds',       varLabel:"Background",        isList:true}
 ];
 
+//Client variable definitions
+instance.prototype.clientdatalabels = {
+	zoomOSCVersion:'ZoomOSC Version',
+	subscribeMode:'Subscribe Mode',
+	galTrackMode:'Gallery Tracking Mode',
+	callStatus :'Call Status',
+	numberOfTargets:'Number of Targets',
+	numberOfUsersInCall: 'Number of Users in Call',
+	activeSpeaker:'Active Speaker',
+	listIndexOffset:'Current List Index Offset',
+	numberOfSelectedUsers:'Number of users in Selection group'
+};
 
-
-instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
+instance.prototype.updateVariable = function(thisName, thisLabel, thisValue, thisZoomID = null) {
 	var self = this;
 	if (thisValue == null || thisValue == undefined) return;
-	let thisDefinition = { label:thisLabel, name: thisName };
+	let thisDefinition = { label:thisLabel, name: thisName, zoomID: thisZoomID };
 
 	if (!self.variable_definitions.some(e => e.name === thisName)) {
 
@@ -165,7 +176,12 @@ instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
 	//console.log("ZOSC: Updated var "+thisName+" to "+thisValue);
 };
 
-instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList){
+instance.prototype.export_variables = function() {
+  this.setVariableDefinitions(this.variable_definitions);
+  this.setVariables(this.variable_data);
+};
+
+instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList, export_vars = true){
 	var self = this;
 	//user name in user data, string to tag companion variable
 
@@ -224,7 +240,7 @@ for(var variableToPublish in variablesToPublishList){
 								//if the variable has a value push and set it
 								if(thisVariableValue != null && thisVariableValue != undefined){
 									//push variable and set
-									self.setVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue);
+									self.updateVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue, sourceUser.zoomID);
 									//self.setVariable( thisFormattedVarName, thisVariableValue);
 								}
 
@@ -233,16 +249,12 @@ for(var variableToPublish in variablesToPublishList){
 			}
 		}
 	}
+	if (export_vars) self.export_variables();
 };
 
-//Add Variables. Called after every received msg from zoomosc
-instance.prototype.init_variables = function() {
-
+instance.prototype.assign_gallery_positions = function (export_vars = true) {
 	var self = this;
-	//print list of users
-	// console.log("USERS: "+JSON.stringify(self.user_data));
-	// self.log('debug',"USERS: "+JSON.stringify(self.user_data));
-// GRID LAYOUT/calculate gallery position data
+	// GRID LAYOUT/calculate gallery position data
 	var numRows=self.zoomosc_client_data.galleryShape[0];
 	var numCols=self.zoomosc_client_data.galleryShape[1];
 
@@ -273,93 +285,59 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 							// thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName]
 							//self.setVariable( thisFormattedVarName,'-');
 							self.variable_data.thisFormattedVarName = '-';
+							if ((thisVar = self.variable_definitions.filter(e => e.name === thisFormattedVarName)).length > 0) {
+								thisVar[0].zoomID = null;  // Dissociate a user from this gallery position
+							}
 						}
 				}
 		}
 	}
 
-self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client_data.galleryShape);
-
-	//add new variables from list of users
-	if(Object.keys(self.user_data).length>0){
-		var i =self.zoomosc_client_data.listIndexOffset;
-		for (let user in self.user_data) {
-			var this_user = self.user_data[user];
-			//this_user.listIndex = i++;
-			console.log("setting variables for user " + this_user.userName + ", zoomID: " + this_user.zoomID);
-			self.setVariablesForUser(this_user,self.userSourceList,self.variablesToPublishList);
-
-		}
-}
-
-//Client variables
-var clientdatalabels = {
-zoomOSCVersion:'ZoomOSC Version',
-subscribeMode:'Subscribe Mode',
-galTrackMode:'Gallery Tracking Mode',
-callStatus :'Call Status',
-numberOfTargets:'Number of Targets',
-numberOfUsersInCall: 'Number of Users in Call',
-activeSpeaker:'Active Speaker',
-listIndexOffset:'Current List Index Offset',
-numberOfSelectedUsers:'Number of users in Selection group'
-
+	self.zoomosc_client_data.oldgalleryShape = Object.assign({}, self.zoomosc_client_data.galleryShape);
+	if (export_vars) self.export_variables();
 };
-var clientVarVal=0;
-//
-for(let clientVar in clientdatalabels){
-	//ZoomOSC Version
-	switch(clientVar){
-		case 'listIndexOffset':
-			clientVarVal = self.zoomosc_client_data.listIndexOffset;
-			break;
-		case 'zoomOSCVersion':
-		case 'callStatus':
-		case 'numberOfTargets':
-		case 'numberOfUsersInCall':
-		case 'activeSpeaker':
-			clientVarVal=self.zoomosc_client_data[clientVar];
-			break;
-		case 'numberOfSelectedUsers':
-			clientVarVal = self.zoomosc_client_data.callStatus ? self.zoomosc_client_data[clientVar] : 0;
-			break;
-		case 'subscribeMode':
-			switch(self.zoomosc_client_data[clientVar]){
 
-				case ZOSC.enums.SubscribeModeNone:
-					clientVarVal='None';
-					break;
+instance.prototype.update_client_variables = function(export_vars = true) {
+	var self = this;
+	var clientVarVal=0;
 
-				case ZOSC.enums.SubscribeModeTargetList:
-					clientVarVal='Target List';
-					break;
-
-				case ZOSC.enums.SubscribeModeAll:
-					clientVarVal='All';
-					break;
-
-				case ZOSC.enums.SubscribeModePanelists:
-					clientVarVal='Panelists';
-					break;
-
-				case ZOSC.enums.SubscribeModeOnlyGallery:
-					clientVarVal='Only Gallery';
-					break;
-
-				default:
-					break;
-				}
-			break;
-
-			case 'galTrackMode':
+	for(let clientVar in self.clientdatalabels){
+		//ZoomOSC Version
+		switch(clientVar){
+			case 'listIndexOffset':
+				clientVarVal = self.zoomosc_client_data.listIndexOffset;
+				break;
+			case 'zoomOSCVersion':
+			case 'callStatus':
+			case 'numberOfTargets':
+			case 'numberOfUsersInCall':
+			case 'activeSpeaker':
+				clientVarVal=self.zoomosc_client_data[clientVar];
+				break;
+			case 'numberOfSelectedUsers':
+				clientVarVal = self.zoomosc_client_data.callStatus ? self.zoomosc_client_data[clientVar] : 0;
+				break;
+			case 'subscribeMode':
 				switch(self.zoomosc_client_data[clientVar]){
 
-					case ZOSC.enums.GalleryTrackModeTargetIndex:
-						clientVarVal='Target Index';
+					case ZOSC.enums.SubscribeModeNone:
+						clientVarVal='None';
 						break;
 
-					case ZOSC.enums.GalleryTrackModeZoomID:
-						clientVarVal='ZoomID';
+					case ZOSC.enums.SubscribeModeTargetList:
+						clientVarVal='Target List';
+						break;
+
+					case ZOSC.enums.SubscribeModeAll:
+						clientVarVal='All';
+						break;
+
+					case ZOSC.enums.SubscribeModePanelists:
+						clientVarVal='Panelists';
+						break;
+
+					case ZOSC.enums.SubscribeModeOnlyGallery:
+						clientVarVal='Only Gallery';
 						break;
 
 					default:
@@ -367,16 +345,54 @@ for(let clientVar in clientdatalabels){
 					}
 				break;
 
-			default:
-				break;
+				case 'galTrackMode':
+					switch(self.zoomosc_client_data[clientVar]){
 
+						case ZOSC.enums.GalleryTrackModeTargetIndex:
+							clientVarVal='Target Index';
+							break;
+
+						case ZOSC.enums.GalleryTrackModeZoomID:
+							clientVarVal='ZoomID';
+							break;
+
+						default:
+							break;
+						}
+					break;
+
+				default:
+					break;
+
+			}
+		//self.setVariable('client_'+clientVar,clientVarVal);
+		self.updateVariable('client_'+clientVar, self.clientdatalabels[clientVar], clientVarVal);
 	}
-	//self.setVariable('client_'+clientVar,clientVarVal);
-	self.setVariable('client_'+clientVar, clientdatalabels[clientVar], clientVarVal);
+	if (export_vars) self.export_variables();
+};
+
+//Initialize variables
+instance.prototype.init_variables = function(export_vars = true) {
+
+	var self = this;
+	//print list of users
+	// console.log("USERS: "+JSON.stringify(self.user_data));
+	// self.log('debug',"USERS: "+JSON.stringify(self.user_data))
+
+	self.assign_gallery_positions(false);
+
+	let user_data_values = Object.values(self.user_data);
+
+	//add new variables from list of users
+	if(user_data_values.length>0){
+		Object.values(self.user_data).forEach(user => 
+			self.setVariablesForUser(user,self.userSourceList,self.variablesToPublishList, false));
+		console.log("Setting variables for", user_data_values.length, "participants");
 	}
 
-  self.setVariableDefinitions(self.variable_definitions);
-  self.setVariables(self.variable_data);
+	self.update_client_variables(false);
+
+	if (export_vars) self.export_variables();
 };
 
 
