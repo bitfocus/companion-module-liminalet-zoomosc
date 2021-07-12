@@ -2,8 +2,9 @@
 var instance_skel = require('../../instance_skel');
 var OSC 					= require('osc');
 //API file
-var ZOSC=require('./zoscconstants');
-
+var ZOSC=require('./zoscconstants.js');
+//Icons file
+var ZOSC_ICONS=require('./zoscicons.js');
 var debug;
 var log;
 
@@ -70,9 +71,12 @@ function instance(system, id, config) {
 
 instance.GetUpgradeScripts = function() {
 	return [
-		() => false, // placeholder script, that no cannot be removed
-	]
-}
+		() => false, // placeholder script, that not cannot be removed
+		instance_skel.CreateConvertToBooleanFeedbackUpgradeScript({
+			'user_status_fb': true
+		})
+	];
+};
 
 instance.prototype.updateConfig = function(config) {
 	console.log("updateConfig");
@@ -152,7 +156,6 @@ instance.prototype.setVariable = function(thisName, thisLabel, thisValue) {
 	if (thisValue == null || thisValue == undefined) return;
 	let thisDefinition = { label:thisLabel, name: thisName };
 
-
 	if (!self.variable_definitions.some(e => e.name === thisName)) {
 
 		console.log("Adding def: "+JSON.stringify(thisDefinition));
@@ -195,7 +198,10 @@ for(var variableToPublish in variablesToPublishList){
 								if(thisVariable.isList){
 									thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
 									thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								}else{
+								} else if (thisSource.varName == "me") {
+                                    thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel;
+									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString;
+                                } else {
 									thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
 									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
 								}
@@ -569,12 +575,13 @@ var allInstanceActions=[];
 		// console.log('ARGS: '+ args);
 		//add arguments
 		for (let arg in args) {
-			switch(args[arg].types.toString()){
+			switch(args[arg].types.toString().trim()){
 				case 'string':
 				newGroup.options.push({
 					type: 'textinput',
 					label: args[arg].name,
-					id: args[arg].name
+					id: args[arg].name,
+					default: ""
 				});
 				break;
 
@@ -584,7 +591,7 @@ var allInstanceActions=[];
 					label: args[arg].name,
 					id: args[arg].name,
 					min:0,
-					max:1000,
+					max:Math.pow(2, 16),
 					default:1
 				});
 					break;
@@ -738,16 +745,23 @@ instance.prototype.action = function(action) {
 	// /zoom/[TARGET_TYPE]/[message]
 	function pushOscArgs(){
 	// add args
-	for (let arg in action.options){
-		console.log("ARG: "+arg);
 
-		console.log("ARG: "+JSON.stringify(action.options));
-		if(arg!='message' && arg!='user' && arg!='userString' && action.options[arg].length>0){
-			console.log("IS ARG: "+arg);
+	let emptyArgAllowList = ['Meeting Password'];  // Send these args regardless of if they're empty
+	let argDisallowList = ['message', 'user', 'userString']; // Never send these args (processed in another block)
+
+	for (let arg in action.options){
+		console.log("ARG: " + arg + ", " + action.options[arg] + ", " + 
+			typeof action.options[arg] + ", " + JSON.stringify(action.options));
+
+		if(!argDisallowList.includes(arg) && (action.options[arg].toString().length>0 || emptyArgAllowList.includes(arg))){
 			var thisArg=action.options[arg];
-			if(!isNaN(thisArg)){
+			if(!isNaN(thisArg) && thisArg !== ""){
 				thisArg=parseInt(thisArg);
 			}
+			if(arg.toString().toUpperCase().startsWith("MEETING NUMBER")) {
+				thisArg = thisArg.toString().replaceAll(' ','');
+			}
+			console.log("IS ARG: " + arg + " (" + thisArg + "), type " + typeof thisArg);
 			var oscArgType;
 	//set osc type from js type
 			switch(typeof thisArg){
@@ -914,6 +928,13 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				}
 				//self.log('debug',"Clear selection");
 				break;
+			case "singleSelection":
+				for (let user in self.user_data){
+					self.user_data[user].selected = false;
+				}
+				self.user_data[selectedUser].selected = true;
+				//self.log('debug',"Single selection " + self.user_data[selectedUser].userName);
+				break;
 			default:
 				break;
 		}
@@ -934,6 +955,7 @@ instance.prototype.init_feedbacks = function(){
 			{id:'onlineStatus',	label:'Online Status'},
 			{id:'videoStatus',	 label:'Video Status'},
 			{id:'audioStatus',	 label:'Audio Status'},
+			{id:'spotlightStatus', label:'Spotlight Status'},
 			{id:'activeSpeaker', label:'Active Speaker Status'},
 			{id:'handStatus',		label:'Hand Raised Status'},
 			{id:'selected',		label:'Selected'},
@@ -945,8 +967,12 @@ instance.prototype.init_feedbacks = function(){
 
 	var feedbacks={};
 		feedbacks.user_status_fb={
+			type: 'boolean',
 			label:'User Status Feedback',
 			description:'Map user status to button properties',
+			style:{
+				bgcolor: self.rgb(0,0,0)
+			},
 			options:[
 				{
 					type:'dropdown',
@@ -974,29 +1000,16 @@ instance.prototype.init_feedbacks = function(){
 					id:'propertyValue',
 					choices:[{id:1,label:"On"},{id:0,label:"Off"}],
 					default:1
-				},
-				{
-					type: 'colorpicker',
-					label: 'Foreground color',
-					id: 'fg',
-					default: self.rgb(255,255,255)
-				},
-				{
-					type: 'colorpicker',
-					label: 'Background color',
-					id: 'bg',
-					default: self.rgb(0,0,0)
 				}
 			],
 			//handle feedback code
 			callback: (feedback,bank)=>{
 
-				if(!self.zoomosc_client_data.callStatus) return;
+				if(!self.zoomosc_client_data.callStatus) return false;
 				var opts=feedback.options;
 				//only attempt the feedback if user and property exists
 				if(opts.user!=undefined&& opts.prop!=undefined){
 				var sourceUser;
-				var sourceProp;
 				switch(opts.user){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 						return; // not supported
@@ -1088,10 +1101,7 @@ instance.prototype.init_feedbacks = function(){
 				var userPropVal=userToFeedback[propertyToFeedback];
 				//
 					if (userPropVal==parseInt(opts.propertyValue)){
-						return{
-							color:feedback.options.fg,
-							bgcolor:feedback.options.bg
-						};
+						return true;
 					}
 				}
 			//check exists
@@ -1584,425 +1594,211 @@ instance.prototype.init_ping = function() {
 
 //PRESETS
 instance.prototype.init_presets = function () {
+	const fs = require('fs');
+	const path = require('path');
 	var self = this;
 	var presets = [];
 
-
-	// $(zoomosc:userName_galPos_0,0)
-	// Generate Audio Preset
-	let instanceLabel=self.config.label;
-	//gallery position presets
-for(let y=0;y<4;y++){
-	for(let x=0;x<8;x++){
-
-		//Audio presets
-		presets.push({
-			category: 'Gallery Audio',
-			label: 'Gallery Audio '+y+','+x,
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Audio',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
+	var preset_actions = {
+		"Audio": {
+			preset_label: "Audio",
+			button_label: "\\nAudio",
+			action: 'AV_GROUP',
+			message: 'ZOSC_MSG_PART_TOGGLE_MUTE',
+			prop:'audioStatus',
+			enabled_icon: ZOSC_ICONS.MIC_ENABLED,
+			disabled_icon: ZOSC_ICONS.MIC_DISABLED
 			},
-
-			//TOGGLE AUDIO
-			actions: [{
-				action: 'AV_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_MUTE',
-					user: 'galleryPosition',
-					userString:y+','+x
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'audioStatus',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
+		"Video": {
+			preset_label: "Video",
+			button_label: "\\nVideo",
+			action: 'AV_GROUP',
+			message: 'ZOSC_MSG_PART_TOGGLE_VIDEO',
+			prop:'videoStatus',
+			enabled_icon: ZOSC_ICONS.CAMERA_ENABLED,
+			disabled_icon: ZOSC_ICONS.CAMERA_DISABLED
 			},
-			{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'audioStatus',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
+		"Spotlight": {
+			preset_label: "Spotlight",
+			button_label: "\\nSpotlight",
+			action: 'SPOTLIGHT_GROUP',
+			message: 'ZOSC_MSG_PART_TOGGLE_SPOT',
+			prop:'spotlightStatus',
+			enabled_icon: ZOSC_ICONS.SPOTLIGHT_ENABLED,
+			disabled_icon: ZOSC_ICONS.SPOTLIGHT_DISABLED
+			},
+		"Pin": {
+			preset_label: "Pin",
+			button_label: "\\nPin",
+			action: 'PIN_GROUP',
+			message: 'ZOSC_MSG_PART_TOGGLE_PIN',
+			prop:'videoStatus', //TODO: change to pinStatus when implemented
+			enabled_icon: ZOSC_ICONS.PIN_ENABLED,
+			disabled_icon: null
+			},
+		"Single Selection": {
+			preset_label: "Single Selection",
+			button_label: "",
+			action: 'SELECTION_GROUP',
+			message: 'ZOSC_MSG_PART_LIST_SINGLE_SELECTION',
+			prop:'selected',
+			enabled_icon: null,
+			disabled_icon: null
+			},
+		"Multiple Selection": {
+			preset_label: "Multi-selection",
+			button_label: "",
+			action: 'SELECTION_GROUP',
+			message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
+			prop:'selected',
+			enabled_icon: null,
+			disabled_icon: null
+			},
+		"Select Favorites": {
+			preset_label: "Select Favorites",
+			button_label: "\\nFavorite",
+			action: 'FAVORITE_GROUP',
+			message: 'ZOSC_MSG_PART_LIST_TOGGLE_FAVORITE',
+			prop:'favorite',
+			enabled_icon: ZOSC_ICONS.FAVORITE_ENABLED,
+			disabled_icon: ZOSC_ICONS.FAVORITE_DISABLED
+			},
+		"ZoomISO Output": {
+			preset_label: "ZoomISO Outputs",
+			button_label: "",
+			action: 'ISO_ACTION_GROUP',
+			message: 'ZOSC_MSG_OUTPUT_ISO',
+			prop:'videoStatus', //TODO: change to isoStatus when implemented
+			enabled_icon: null,
+			disabled_icon: null
+			},
+		};
+
+	var preset_target_types = {
+			"Gallery" : {
+				preset_label: "Gallery Position (macOS only)",
+				getButtonNumber: function (x, y) {return x+","+y;},
+				var_string: "galPos",
+				user_string: "galleryPosition"
+			},
+			"ListIndex" : {
+				preset_label: "List Index",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "listIndex",
+				user_string: "listIndex"
+			},
+			"TargetID" : {
+				preset_label: "Target ID",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "tgtID",
+				user_string: "targetID"
+			},
+		};
+	
+		var remove_instance_identifiers = function (obj) {
+			return obj.reduce((acc, value) => acc.concat(Object.keys(value).filter(
+				a => !["id", "label", "instance", "instance_id"].includes(a)).reduce(
+					(obj, key) => {
+						obj[key] = value[key];
+						return obj;
+					}, {})), []);
+		};
+
+for(const [targetType_short, targetType] of Object.entries(preset_target_types)) {
+	for(const [preset_action_short, preset_action] of Object.entries(preset_actions)) {
+		for(let x=0;x<7;x++){
+			for(let y=0;y<7;y++){
+				presets.push({
+					category: preset_action.preset_label+" by "+targetType.preset_label,
+					label: preset_action.preset_label+" by "+targetType.preset_label+" ("+targetType.getButtonNumber(x,y)+")",
+					bank: {
+						style: 'text',
+						text: '$('+self.config.label+':userName_'+targetType.var_string+'_'+
+							  targetType.getButtonNumber(x,y)+')'+preset_action.button_label,
+						size: 'Auto',
+						color: self.rgb(255,255,255),
+						bgcolor: self.rgb(0,0,0)
+					},
+					actions: [{
+						action: preset_action.action,
+						options: {
+							message: preset_action.message,
+							user: targetType.user_string,
+							userString:targetType.getButtonNumber(x,y)
+						}
+					}],
+					feedbacks:[{
+						type:'user_status_fb',
+						options:{
+							user:targetType.user_string,
+							userString:targetType.getButtonNumber(x,y),
+							prop:preset_action.prop,
+							propertyValue:1,
+						},
+						style:{
+							bgcolor: self.rgb(0,100,0)
+						}
+
+					},
+					{
+						type:'user_status_fb',
+						options:{
+							user:targetType.user_string,
+							userString:targetType.getButtonNumber(x,y),
+							prop:preset_action.prop,
+							propertyValue:0,
+						},
+						style:{
+							bgcolor:self.rgb(100,0,0)
+						}
+
+					}
+				]
+				});
 
 			}
-		]
-		});
+		}
 
-		presets.push({
-			category: 'List Index Audio',
-			label: 'List Index Audio '+(y*8+x),
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Audio',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
+		var local_path_options = [
+			targetType_short+" "+preset_action_short,
+			'* '+preset_action_short,
+			targetType_short+' *', '*'];
 
-			//TOGGLE AUDIO
-			actions: [{
-				action: 'AV_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_MUTE',
-					user: 'listIndex',
-					userString:(y*8+x)
+		for (let local_path of local_path_options) {
+			if (fs.existsSync(local_path = path.resolve(__dirname,'presets/'+local_path+'.companionconfig'))) {
+				let local_preset = JSON.parse(fs.readFileSync(local_path));
+				for(const [config_key, config_value] of (Object.entries(local_preset.config).filter(e => Object.keys(e[1]).length !== 0))) {
+					//config_value.text = config_value.text.replaceAll("$(zoomosc", "$("+self.config.label);
+					presets.push({
+						category: preset_action.preset_label+" by "+targetType.preset_label,
+						label: config_value.text,
+						bank: config_value,
+						actions: remove_instance_identifiers(local_preset.actions[config_key]),
+						release_actions: remove_instance_identifiers(local_preset.release_actions[config_key]),
+						feedbacks: remove_instance_identifiers(local_preset.feedbacks[config_key]),
+					});
 				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'audioStatus',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'audioStatus',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
 			}
-		]
-		});
-		//Video Presets
-		presets.push({
-			category: 'Gallery Video',
-			label: 'Gallery Video '+y+','+x,
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Video',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-			//TOGGLE AUDIO
-			actions: [{
-				action: 'AV_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_VIDEO',
-					user: 'galleryPosition',
-					userString:y+','+x
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'videoStatus',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'videoStatus',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
-			}
-		]
-		});
-
-		presets.push({
-			category: 'List Index Video',
-			label: 'List Index Video '+(y*8+x),
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Video',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-
-			//TOGGLE Video
-			actions: [{
-				action: 'AV_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_VIDEO',
-					user: 'listIndex',
-					userString:(y*8+x)
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'videoStatus',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'videoStatus',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
-			}
-		]
-		});
-
-		//Spotlight Presets
-		presets.push({
-			category: 'Gallery Spotlight',
-			label: 'Gallery Spotlight '+y+','+x,
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Spotlight',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-			//TOGGLE Spotlight
-			actions: [{
-				action: 'SPOTLIGHT_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_SPOT',
-					user: 'galleryPosition',
-					userString:y+','+x
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'spotlightStatus',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'spotlightStatus',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
-			}
-		]
-		});
-
-		presets.push({
-			category: 'List Index Spotlight',
-			label: 'List Index Spotlight '+(y*8+x),
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Spotlight',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-
-			//TOGGLE Spotlight
-			actions: [{
-				action: 'SPOTLIGHT_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_SPOT',
-					user: 'listIndex',
-					userString:(y*8+x)
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'spotlightStatus',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'spotlightStatus',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
-			}
-		]
-		});
-
-		//Pin Presets
-		presets.push({
-			category: 'Gallery Pin',
-			label: 'Gallery Pin '+y+','+x,
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')\\n'+'Pin',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-
-			actions: [{
-				action: 'PIN_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_PIN',
-					user: 'galleryPosition',
-					userString:y+','+x
-				}
-			}]
-
-
-		});
-
-		presets.push({
-			category: 'List Index Pin',
-			label: 'List Index Pin '+(y*8+x),
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')\\n'+'Pin',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-
-			//TOGGLE Pin
-			actions: [{
-				action: 'PIN_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_TOGGLE_PIN',
-					user: 'listIndex',
-					userString:(y*8+x)
-				}
-			}]
-		});
-
-		//Selection Presets
-		presets.push({
-			category: 'Gallery Selection',
-			label: 'Gallery Selection '+y+','+x,
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_galPos_'+y+','+x+')',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-			//TOGGLE Selection
-			actions: [{
-				action: 'SELECTION_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
-					user: 'galleryPosition',
-					userString:y+','+x
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'selected',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user:ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION,
-					userString:y+','+x,
-					prop:'selected',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
-			}
-		]
-		});
-
-		presets.push({
-			category: 'List Index Selection',
-			label: 'List Index Selection '+(y*8+x),
-			bank: {
-				style: 'text',
-				text: '$('+instanceLabel+':userName_listIndex_'+(y*8+x)+')',
-				size: 'Auto',
-				color: '16777215',
-				bgcolor: self.rgb(0,100+(y*30),0)
-			},
-
-			//TOGGLE Selection
-			actions: [{
-				action: 'SELECTION_GROUP',
-				options: {
-					message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
-					user: 'listIndex',
-					userString:(y*8+x)
-				}
-			}],
-			feedbacks:[{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'selected',
-					propertyValue:1,
-					bg:self.rgb(0,255,0)
-				}
-
-			},
-			{
-				type:'user_status_fb',
-				options:{
-					user: 'listIndex',
-					userString:(y*8+x),
-					prop:'selected',
-					propertyValue:0,
-					bg:self.rgb(255,0,0)
-				}
-
-			}
-		]
-		});
+		}
 	}
 }
-
+console.log("DEBUG Finding custom presets", fs.readdirSync(path.resolve(__dirname,'presets/')));
+fs.readdirSync(path.resolve(__dirname,'presets/')).forEach(file => {
+	if(path.basename(file).startsWith("Custom")) {
+		let local_preset = JSON.parse(fs.readFileSync(path.resolve(__dirname,'presets/'+file)));
+		for(const [config_key, config_value] of (Object.entries(local_preset.config).filter(e => Object.keys(e[1]).length !== 0))) {
+			//config_value.text = config_value.text.replaceAll("$(zoomosc", "$("+self.config.label);
+			presets.push({
+				category: local_preset.page.name,
+				label: config_value.text,
+				bank: config_value,
+				actions: remove_instance_identifiers(local_preset.actions[config_key]),
+				release_actions: remove_instance_identifiers(local_preset.release_actions[config_key]),
+				feedbacks: remove_instance_identifiers(local_preset.feedbacks[config_key]),
+			});
+		}
+	}
+});
 
 
 self.setPresetDefinitions(presets);
