@@ -182,6 +182,15 @@ instance.prototype.export_variables = function() {
   this.setVariables(this.variable_data);
 };
 
+instance.prototype.clear_user_data = function () {
+	this.user_data = {};
+	this.variable_data = {};
+	this.variable_definitions = [];
+	this.zoomosc_client_data.numberOfSelectedUsers = 0;
+	this.export_variables();
+	this.checkFeedbacks();
+};
+
 instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList, export_vars = true){
 	var self = this;
 	//user name in user data, string to tag companion variable
@@ -215,7 +224,7 @@ for(var variableToPublish in variablesToPublishList){
 								if(thisVariable.isList){
 									thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
 									thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								} else if (thisSource.varName == "me") {
+								} else if (thisSource.varName == 'me') {
                                     thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel;
 									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString;
                                 } else {
@@ -253,8 +262,37 @@ for(var variableToPublish in variablesToPublishList){
 	if (export_vars) self.export_variables();
 };
 
+instance.prototype.remove_variables_for_user = function(zoomID) {
+	if (zoomID === undefined || zoomID === null) return;
+	var self = this;
+	let user_variable_definitions = self.variable_definitions.filter(e => e.zoomID == zoomID);
+	let user_variable_names = user_variable_definitions.map(e => e.name);
+	let user_variable_data = Object.keys(self.variable_data).filter(e => user_variable_names.includes(e));
+
+	console.log("Removing zoomID", zoomID, "definitions: ", JSON.stringify(user_variable_definitions), "and data: ", user_variable_data);
+	
+	self.variable_definitions = self.variable_definitions.filter(e => user_variable_definitions.includes(e));
+
+	user_variable_data.forEach(this_variable_name => {
+		self.variable_data[this_variable_name] = undefined;
+	});
+	
+};
+
+instance.prototype.remove_offline_users = function() {
+	var self = this;
+	for(let user in self.user_data){
+		if(self.user_data[user].onlineStatus==0){
+			console.log("Deleting offline user: "+user);
+			self.remove_variables_for_user(user.zoomID);
+			delete self.user_data[user];
+		}
+	}
+};
+
 instance.prototype.assign_gallery_positions = function (export_vars = true) {
 	var self = this;
+	if (self.zoomosc_client_data.galleryOrder === undefined) return;
 	// GRID LAYOUT/calculate gallery position data
 	var numRows=self.zoomosc_client_data.galleryShape[0];
 	var numCols=self.zoomosc_client_data.galleryShape[1];
@@ -1220,9 +1258,8 @@ if(!self.disabled){
 					cameraDevices:		[],
 					micDevices:       [],
 					speakerDevices:   [],
-					backgrounds:      []
-
-
+					backgrounds:      [],
+					me: Boolean(isMe)
 				};
 				var roleTextVals=[
 					'None','For Users','Always','Full'
@@ -1245,28 +1282,13 @@ if(!self.disabled){
 					updateActions=true;
 				}
 
-				if (this_user.onlineStatus>=0 && this_user.zoomID>=0)
-				{
-						self.user_data[this_user.zoomID] = this_user;
+				if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
+					//set variables and action properties from received list
+					self.user_data[this_user.zoomID] = this_user;
+					self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
 				}
 
-				//set variables and action properties from received list
-				if(isMe){
-					self.user_data[this_user.zoomID].me = true;
-				}
-				else{
-					self.user_data[this_user.zoomID].me = false;
-				}
-
-				if(updateActions){
-					self.actions();
-
-				}
-
-				self.zoomosc_client_data.numberOfSelectedUsers = 0;
-
-				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
-
+				if(updateActions) self.actions();
 		}
 
 // console.log("Received OSC Message: "+ JSON.stringify(message));
@@ -1304,11 +1326,12 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					if(userOnlineStatus==0){
 						// console.log("DELETE OFFLINE USER");
 						delete self.user_data[userZoomID];
+						self.remove_variables_for_user(userZoomID);
 					}
 					else{
 						parseListRecvMsg(message.args,isMe);
 					}
-					parseListRecvMsg(message.args,isMe);
+					//parseListRecvMsg(message.args,isMe);
 
 					break;
 
@@ -1364,6 +1387,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					console.log("offline");
 					self.user_data[usrMsgUser].onlineStatus=0;
 					self.user_data[usrMsgUser].onlineStatusText='Offline';
+					self.remove_variables_for_user(usrMsgUser);
 
 					break;
 					//add camera devices to users
@@ -1471,6 +1495,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			break;
 
 		case 'galleryOrder':
+			if (!self.zoomosc_client_data.callStatus) break;
 		console.log("Gallery Order Message Received: "+JSON.stringify(message));
 		//add order to client data
 			self.zoomosc_client_data.galleryOrder=[];
@@ -1478,27 +1503,18 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				self.zoomosc_client_data.galleryOrder.push(message.args[user].value);
 			}
 		//delete offline users
-			for(let oldUser in self.user_data){
-				if(self.user_data[oldUser].onlineStatus==0){
-					console.log("Deleting old user: "+oldUser);
-					delete self.user_data[oldUser];
-					}
-					//set all users galleryindex to -1
-					self.user_data[oldUser].galleryIndex=-1;
-
-			}
+			self.remove_offline_users();
+			Object.keys(self.user_data).forEach(zoomID => self.user_data[zoomID].galleryIndex=-1);
 
 			console.log("gallery order: " + self.zoomosc_client_data.galleryOrder);
 			let galleryOrder=self.zoomosc_client_data.galleryOrder;
 			for( i=0; i<galleryOrder.length; i++ ){
 				let currentZoomID=galleryOrder[i];
-				self.user_data[currentZoomID].galleryIndex=i;
-				console.log("user: "+self.user_data[currentZoomID].userName+" galindex: "+self.user_data[currentZoomID].galleryIndex);
-			}
-			for(let user in self.user_data){
-				if(self.user_data[user].onlineStatus==0){
-					console.log("DELETE OFFLINE USER");
-					delete self.user_data[user];
+				if (currentZoomID in self.user_data) {
+					self.user_data[currentZoomID].galleryIndex=i;
+					console.log("user: "+self.user_data[currentZoomID].userName+" galindex: "+self.user_data[currentZoomID].galleryIndex);
+				} else {
+					console.log("zoomID", currentZoomID, "not found in self.user_data");
 				}
 			}
 
@@ -1521,7 +1537,7 @@ console.log(message.address.toString());
 
 			case ZOSC.outputFullMessages.ZOSC_MSG_SEND_LIST_CLEAR.MESSAGE:
 			 console.log("clearing list");
-			 self.user_data={};
+			 self.clear_user_data();
 			 break;
 
 		 default:
@@ -1592,10 +1608,7 @@ instance.prototype.init_ping = function() {
 			self.zoomosc_client_data.numberOfUsersInCall =	0;
 			self.zoomosc_client_data.numberOfSelectedUsers = 0;
 			self.status(self.STATUS_ERROR);
-			self.init_variables();
-			// self.user_data={};
-
-			//self.init_variables();
+			self.clear_user_data();
 		}
 
 		//Set status to OK if ping is responded within limit
