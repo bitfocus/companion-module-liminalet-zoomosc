@@ -119,7 +119,8 @@ instance.prototype.userSourceList= [
 	{varName:'index',							 varString:'tgtID',						 varLabel:'Target ID'},
 	{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
 	{varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
-	{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'}];
+	{varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'},
+	{varName:'me',              varString:'me',                     varLabel:'Me'}];
 
 instance.prototype.galleryUserSourceList = [
 	{varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
