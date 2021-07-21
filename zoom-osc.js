@@ -53,11 +53,18 @@ function instance(system, id, config) {
 	self.actions(); // export actions
 	self.init_presets();
 
-//Subscribe to ZoomOSC
+	self.init_send_subscribe();
+
+	return self;
+}
+
+instance.prototype.init_send_subscribe= function() {
+	var self = this;
+	//Subscribe to ZoomOSC
 	self.system.emit('osc_send',
 		self.config.host,				self.config.port,
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE,
-		 {type: 'f', value: parseFloat(self.config.subscribeMode)}
+		{type: 'f', value: parseFloat(self.config.subscribeMode)}
 	);
 	//set gallery track mode
 	self.system.emit('osc_send',
@@ -66,7 +73,6 @@ function instance(system, id, config) {
 		{type: 'i', value: parseInt(self.config.galTrackMode)}
 	);
 
-	return self;
 }
 
 instance.GetUpgradeScripts = function() {
@@ -127,14 +133,14 @@ instance.prototype.variablesToPublishList={
 	index: {varName: 'index',						varString:'index',					 varLabel:"Target ID"},
 	userName: {varName: 'userName',						varString:'userName',					 varLabel:"User Name"},
 	galleryIndex: {varName: 'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
-	roleText: {varName: 'roleText',						varString:'role',							 varLabel:'Role'},
+	/*roleText: {varName: 'roleText',						varString:'role',							 varLabel:'Role'},
 	onlineStatusText: {varName: 'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
 	videoStatusText: {varName: 'videoStatusText',		  varString:'videoStatus',			 varLabel:'Video Status'},
 	audioStatusText: {varName: 'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
 	spotlightStatusText: {varName: 'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
 	handStatusText: {varName: 'handStatusText',			 varString:'handStatus',				 varLabel:'Hand Status'},
 	activeSpeakerText: {varName: 'activeSpeakerText',	   varString:'activeSpeaker',		 varLabel:'Active Speaker'},
-	selected: {varName: 'selected',		 				 varString:'selected',						varLabel:'Selected'},
+	selected: {varName: 'selected',		 				 varString:'selected',						varLabel:'Selected'},*/
 	currentCameraDevice: {varName: 'currentCameraDevice', varString:'currentCameraDevice',     varLabel:"Camera Device",     isList:false},
 	currentMicDevice: {varName: 'currentMicDevice',    varString:'currentMicDevice',        varLabel:"Microphone Device", isList:false},
 	currentSpeakerDevice: {varName: 'currentSpeakerDevice',varString:'currentSpeakerDevice',    varLabel:"Speaker Device",    isList:false},
@@ -183,11 +189,12 @@ instance.prototype.export_variables = function() {
 };
 
 instance.prototype.clear_user_data = function () {
+	this.init_variables(true, true);
+	this.export_variables();
 	this.user_data = {};
 	this.variable_data = {};
 	this.variable_definitions = [];
 	this.zoomosc_client_data.numberOfSelectedUsers = 0;
-	this.export_variables();
 	//this.checkFeedbacks();
 };
 
@@ -200,11 +207,11 @@ for(var variableToPublish in variablesToPublishList){
 	// sources
 	for(var source in userSourceList){
 		var thisSource=userSourceList[source];
-		//dont publish variables that are -1
 		if (thisSource.varName == 'listIndex') {
 			sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
 		}
-		if(![-1, null].includes(sourceUser[thisSource.varName])){
+		//dont publish variables that are -1
+		if(![-1, null, []].includes(sourceUser[thisSource.varName])){
 			var thisVariable=self.variablesToPublishList[variableToPublish];
 			var thisVariableName=thisVariable.varName;
 			//if it is a device list, add each device
@@ -241,7 +248,7 @@ for(var variableToPublish in variablesToPublishList){
 									thisZoomID = sourceUser.zoomID;
 
 									//if this is a list, populate with the device name
-									if(thisVariable.isList){
+									if(thisVariable.isList && sourceUser[thisVariableName] != undefined && sourceUser[thisVariableName].length > 0) {
 										thisVariableValue=sourceUser[thisVariableName][i].deviceName;
 									}else{
 										thisVariableValue=sourceUser[thisVariableName];
@@ -264,10 +271,13 @@ for(var variableToPublish in variablesToPublishList){
 	if (export_vars) self.export_variables();
 };
 
-instance.prototype.remove_variables_for_user = function(zoomID) {
+instance.prototype.remove_variables_for_user = function(zoomID, var_name_filter = undefined) {
 	if (zoomID === undefined || zoomID === null) return;
 	var self = this;
 	let user_variable_definitions = self.variable_definitions.filter(e => e.zoomID == zoomID);
+	if (var_name_filter != undefined) {
+		user_variable_definitions = user_variable_definitions.filter(e => e.name.includes(var_name_filter));
+	}
 	let user_variable_names = user_variable_definitions.map(e => e.name);
 	let user_variable_data = Object.keys(self.variable_data).filter(e => user_variable_names.includes(e));
 
@@ -341,7 +351,7 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 	if (export_vars) self.export_variables();
 };*/
 
-instance.prototype.assign_user_gallery_position = function(zoomID, export_vars = true) {
+instance.prototype.clear_user_gallery_position = function(zoomID, export_vars = true) {
 	var self = this;
 	//clears variables from previously assigned gallery position (if present)
 	if (self.user_data[zoomID].galleryPosition) {
@@ -350,18 +360,33 @@ instance.prototype.assign_user_gallery_position = function(zoomID, export_vars =
 			[self.userSourceList.galleryIndex,	
 			 self.userSourceList.galleryPosition],
 			self.variablesToPublishList,
-			export_vars,
+			false,
 			true);
 		self.user_data[zoomID].galleryPosition = '-';
 	}
+
+	if (export_vars) self.export_variables();
+};
+
+instance.prototype.assign_user_gallery_position = function(zoomID, export_vars = true) {
+	var self = this;
+
 	//assigns new gallery position from math with galleryIndex and number of columns in window
 	//var numRows=self.zoomosc_client_data.galleryShape[0];
-	var numCols=self.zoomosc_client_data.galleryShape[1];
 	if (self.zoomosc_client_data.galleryOrder.includes(Number(zoomID))) {
-		thisGalleryIndex = self.zoomosc_client_data.galleryOrder.indexOf(Number(zoomID));
+		let thisGalleryIndex = self.zoomosc_client_data.galleryOrder.indexOf(Number(zoomID));
+		let numCols=self.zoomosc_client_data.galleryShape[1];
 		self.user_data[zoomID].galleryPosition = Math.floor(thisGalleryIndex/numCols) + "," + thisGalleryIndex % numCols;
 		//console.log('galPos for user', zoomID, thisGalleryIndex, numCols);
+		self.setVariablesForUser(
+			self.user_data[zoomID], 
+			[self.userSourceList.galleryIndex,	
+			 self.userSourceList.galleryPosition],
+			self.variablesToPublishList,
+			false);
 	}
+
+	if (export_vars) self.export_variables();
 };
 
 instance.prototype.update_client_variables = function(export_vars = true) {
@@ -826,8 +851,7 @@ instance.prototype.action = function(action) {
 				if (users.length > index)
 				{
 						userString= parseInt(self.user_data[users[index]].zoomID);
-				}
-				//else { userString = 0; }
+				} else { userString = -1; }
 
 				break;
 		default:
@@ -1077,7 +1101,7 @@ instance.prototype.init_feedbacks = function(){
 					label:'User',
 					id:'user',
 					choices:this.userList,
-					default:'Me'
+					default:this.userList[ZOSC.keywords.ZOSC_MSG_PART_ME]
 				},
 				{
 					type:'textinput',
@@ -1277,62 +1301,69 @@ if(!self.disabled){
 			self.zoomosc_client_data.numberOfTargets		 =	msgArgs[5].value;
 			self.zoomosc_client_data.numberOfUsersInCall =	msgArgs[6].value;
 			// self.checkFeedbacks('sub_bg');
+			if (self.zoomosc_client_data.numberOfUsersInCall == 0 && Object.keys(self.user_data).length != 0) {
+				self.system.emit('osc_send',
+								self.config.host, self.config.port,
+								'/zoom/list');
+			}
 		}
 
 		//list message
 		function parseListRecvMsg(msgArgs,isMe){
 
-	//add the values from the list to the user at index supplied
+			// list messages are only sent when ZoomOSC is in a meeting
+			self.zoomosc_client_data.callStatus = 1;
 
-				var this_user = {
-					index:						msgArgs[0].value,
-					userName:				  msgArgs[1].value,
-					galleryIndex:		  msgArgs[2].value,
-					zoomID:					  msgArgs[3].value,
-					participantCount: msgArgs[4].value,
-					listCount:				msgArgs[5].value,
-					role:						  msgArgs[6].value,
-					onlineStatus:		  msgArgs[7].value,
-					videoStatus:			msgArgs[8].value,
-					audioStatus:			msgArgs[9].value,
-					spotlightStatus:  0,
-					activeSpeaker:		0,
-					selected: false,
-					handStatus:			  0,
-					cameraDevices:		[],
-					micDevices:       [],
-					speakerDevices:   [],
-					backgrounds:      [],
-					me: Boolean(isMe) ? true : null
-				};
-				var roleTextVals=[
-					'None','For Users','Always','Full'
-				];
-				var onOffTextVals=['Off','On'];
-				var onlineTextVals=['Offline','Online'];
-				var handTextVals=['Down','Up'];
-				var activeSpeakerTextVals=['Inactive','Active'];
-				this_user.roleText						= roleTextVals[this_user.role];
-				this_user.videoStatusText		  = onOffTextVals[this_user.videoStatus];
-				this_user.audioStatusText		  = onOffTextVals[this_user.audioStatus];
-				this_user.onlineStatusText		= onlineTextVals[this_user.onlineStatus];
-				this_user.activeSpeakerText	  = activeSpeakerTextVals[this_user.activeSpeaker];
-				this_user.handStatusText			= handTextVals[this_user.handStatus];
-				this_user.spotlightStatusText = onOffTextVals[this_user.spotlightStatus];
+			//add the values from the list to the user at index supplied
 
-				//DOES THIS EXIST???
-				var updateActions = false;
-				if(!(this_user.zoomID in self.user_data)){
-					updateActions=true;
-				}
+			var this_user = {
+				index:						msgArgs[0].value,
+				userName:				  msgArgs[1].value,
+				galleryIndex:		  msgArgs[2].value,
+				zoomID:					  msgArgs[3].value,
+				//participantCount: msgArgs[4].value,
+				//listCount:				msgArgs[5].value,
+				role:						  msgArgs[6].value,
+				onlineStatus:		  Boolean(msgArgs[7].value),
+				videoStatus:			Boolean(msgArgs[8].value),
+				audioStatus:			Boolean(msgArgs[9].value),
+				spotlightStatus:  false,
+				activeSpeaker:		false,
+				selected: false,
+				handStatus:			  false,
+				cameraDevices:		[],
+				micDevices:       [],
+				speakerDevices:   [],
+				backgrounds:      [],
+				me: Boolean(isMe) ? true : null
+			};
+			/*var roleTextVals=[
+				'None','For Users','Always','Full'
+			];
+			var onOffTextVals=['Off','On'];
+			var onlineTextVals=['Offline','Online'];
+			var handTextVals=['Down','Up'];
+			var activeSpeakerTextVals=['Inactive','Active'];
+			this_user.roleText						= roleTextVals[this_user.role];
+			this_user.videoStatusText		  = onOffTextVals[this_user.videoStatus];
+			this_user.audioStatusText		  = onOffTextVals[this_user.audioStatus];
+			this_user.onlineStatusText		= onlineTextVals[this_user.onlineStatus];
+			this_user.activeSpeakerText	  = activeSpeakerTextVals[this_user.activeSpeaker];
+			this_user.handStatusText			= handTextVals[this_user.handStatus];
+			this_user.spotlightStatusText = onOffTextVals[this_user.spotlightStatus];*/
 
-				if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
-					//set variables and action properties from received list
-					self.user_data[this_user.zoomID] = this_user;
-					self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
-				}
+			if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
+				//set variables and action properties from received list
+				self.user_data[this_user.zoomID] = this_user;
+				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList, false);
+			}
 
-				if(updateActions) self.actions();
+			//msgArgs[5].value is the total count of all users in the zoomosc list
+			if (msgArgs[5].value == Object.keys(self.user_data).length) { //true if this is the last expected list message
+				self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex], false);
+				self.export_variables();
+				self.actions();
+			}
 		}
 
 // console.log("Received OSC Message: "+ JSON.stringify(message));
@@ -1385,62 +1416,69 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						}
 						parseListRecvMsg(message.args,isMe);
 					}
-					//parseListRecvMsg(message.args,isMe);
 
+					break;
+				
+				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_USERNAME_CHANGED.MESSAGE:
+					console.log('Username changed for zoomID', usrMsgUser, 'from', message.args[4].value, 'to', message.args[1].value);
+					self.user_data[usrMsgUser].userName = message.args[1].value;
+					self.remove_variables_for_user(usrMsgUser, "user");
+					self.setVariablesForUser(self.user_data[usrMsgUser], [self.userSourceList.userName], self.variablesToPublishList);
+					self.setVariablesForUser(self.user_data[usrMsgUser], self.userSourceList, {userName: self.variablesToPublishList.userName});
 					break;
 
 				//user status messages
 				//pins
 				case ZOSC.actions.PIN_GROUP.MESSAGES.ZOSC_MSG_PART_PIN.USER_ACTION:
 					console.log('pin: '+self.user_data[usrMsgUser]);
-					self.user_data[usrMsgUser].pin=1;
+					self.user_data[usrMsgUser].pinStatus=true;
 					break;
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_ON.MESSAGE:
 					console.log('Spotlight on');
-					self.user_data[usrMsgUser].spotlightStatus=1;
-					self.user_data[usrMsgUser].spotlightStatusText='On';
+					self.user_data[usrMsgUser].spotlightStatus=true;
+					//self.user_data[usrMsgUser].spotlightStatusText='On';
 					break;
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_OFF.MESSAGE:
 					console.log('Spotlight off');
-					self.user_data[usrMsgUser].spotlightStatus=0;
-					self.user_data[usrMsgUser].spotlightStatusText='Off';
+					self.user_data[usrMsgUser].spotlightStatus=false;
+					//self.user_data[usrMsgUser].spotlightStatusText='Off';
 					break;
 				//AV: VIDEO
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_VIDON.USER_ACTION:
 					console.log('vidstatus on: '+self.user_data[usrMsgUser]);
-					self.user_data[usrMsgUser].videoStatus=1;
-					self.user_data[usrMsgUser].videoStatusText='On';
+					self.user_data[usrMsgUser].videoStatus=true;
+					//self.user_data[usrMsgUser].videoStatusText='On';
 					break;
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_VIDOFF.USER_ACTION:
 					console.log("vidstatus OFF");
-					self.user_data[usrMsgUser].videoStatus=0;
-					self.user_data[usrMsgUser].videoStatusText='Off';
+					self.user_data[usrMsgUser].videoStatus=false;
+					//self.user_data[usrMsgUser].videoStatusText='Off';
 					break;
 
 				//AV: AUDIO
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_UNMUTE.USER_ACTION:
 					console.log('UNMUTE: ');
-					self.user_data[usrMsgUser].audioStatus=1;
-					self.user_data[usrMsgUser].audioStatusText='On';
+					self.user_data[usrMsgUser].audioStatus=true;
+					//self.user_data[usrMsgUser].audioStatusText='On';
 					break;
 
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_MUTE.USER_ACTION:
 					console.log("MUTE");
-					self.user_data[usrMsgUser].audioStatus=0;
-					self.user_data[usrMsgUser].audioStatusText='Off';
+					self.user_data[usrMsgUser].audioStatus=false;
+					//self.user_data[usrMsgUser].audioStatusText='Off';
 					break;
 
 				//onlie status
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_USER_ONLINE.MESSAGE:
 					console.log("online");
-					self.user_data[usrMsgUser].onlineStatus=1;
-					self.user_data[usrMsgUser].onlineStatusText='Online';
+					self.user_data[usrMsgUser].onlineStatus=true;
+					//self.user_data[usrMsgUser].onlineStatusText='Online';
 					break;
 
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_USER_OFFLINE.MESSAGE:
 					console.log("offline");
-					self.user_data[usrMsgUser].onlineStatus=0;
-					self.user_data[usrMsgUser].onlineStatusText='Offline';
+					self.user_data[usrMsgUser].onlineStatus=false;
+					//self.user_data[usrMsgUser].onlineStatusText='Offline';
 					self.remove_variables_for_user(usrMsgUser);
 
 					break;
@@ -1495,17 +1533,11 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_ACTIVE_SPEAKER.MESSAGE:
 					console.log("active speaker");
 					var speakerZoomID=message.args[3].value;
+					self.zoomosc_client_data.activeSpeaker=message.args[1].value; //username
 
 					for(let user in self.user_data){
-						if(self.user_data[user].zoomID==speakerZoomID){
-							self.user_data[user].activeSpeaker=1;
-							self.user_data[user].activeSpeakerText='Active';
-							self.zoomosc_client_data.activeSpeaker=self.user_data[user].userName;
-						}
-						else{
-							self.user_data[user].activeSpeaker=0;
-							self.user_data[user].activeSpeakerText='Inactive';
-						}
+						self.user_data[user].activeSpeaker=(self.user_data[user].zoomID==speakerZoomID); //boolean
+						//self.user_data[user].activeSpeakerText= self.user_data[user].activeSpeaker ? 'Active' : 'Inactive';
 					}
 
 					break;
@@ -1513,23 +1545,27 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					//Hand Raising
 					case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_HAND_RAISED.MESSAGE:
 						console.log("Hand Raised");
-						self.user_data[usrMsgUser].handStatus=1;
-						self.user_data[usrMsgUser].handStatusText='Up';
+						self.user_data[usrMsgUser].handStatus=true;
+						//self.user_data[usrMsgUser].handStatusText='Up';
 						break;
 
 					case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_HAND_LOWERED.MESSAGE:
 						console.log("hand lowered");
-						self.user_data[usrMsgUser].handStatus=0;
-						self.user_data[usrMsgUser].handStatusText='Down';
+						self.user_data[usrMsgUser].handStatus=false;
+						//self.user_data[usrMsgUser].handStatusText='Down';
 						break;
 
 				default:
 					console.log("user message not matched");
 					break;
 
+			
 
 		}
 
+		if (isMe) {
+			self.setVariablesForUser(self.user_data[usrMsgUser], [self.userSourceList.me], self.variablesToPublishList);
+		}
 			break;
 		//pong message received
 		case 'pong':
@@ -1577,12 +1613,14 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			}*/
 			//console.log("Users not in gallery: ", Object.keys(self.user_data).filter(zoomID => !self.zoomosc_client_data.galleryOrder.includes(Number(zoomID))));
 			//assign galleryPositions based on new galleryIndexes
+			Object.keys(self.user_data).forEach(zoomID => self.clear_user_gallery_position(zoomID, false));
 			Object.keys(self.user_data).forEach(zoomID => self.assign_user_gallery_position(zoomID, false));
 			//refresh variables from galleryIndex and galleryPosition
-			self.update_user_variables_subset(
+			/*self.update_user_variables_subset(
 				self.variablesToPublishList, 
 				[self.userSourceList.galleryIndex,
-				 self.userSourceList.galleryPosition]);
+				 self.userSourceList.galleryPosition]);*/
+			self.export_variables();
 
 			// console.log("Gallery Order Message Received: "+JSON.stringify(self.zoomosc_client_data.galleryOrder));
 			break;
@@ -1680,6 +1718,11 @@ instance.prototype.init_ping = function() {
 		//Set status to OK if ping is responded within limit
 		else {
 			self.zoomosc_client_data.state = 'online';
+			//if module was offline, initalize subscribe & galTrack modes and get list
+			if (self.currentStatus == self.STATUS_ERROR) {
+				//self.system.emit('osc_send', self.config.host, self.config.port, '/zoom/list');
+				self.init_send_subscribe();
+			}
 			self.status(self.STATUS_OK);
 		}
 	}
