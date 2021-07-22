@@ -683,11 +683,11 @@ var allInstanceActions=[];
 			// split arguments
 		let argsRaw = thisGroup.ARGS.split(',');
 
-		let args = argsRaw.reduce((accumelated_args, element) => {
+		let args = argsRaw.reduce((accumelated_args, element, _, __) => {
 			// console.log("arg is " + element)
 			let parts = element.split(':');
 			let types = parts[0].split('|');
-			accumelated_args.push({types: types, name: parts[1]});
+			return [...accumelated_args, {types: types, name: parts[1]}]; //combine accumelated_args with new arg
 		}, []);
 
 		// console.log('ARGS: '+ args);
