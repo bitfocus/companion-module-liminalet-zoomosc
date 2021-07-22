@@ -1363,6 +1363,7 @@ if(!self.disabled){
 				self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex], false);
 				self.export_variables();
 				self.actions();
+				self.status(self.STATUS_OK);
 			}
 		}
 
@@ -1404,8 +1405,11 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						self.remove_variables_for_user(userZoomID);
 					}
 					else{
+						//My list msg is always sent first, so clear list if reciving my list
+						//TODO: move this block to on recived msg 'listCleared' once implemented in ZoomOSC
 						if (isMe) {
 							console.log("LIST RECEIVED for me");
+							self.status(self.STATUS_WARNING, "Receiving Participant List");
 							self.clear_user_data();
 							//TODO: Remove asking for gallery order once it's sent with list messages
 							self.system.emit('osc_send',
