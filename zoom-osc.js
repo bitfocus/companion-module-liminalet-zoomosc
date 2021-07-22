@@ -474,7 +474,6 @@ instance.prototype.init_variables = function(export_vars = true, clear = false) 
 	//self.assign_gallery_positions(false);
 
 	//set gallery position and index variables to '-' to show that they're valid 
-	let user_data_values = Object.values(self.user_data);
 	for (let row = 0; row < 7; row++) {
 		for (let col = 0; col < 7; col++) {
 		self.setVariablesForUser({
@@ -487,6 +486,7 @@ instance.prototype.init_variables = function(export_vars = true, clear = false) 
 		}
 	}
 
+	let user_data_values = Object.values(self.user_data);
 	//add new variables from list of users
 	if(user_data_values.length>0){
 		Object.values(self.user_data).forEach(user => 
