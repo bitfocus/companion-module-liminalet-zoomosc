@@ -73,7 +73,7 @@ instance.prototype.init_send_subscribe= function() {
 		{type: 'i', value: parseInt(self.config.galTrackMode)}
 	);
 
-}
+};
 
 instance.GetUpgradeScripts = function() {
 	return [
@@ -681,16 +681,14 @@ var allInstanceActions=[];
 			}
 
 			// split arguments
-		let argStr = thisGroup.ARGS;
-		let argsRaw = argStr.split(',');
-		let args = [];
+		let argsRaw = thisGroup.ARGS.split(',');
 
-		argsRaw.forEach(element => {
+		let args = argsRaw.reduce((accumelated_args, element) => {
 			// console.log("arg is " + element)
 			let parts = element.split(':');
 			let types = parts[0].split('|');
-			args.push({types: types, name: parts[1]});
-		});
+			accumelated_args.push({types: types, name: parts[1]});
+		}, []);
 
 		// console.log('ARGS: '+ args);
 		//add arguments
@@ -736,7 +734,7 @@ var allInstanceActions=[];
 
 	}
 //set actions in ui
-	allInstanceActions["listIndexOffset"] = {
+	allInstanceActions.listIndexOffset = {
 		id:		 "listIndexOffset",
 		label:	"List Index Offset",
 		options:[
@@ -1632,6 +1630,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 
 		case 'listCleared': //ZOSC.outputFullMessages.ZOSC_MSG_SEND_LIST_CLEAR.MESSAGE:
 			console.log('List Cleared message received');
+			break;
 
 		default:
 			console.log("zoom message not matched");
