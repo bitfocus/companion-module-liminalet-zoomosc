@@ -1392,7 +1392,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			switch(usrMsgTypePart){
 				//List Received
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_LIST.MESSAGE:
-					// console.log("LIST RECEIVED");
+					console.log("LIST RECEIVED");
 					//test user name for no user
 					// let userNameToTest= message.args[1].value;
 					let userZoomID=		 message.args[3].value;
@@ -1405,6 +1405,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					}
 					else{
 						if (isMe) {
+							console.log("LIST RECEIVED for me");
 							self.clear_user_data();
 							//TODO: Remove asking for gallery order once it's sent with list messages
 							self.system.emit('osc_send',
@@ -1625,7 +1626,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			// console.log("Gallery Order Message Received: "+JSON.stringify(self.zoomosc_client_data.galleryOrder));
 			break;
 
-
+		case 'listCleared': //ZOSC.outputFullMessages.ZOSC_MSG_SEND_LIST_CLEAR.MESSAGE:
+			console.log('List Cleared message received');
 
 		default:
 			console.log("zoom message not matched");
