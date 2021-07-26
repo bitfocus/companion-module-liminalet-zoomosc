@@ -225,7 +225,7 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 			for (x=0;x<ZOOM_MAX_GALLERY_SIZE_X;x++){
 				// check which user is in gallery position
 			for (let user in self.user_data){
-					if(self.user_data[user].zoomID==self.zoomosc_client_data.galleryOrder[userIndex]){
+					if(self.zoomosc_client_data.galleryOrder && self.user_data[user].zoomID==self.zoomosc_client_data.galleryOrder[userIndex]){
 						//add gallery position to self.user_data
 						self.user_data[user].galleryPosition=y.toString()+','+x.toString();
 						// self.user_data[user].galleryIndex=userIndex;
@@ -1457,8 +1457,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				self.user_data[currentZoomID].galleryIndex=i;
 				console.log("user: "+self.user_data[currentZoomID].userName+" galindex: "+self.user_data[currentZoomID].galleryIndex);
 			}
-			for(let user in user_data){
-				if(user_data[user].onlineStatus==0){
+			for(let user in self.user_data){
+				if(self.user_data[user].onlineStatus==0){
 					console.log("DELETE OFFLINE USER");
 					delete self.user_data[user];
 				}
