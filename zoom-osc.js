@@ -465,7 +465,7 @@ instance.prototype.update_client_variables = function(export_vars = true) {
 
 //Initialize variables
 instance.prototype.init_variables = function(export_vars = true, clear = false) {
-
+	this.debug("Running init_variables");
 	var self = this;
 	//print list of users
 	// console.log("USERS: "+JSON.stringify(self.user_data));
@@ -1707,7 +1707,7 @@ instance.prototype.init_ping = function() {
 			pingOSC();
 		}
 		//Set Status to Error in config if ping not responded to
-		if (timesinceping > PING_TIME_ERR) {
+		if (timesinceping > PING_TIME_ERR && self.currentStatus != self.STATUS_ERROR) {
 			self.zoomosc_client_data.state = 'offline';
 			self.zoomosc_client_data.zoomOSCVersion			=	"Not Connected";
 			self.zoomosc_client_data.subscribeMode			 =	0;
@@ -1716,12 +1716,12 @@ instance.prototype.init_ping = function() {
 			self.zoomosc_client_data.numberOfTargets		 =	0;
 			self.zoomosc_client_data.numberOfUsersInCall =	0;
 			self.zoomosc_client_data.numberOfSelectedUsers = 0;
-			self.status(self.STATUS_ERROR);
+			self.status(self.STATUS_ERROR, "Not Connected");
 			self.clear_user_data();
 		}
 
 		//Set status to OK if ping is responded within limit
-		else {
+		else if (timesinceping <= PING_TIME_ERR) {
 			self.zoomosc_client_data.state = 'online';
 			//if module was offline, initalize subscribe & galTrack modes and get list
 			if (self.currentStatus == self.STATUS_ERROR) {
