@@ -1099,7 +1099,7 @@ instance.prototype.init_feedbacks = function(){
 					label:'User',
 					id:'user',
 					choices:this.userList,
-					default:this.userList[ZOSC.keywords.ZOSC_MSG_PART_ME]
+					default:this.userList.me.id
 				},
 				{
 					type:'textinput',
@@ -1111,7 +1111,8 @@ instance.prototype.init_feedbacks = function(){
 					type:'dropdown',
 					label:'Property',
 					id:'prop',
-					choices:userStatusProperties
+					choices:userStatusProperties,
+					default:userStatusProperties[1].id
 
 				},
 				{
