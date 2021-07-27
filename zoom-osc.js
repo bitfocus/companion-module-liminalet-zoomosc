@@ -112,8 +112,8 @@ instance.prototype.init = function() {
 	log = self.log;
 	this.disabled=false;
 	self.init_osc();
-	self.status(self.STATE_OK);
-	self.init_variables();
+	self.status(self.STATUS_UNKNOWN, "Initalizing");
+	self.init_variables(true);
 	self.init_ping();
 	self.init_feedbacks();
 	self.init_presets();
@@ -1406,18 +1406,19 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					else{
 						//My list msg is always sent first, so clear list if reciving my list
 						//TODO: move this block to on recived msg 'listCleared' once implemented in ZoomOSC
-						if (isMe) {
-							console.log("LIST RECEIVED for me");
-							self.status(self.STATUS_WARNING, "Receiving Participant List");
-							self.clear_user_data();
+						//if (isMe && self.currentStatus != self.STATUS_WARNING) {
+							//console.log("LIST RECEIVED for me; resetting");
+							//self.status(self.STATUS_WARNING, "Refreshing Participant List");
+							//self.clear_user_data();
 							//TODO: Remove asking for gallery order once it's sent with list messages
-							self.system.emit('osc_send',
+							/*self.system.emit('osc_send',
 								self.config.host, self.config.port,
 								'/zoom/getGalleryOrder');
 							self.system.emit('osc_send',
 								self.config.host, self.config.port,
 								'/zoom/getOrder');
-						}
+							*/
+						//}
 						parseListRecvMsg(message.args,isMe);
 					}
 
@@ -1631,6 +1632,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 
 		case 'listCleared': //ZOSC.outputFullMessages.ZOSC_MSG_SEND_LIST_CLEAR.MESSAGE:
 			console.log('List Cleared message received');
+			if (self.zoomosc_client_data.callStatus) self.status(self.STATUS_WARNING, "Refreshing Participant List");
+			self.clear_user_data();
 			break;
 
 		default:
@@ -1722,7 +1725,7 @@ instance.prototype.init_ping = function() {
 		}
 
 		//Set status to OK if ping is responded within limit
-		else if (timesinceping <= PING_TIME_ERR) {
+		else if (timesinceping <= PING_TIME_ERR && self.currentStatus != self.STATUS_WARNING) {
 			self.zoomosc_client_data.state = 'online';
 			//if module was offline, initalize subscribe & galTrack modes and get list
 			if (self.currentStatus == self.STATUS_ERROR) {
