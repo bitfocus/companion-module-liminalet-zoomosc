@@ -164,8 +164,8 @@ instance.prototype.clientdatalabels = {
 	numberOfSelectedUsers:'Number of users in Selection group'
 };
 
-instance.prototype.update_user_variables_subset = function (attribute, source, export_variables = true) {
-	Object.values(this.user_data).forEach(user => { this.setVariablesForUser(user, source, attribute,false); });
+instance.prototype.update_user_variables_subset = function (attribute, source, export_variables = false) {
+	Object.values(this.user_data).forEach(user => { this.setVariablesForUser(user, source, attribute); });
 	if (export_variables) this.export_variables();
 };
 
@@ -198,7 +198,7 @@ instance.prototype.clear_user_data = function () {
 	//this.checkFeedbacks();
 };
 
-instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList, export_vars = true, clear = false){
+instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, variablesToPublishList, export_vars = false, clear = false){
 	var self = this;
 	//user name in user data, string to tag companion variable
 
@@ -305,7 +305,7 @@ instance.prototype.remove_offline_users = function() {
 	if (userRemoved) self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex]);
 };
 
-/*instance.prototype.assign_gallery_positions = function (export_vars = true) {
+/*instance.prototype.assign_gallery_positions = function (export_vars = false) {
 	var self = this;
 	if (self.zoomosc_client_data.galleryOrder === undefined) return;
 	// GRID LAYOUT/calculate gallery position data
@@ -351,7 +351,7 @@ for(y=0;y<ZOOM_MAX_GALLERY_SIZE_Y;y++){
 	if (export_vars) self.export_variables();
 };*/
 
-instance.prototype.clear_user_gallery_position = function(zoomID, export_vars = true) {
+instance.prototype.clear_user_gallery_position = function(zoomID, export_vars = false) {
 	var self = this;
 	//clears variables from previously assigned gallery position (if present)
 	if (self.user_data[zoomID].galleryPosition) {
@@ -368,15 +368,18 @@ instance.prototype.clear_user_gallery_position = function(zoomID, export_vars = 
 	if (export_vars) self.export_variables();
 };
 
-instance.prototype.assign_user_gallery_position = function(zoomID, export_vars = true) {
+instance.prototype.assign_user_gallery_position = function(zoomID, gallery_index = undefined, export_vars = false) {
 	var self = this;
 
 	//assigns new gallery position from math with galleryIndex and number of columns in window
 	//var numRows=self.zoomosc_client_data.galleryShape[0];
-	if (self.zoomosc_client_data.galleryOrder.includes(Number(zoomID))) {
-		let thisGalleryIndex = self.zoomosc_client_data.galleryOrder.indexOf(Number(zoomID));
+	if (gallery_index == undefined && self.zoomosc_client_data.galleryOrder.includes(Number(zoomID))) {
+		gallery_index = self.zoomosc_client_data.galleryOrder.indexOf(Number(zoomID));
+	}
+	if (gallery_index != undefined) {
 		let numCols=self.zoomosc_client_data.galleryShape[1];
-		self.user_data[zoomID].galleryPosition = Math.floor(thisGalleryIndex/numCols) + "," + thisGalleryIndex % numCols;
+		self.user_data[zoomID].galleryPosition = Math.floor(gallery_index/numCols) + "," + gallery_index % numCols;
+		self.user_data[zoomID].galleryIndex = gallery_index;
 		//console.log('galPos for user', zoomID, thisGalleryIndex, numCols);
 		self.setVariablesForUser(
 			self.user_data[zoomID], 
@@ -389,7 +392,7 @@ instance.prototype.assign_user_gallery_position = function(zoomID, export_vars =
 	if (export_vars) self.export_variables();
 };
 
-instance.prototype.update_client_variables = function(export_vars = true) {
+instance.prototype.update_client_variables = function(export_vars = false) {
 	var self = this;
 	var clientVarVal=0;
 
@@ -464,7 +467,7 @@ instance.prototype.update_client_variables = function(export_vars = true) {
 };
 
 //Initialize variables
-instance.prototype.init_variables = function(export_vars = true, clear = false) {
+instance.prototype.init_variables = function(export_vars = false, clear = false) {
 	this.debug("Running init_variables");
 	var self = this;
 	//print list of users
@@ -1354,12 +1357,13 @@ if(!self.disabled){
 			if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
 				//set variables and action properties from received list
 				self.user_data[this_user.zoomID] = this_user;
-				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList, false);
+				self.assign_user_gallery_position(this_user.zoomID, this_user.galleryIndex);
+				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
 			}
 
 			//msgArgs[5].value is the total count of all users in the zoomosc list
 			if (msgArgs[5].value == Object.keys(self.user_data).length) { //true if this is the last expected list message
-				self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex], false);
+				self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex]);
 				self.export_variables();
 				self.actions();
 				self.status(self.STATUS_OK);
@@ -1618,8 +1622,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			}*/
 			//console.log("Users not in gallery: ", Object.keys(self.user_data).filter(zoomID => !self.zoomosc_client_data.galleryOrder.includes(Number(zoomID))));
 			//assign galleryPositions based on new galleryIndexes
-			Object.keys(self.user_data).forEach(zoomID => self.clear_user_gallery_position(zoomID, false));
-			Object.keys(self.user_data).forEach(zoomID => self.assign_user_gallery_position(zoomID, false));
+			Object.keys(self.user_data).forEach(zoomID => self.clear_user_gallery_position(zoomID));
+			Object.keys(self.user_data).forEach(zoomID => self.assign_user_gallery_position(zoomID));
 			//refresh variables from galleryIndex and galleryPosition
 			/*self.update_user_variables_subset(
 				self.variablesToPublishList, 
