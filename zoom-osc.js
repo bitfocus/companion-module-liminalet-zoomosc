@@ -295,7 +295,8 @@ instance.prototype.remove_offline_users = function() {
 	var self = this;
 	let userRemoved = false;
 	for(let user in self.user_data){
-		if(self.user_data[user].onlineStatus==0){
+		//only remove users with no target IDs
+		if(self.user_data[user].onlineStatus==0 && self.user_data[user].index == -1){
 			console.log("Deleting offline user: "+user);
 			self.remove_variables_for_user(user.zoomID);
 			delete self.user_data[user];
@@ -1303,6 +1304,7 @@ if(!self.disabled){
 			self.zoomosc_client_data.numberOfTargets		 =	msgArgs[5].value;
 			self.zoomosc_client_data.numberOfUsersInCall =	msgArgs[6].value;
 			// self.checkFeedbacks('sub_bg');
+
 			if (self.zoomosc_client_data.numberOfUsersInCall == 0 && Object.keys(self.user_data).length != 0) {
 				self.system.emit('osc_send',
 								self.config.host, self.config.port,
@@ -1354,7 +1356,8 @@ if(!self.disabled){
 			this_user.handStatusText			= handTextVals[this_user.handStatus];
 			this_user.spotlightStatusText = onOffTextVals[this_user.spotlightStatus];*/
 
-			if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
+			//if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
+			if (this_user.zoomID>=0) {
 				//set variables and action properties from received list
 				self.user_data[this_user.zoomID] = this_user;
 				self.assign_user_gallery_position(this_user.zoomID, this_user.galleryIndex);
@@ -1402,7 +1405,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					let userZoomID=		 message.args[3].value;
 					let userOnlineStatus= message.args[7].value;
 
-					if(userOnlineStatus==0){
+					if(userOnlineStatus==0 && message.args[0].value == -1){ //remove offline users without a target ID
 						// console.log("DELETE OFFLINE USER");
 						delete self.user_data[userZoomID];
 						self.remove_variables_for_user(userZoomID);
@@ -1488,7 +1491,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					console.log("offline");
 					self.user_data[usrMsgUser].onlineStatus=false;
 					//self.user_data[usrMsgUser].onlineStatusText='Offline';
-					self.remove_variables_for_user(usrMsgUser);
+					//only remove users with no target ID
+					if (self.user_data[usrMsgUser].index == -1) self.remove_variables_for_user(usrMsgUser);
 
 					break;
 					//add camera devices to users
