@@ -1363,17 +1363,16 @@ if(!self.disabled){
 			this_user.spotlightStatusText = onOffTextVals[this_user.spotlightStatus];*/
 
 			//if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
-			if (this_user.zoomID>=0) {
 				//set variables and action properties from received list
 				self.user_data[this_user.zoomID] = this_user;
 				self.assign_user_gallery_position(this_user.zoomID, this_user.galleryIndex);
 				self.setVariablesForUser(self.user_data[this_user.zoomID], self.userSourceList, self.variablesToPublishList);
-			}
+			//}
 
 			//msgArgs[5].value is the total count of all users in the zoomosc list
 			if (msgArgs[5].value == Object.keys(self.user_data).length) { //true if this is the last expected list message
-				self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex]);
-				self.export_variables();
+				//self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex]);
+				//self.export_variables();
 				self.actions();
 				self.status(self.STATUS_OK);
 			}
