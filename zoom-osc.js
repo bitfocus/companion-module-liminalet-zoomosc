@@ -214,8 +214,10 @@ instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, va
 			if (thisSource.varName == 'listIndex') {
 				sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
 			}
+
+			if (Array.isArray(sourceUser[thisSource.varName])) self.debug('found array var');
 			//dont publish variables that are -1
-			if(![-1, null, []].includes(sourceUser[thisSource.varName])){
+			if(![-1, null].includes(sourceUser[thisSource.varName]) && !(Array.isArray(sourceUser[thisSource.varName]) && !sourceUser[thisSource.varName].length) && sourceUser.hasOwnProperty(variableToPublish)){
 				var thisVariable=self.variablesToPublishList[variableToPublish];
 				var thisVariableName=thisVariable.varName;
 				//if it is a device list, add each device
@@ -223,7 +225,6 @@ instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, va
 					let listSize;
 					if(thisVariable.isList && sourceUser[thisVariableName] != undefined){
 						listSize=sourceUser[thisVariableName].length;
-						if (listSize == 0) break;
 
 					}else{
 						listSize=1;
