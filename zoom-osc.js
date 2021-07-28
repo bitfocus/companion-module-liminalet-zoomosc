@@ -40,6 +40,7 @@ function instance(system, id, config) {
 	self.zoomosc_client_data.listIndexOffset = 0;
 	self.zoomosc_client_data.numberOfSelectedUsers = 0;
 	self.variable_data = {};
+	self.variable_data_delta = {};
 	self.variable_definitions = [];
 
 
@@ -179,13 +180,15 @@ instance.prototype.updateVariable = function(thisName, thisLabel, thisValue, thi
 		console.log("Adding def: "+JSON.stringify(thisDefinition));
 		self.variable_definitions.push(thisDefinition);
 	}
-	self.variable_data[thisName] = thisValue;
+	self.variable_data_delta[thisName] = thisValue;
 	//console.log("ZOSC: Updated var "+thisName+" to "+thisValue);
 };
 
 instance.prototype.export_variables = function() {
   this.setVariableDefinitions(this.variable_definitions);
-  this.setVariables(this.variable_data);
+  this.setVariables(this.variable_data_delta);
+  this.variable_data = {...this.variable_data, ...this.variable_data_delta};
+  this.variable_data_delta = {};
 };
 
 instance.prototype.clear_user_data = function () {
@@ -193,6 +196,7 @@ instance.prototype.clear_user_data = function () {
 	this.export_variables();
 	this.user_data = {};
 	this.variable_data = {};
+	this.variable_data_delta = {};
 	this.variable_definitions = [];
 	this.zoomosc_client_data.numberOfSelectedUsers = 0;
 	//this.checkFeedbacks();
@@ -219,6 +223,7 @@ for(var variableToPublish in variablesToPublishList){
 				let listSize;
 				if(thisVariable.isList && sourceUser[thisVariableName] != undefined){
 					listSize=sourceUser[thisVariableName].length;
+					if (listSize == 0) break;
 
 				}else{
 					listSize=1;
@@ -286,7 +291,7 @@ instance.prototype.remove_variables_for_user = function(zoomID, var_name_filter 
 	self.variable_definitions = self.variable_definitions.filter(e => user_variable_definitions.includes(e));
 
 	user_variable_data.forEach(this_variable_name => {
-		self.variable_data[this_variable_name] = undefined;
+		self.variable_data_delta[this_variable_name] = undefined;
 	});
 	
 };
@@ -486,17 +491,17 @@ instance.prototype.init_variables = function(export_vars = false, clear = false)
 			userName: '-'},  
 			[self.userSourceList.galleryIndex,
 			 self.userSourceList.galleryPosition],
-			self.variablesToPublishList, false, true);
+			{userName: self.variablesToPublishList.userName}, false, true);
 		}
 	}
 
 	let user_data_values = Object.values(self.user_data);
 	//add new variables from list of users
-	if(user_data_values.length>0){
+	/*if(user_data_values.length>0){
 		Object.values(self.user_data).forEach(user => 
 			self.setVariablesForUser(user,self.userSourceList,self.variablesToPublishList, false, clear));
 		console.log("Setting variables for", user_data_values.length, "participants");
-	}
+	}*/
 
 	self.update_client_variables(false);
 
