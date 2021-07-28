@@ -206,74 +206,74 @@ instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, va
 	var self = this;
 	//user name in user data, string to tag companion variable
 
-//variables
-for(var variableToPublish in variablesToPublishList){
-	// sources
-	for(var source in userSourceList){
-		var thisSource=userSourceList[source];
-		if (thisSource.varName == 'listIndex') {
-			sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
-		}
-		//dont publish variables that are -1
-		if(![-1, null, []].includes(sourceUser[thisSource.varName])){
-			var thisVariable=self.variablesToPublishList[variableToPublish];
-			var thisVariableName=thisVariable.varName;
-			//if it is a device list, add each device
+	//variables
+	for(var variableToPublish in variablesToPublishList){
+		// sources
+		for(var source in userSourceList){
+			var thisSource=userSourceList[source];
+			if (thisSource.varName == 'listIndex') {
+				sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
+			}
+			//dont publish variables that are -1
+			if(![-1, null, []].includes(sourceUser[thisSource.varName])){
+				var thisVariable=self.variablesToPublishList[variableToPublish];
+				var thisVariableName=thisVariable.varName;
+				//if it is a device list, add each device
 
-				let listSize;
-				if(thisVariable.isList && sourceUser[thisVariableName] != undefined){
-					listSize=sourceUser[thisVariableName].length;
-					if (listSize == 0) break;
+					let listSize;
+					if(thisVariable.isList && sourceUser[thisVariableName] != undefined){
+						listSize=sourceUser[thisVariableName].length;
+						if (listSize == 0) break;
 
-				}else{
-					listSize=1;
-				}
-				//
-				for(let i=0;i<listSize;i++){
-								var thisFormattedVarLabel;
-								var thisFormattedVarName;
-								//if variable is a list add a number to each variable name and label
-								if(thisVariable.isList){
-									thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
-									thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								} else if (thisSource.varName == 'me') {
-                                    thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel;
-									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString;
-                                } else {
-									thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
-									thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
-								}
-
-								//clear all variables to '-' if not in a call
-								var thisVariableValue, thisZoomID;
-								if(!self.zoomosc_client_data.callStatus || clear){
-									thisVariableValue='-';
-									thisZoomID = null;
-								}else{
-									thisZoomID = sourceUser.zoomID;
-
-									//if this is a list, populate with the device name
-									if(thisVariable.isList && sourceUser[thisVariableName] != undefined && sourceUser[thisVariableName].length > 0) {
-										thisVariableValue=sourceUser[thisVariableName][i].deviceName;
-									}else{
-										thisVariableValue=sourceUser[thisVariableName];
+					}else{
+						listSize=1;
+					}
+					//
+					for(let i=0;i<listSize;i++){
+									var thisFormattedVarLabel;
+									var thisFormattedVarName;
+									//if variable is a list add a number to each variable name and label
+									if(thisVariable.isList){
+										thisFormattedVarLabel=thisVariable.varLabel+' '+i+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
+										thisFormattedVarName=thisVariable.varString+'_'+i+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
+									} else if (thisSource.varName == 'me') {
+										thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel;
+										thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString;
+									} else {
+										thisFormattedVarLabel=thisVariable.varLabel+' for '+thisSource.varLabel+' '+sourceUser[thisSource.varName];
+										thisFormattedVarName=thisVariable.varString+'_'+thisSource.varString +'_'+sourceUser[thisSource.varName];
 									}
 
-								}
+									//clear all variables to '-' if not in a call
+									var thisVariableValue, thisZoomID;
+									if(!self.zoomosc_client_data.callStatus || clear){
+										thisVariableValue='-';
+										thisZoomID = null;
+									}else{
+										thisZoomID = sourceUser.zoomID;
 
-								//if the variable has a value push and set it
-								if(thisVariableValue != null && thisVariableValue != undefined){
-									//push variable and set
-									self.updateVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue, thisZoomID);
-									//self.setVariable( thisFormattedVarName, thisVariableValue);
-								}
+										//if this is a list, populate with the device name
+										if(thisVariable.isList && sourceUser[thisVariableName] != undefined && sourceUser[thisVariableName].length > 0) {
+											thisVariableValue=sourceUser[thisVariableName][i].deviceName;
+										}else{
+											thisVariableValue=sourceUser[thisVariableName];
+										}
+
+									}
+
+									//if the variable has a value push and set it
+									if(thisVariableValue != null && thisVariableValue != undefined){
+										//push variable and set
+										self.updateVariable(thisFormattedVarName, thisFormattedVarLabel, thisVariableValue, thisZoomID);
+										//self.setVariable( thisFormattedVarName, thisVariableValue);
+									}
+
+					}
 
 				}
-
 			}
 		}
-	}
-	if (export_vars) self.export_variables();
+		if (export_vars) self.export_variables();
 };
 
 instance.prototype.remove_variables_for_user = function(zoomID, var_name_filter = undefined) {
@@ -1285,7 +1285,7 @@ if(!self.disabled){
 ////OSC LISTENER RECEIVE
 	//check for zoom messages here
 	self.listener.on("message", function(message) {
-
+ 
 				//HELPERS
 		function populateUserDevices(devMsgArgs,deviceType,){
 			let userZoomID      = devMsgArgs[3].value;
