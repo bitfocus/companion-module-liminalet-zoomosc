@@ -10,6 +10,7 @@ var log;
 
 const PING_TIME_ERR = 15000;
 const PING_TIMEOUT	= 3000;
+const LIST_TIMEOUT  = 100;
 //default network settings
 const DEF_TX_PORT	  = '9090';
 const DEF_TX_IP		  = '127.0.0.1';
@@ -27,6 +28,7 @@ function instance(system, id, config) {
 	//contains data from connected ZoomOSC instance
 	self.zoomosc_client_data										 = [];
 	self.zoomosc_client_data.last_ping					 = 0;
+	self.zoomosc_client_data.last_list					 = 0;
 	self.zoomosc_client_data.subscribeMode			 = 0;
 	self.zoomosc_client_data.galleryShape				 = [0,0];
 	self.zoomosc_client_data.oldgalleryShape		 = [0,0];
@@ -484,20 +486,22 @@ instance.prototype.init_variables = function(export_vars = false, clear = false)
 	//self.assign_gallery_positions(false);
 
 	//set gallery position and index variables to '-' to show that they're valid 
-	for (let row = 0; row < 7; row++) {
-		for (let col = 0; col < 7; col++) {
-		self.setVariablesForUser({
-			galleryIndex: (row*7)+col,
-			galleryPosition: row+','+col,
-			userName: '-'},  
-			[self.userSourceList.galleryIndex,
-			 self.userSourceList.galleryPosition],
-			{userName: self.variablesToPublishList.userName}, false, true);
+	if (!clear) {
+		for (let row = 0; row < 7; row++) {
+			for (let col = 0; col < 7; col++) {
+			self.setVariablesForUser({
+				galleryIndex: (row*7)+col,
+				galleryPosition: row+','+col,
+				userName: '-'},  
+				[self.userSourceList.galleryIndex,
+				self.userSourceList.galleryPosition],
+				{userName: self.variablesToPublishList.userName}, false, true);
+			}
 		}
 	}
 
-	let user_data_values = Object.values(self.user_data);
 	//add new variables from list of users
+	//let user_data_values = Object.values(self.user_data);
 	/*if(user_data_values.length>0){
 		Object.values(self.user_data).forEach(user => 
 			self.setVariablesForUser(user,self.userSourceList,self.variablesToPublishList, false, clear));
@@ -1323,6 +1327,7 @@ if(!self.disabled){
 
 			// list messages are only sent when ZoomOSC is in a meeting
 			self.zoomosc_client_data.callStatus = 1;
+			self.zoomosc_client_data.last_list = Date.now();
 
 			//add the values from the list to the user at index supplied
 
@@ -1370,12 +1375,12 @@ if(!self.disabled){
 			//}
 
 			//msgArgs[5].value is the total count of all users in the zoomosc list
-			if (msgArgs[5].value == Object.keys(self.user_data).length) { //true if this is the last expected list message
+			/*if (msgArgs[5].value == Object.keys(self.user_data).length) { //true if this is the last expected list message
 				//self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.listIndex]);
 				//self.export_variables();
 				self.actions();
 				self.status(self.STATUS_OK);
-			}
+			}*/
 		}
 
 // console.log("Received OSC Message: "+ JSON.stringify(message));
@@ -1712,6 +1717,7 @@ instance.prototype.init_ping = function() {
 				else{
 		// self.getAllFeedbacks();
 		var timesinceping = Date.now() - self.zoomosc_client_data.last_ping;
+		var timesincelist = Date.now() - self.zoomosc_client_data.last_list;
 		//has ping been sent?
 		if (self.zoomosc_client_data.last_ping > 0) {
 			//Send ping if last ping sent too long ago
@@ -1747,7 +1753,16 @@ instance.prototype.init_ping = function() {
 			}
 			self.status(self.STATUS_OK);
 		}
+
+		if (self.zoomosc_client_data.last_list != -1 && timesincelist > LIST_TIMEOUT) {
+			//finish parsing list output
+			self.actions();
+			self.status(self.STATUS_OK);
+			self.zoomosc_client_data.last_list = -1;
+			self.debug("Finished parsing list messages");
+		}
 	}
+
 	//Ping timeout loop. cleared when instance disabled
 	self.pingLoop = setTimeout(ping, PING_TIMEOUT);
 	}, PING_TIMEOUT);
