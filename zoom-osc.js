@@ -1367,6 +1367,10 @@ if(!self.disabled){
 			this_user.handStatusText			= handTextVals[this_user.handStatus];
 			this_user.spotlightStatusText = onOffTextVals[this_user.spotlightStatus];*/
 
+			if (this_user.zoomID == -1) {
+				this_user.zoomID = "offline_" + this_user.zoomID + "_" + this_user.index;
+			}
+
 			//if (this_user.onlineStatus>=0 && this_user.zoomID>=0) {
 				//set variables and action properties from received list
 				self.user_data[this_user.zoomID] = this_user;
@@ -1416,9 +1420,10 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					let userOnlineStatus= message.args[7].value;
 
 					if(userOnlineStatus==0 && message.args[0].value == -1){ //remove offline users without a target ID
-						// console.log("DELETE OFFLINE USER");
-						delete self.user_data[userZoomID];
+						this.debug("DELETE OFFLINE USER");
+						
 						self.remove_variables_for_user(userZoomID);
+						delete self.user_data[userZoomID];
 					}
 					else{
 						//My list msg is always sent first, so clear list if reciving my list
