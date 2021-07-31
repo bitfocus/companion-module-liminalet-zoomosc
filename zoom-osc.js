@@ -501,12 +501,14 @@ instance.prototype.init_variables = function(export_vars = false, clear = false)
 	}
 
 	//add new variables from list of users
-	//let user_data_values = Object.values(self.user_data);
-	/*if(user_data_values.length>0){
-		Object.values(self.user_data).forEach(user => 
-			self.setVariablesForUser(user,self.userSourceList,self.variablesToPublishList, false, clear));
-		console.log("Setting variables for", user_data_values.length, "participants");
-	}*/
+	if (clear) {
+		let user_data_values = Object.values(self.user_data);
+		if(user_data_values.length>0){
+			Object.values(self.user_data).forEach(user => 
+				self.setVariablesForUser(user,self.userSourceList,self.variablesToPublishList, false, clear));
+			console.log("Setting variables for", user_data_values.length, "participants");
+		}
+	}
 
 	self.update_client_variables(false);
 
@@ -1768,6 +1770,7 @@ instance.prototype.init_ping = function() {
 
 		if (self.zoomosc_client_data.last_list != -1 && timesincelist > LIST_TIMEOUT) {
 			//finish parsing list output
+			self.export_variables();
 			self.actions();
 			self.status(self.STATUS_OK);
 			self.zoomosc_client_data.last_list = -1;
