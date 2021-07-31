@@ -824,16 +824,21 @@ instance.prototype.action = function(action) {
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 			//add selected user to selection list
 				for (let user in self.user_data){
-					if(self.user_data[user].selected){
+					// user (zoomID) is NaN when user is offline. No user actions can target offline users.
+					if(self.user_data[user].selected && !isNaN(user)){
 						selectionZoomIDs.push(user);
 					}
 				}
 				if (selectionZoomIDs.length > 1) {  // multiple users selected
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 					userString = selectionZoomIDs;
-				} else {  // single user
+				} else if (selectionZoomIDs.length == 1) {  // single user
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 					userString = parseInt(selectionZoomIDs[0]);
+				} else {
+					// no user is selected, so action should not be executed.
+					self.log('debug', "User action targeted selection group, but no online users are selected. No OSC message was sent.");
+					return;
 				}
 				//self.log('debug', "user selection ("+selectionZoomIDs.length + "): " + userString);
 				break;
@@ -1047,7 +1052,9 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			}
 			//self.log('debug',"Clear selection");
 		}
-		if (self.user_data[selectedUser] != undefined) {
+		if (isNaN(selectedUser)) {
+			self.log("debug", "Unable to select " + TARGET_TYPE + " " + userString + ": offline users cannot be selected.");
+		} else if (self.user_data[selectedUser] != undefined) {
 			switch(thisMsg.INTERNAL_ACTION){
 				case "addSelection":
 					self.user_data[selectedUser].selected = true;
