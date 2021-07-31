@@ -183,7 +183,7 @@ instance.prototype.updateVariable = function(thisName, thisLabel, thisValue, thi
 		self.variable_definitions.push(thisDefinition);
 	}
 	self.variable_data_delta[thisName] = thisValue;
-	//console.log("ZOSC: Updated var "+thisName+" to "+thisValue);
+	//self.debug("Updated var "+thisName+" to "+thisValue);
 };
 
 instance.prototype.export_variables = function() {
@@ -662,7 +662,8 @@ var allInstanceActions=[];
 						label:'Message',
 						id:'message',
 						choices:groupActions,
-						default:groupActions[0].id
+						default:groupActions[0].id,
+						minChoicesForSearch: 0
 					}
 				]
 			};
@@ -678,14 +679,16 @@ var allInstanceActions=[];
 							label:'Message',
 							id:'message',
 							choices:groupActions,
-							default:groupActions[0].id
+							default:groupActions[0].id,
+							minChoicesForSearch: 0
 						},
 						{
 							type:'dropdown',
 							label:'User',
 							id:'user',
 							choices:this.userList,
-							default:'me'
+							default:'me',
+							minChoicesForSearch: 0
 						},
 						{
 							type:'textinput',
@@ -1122,7 +1125,8 @@ instance.prototype.init_feedbacks = function(){
 					label:'User',
 					id:'user',
 					choices:this.userList,
-					default:this.userList.me.id
+					default:this.userList.me.id,
+					minChoicesForSearch: 0
 				},
 				{
 					type:'textinput',
@@ -1135,8 +1139,8 @@ instance.prototype.init_feedbacks = function(){
 					label:'Property',
 					id:'prop',
 					choices:userStatusProperties,
-					default:userStatusProperties[1].id
-
+					default:userStatusProperties[1].id,
+					minChoicesForSearch: 0
 				},
 				{
 					type:'dropdown',
