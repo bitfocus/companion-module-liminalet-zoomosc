@@ -1496,6 +1496,15 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					self.setVariablesForUser(self.user_data[usrMsgUser], [self.userSourceList.userName], self.variablesToPublishList);
 					self.setVariablesForUser(self.user_data[usrMsgUser], self.userSourceList, {userName: self.variablesToPublishList.userName});
 					break;
+				
+				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_USER_ROLE_CHANGED.MESSAGE:
+					console.log('Role changed for zoomID', usrMsgUser, 'from', self.user_data[usrMsgUser].role, 'to', message.args[4].value);
+					self.user_data[usrMsgUser].role = message.args[4].value;
+					self.update_client_variables({
+						numberOfCohosts: self.clientdatalabels.numberOfCohosts,
+						numberOfAttendees: self.clientdatalabels.numberOfAttendees,
+						numberOfPanelists: self.clientdatalabels.numberOfPanelists}, true);
+					break;
 
 				//user status messages
 				//pins
@@ -1635,11 +1644,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						break;
 
 				default:
-					console.log("user message not matched");
+					this.debug("user message not matched: " + JSON.stringify(recvMsg) + " " + JSON.stringify(message.args));
 					break;
-
-			
-
 		}
 
 		if (isMe) {
@@ -1711,7 +1717,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			break;
 
 		default:
-			console.log("zoom message not matched");
+			this.debug("zoom message not matched: " + JSON.stringify(recvMsg) + " " + JSON.stringify(message.args));
 			break;
 
 	}
