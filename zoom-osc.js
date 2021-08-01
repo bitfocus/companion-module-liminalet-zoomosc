@@ -10,7 +10,7 @@ var log;
 
 const PING_TIME_ERR = 15000;
 const PING_TIMEOUT	= 3000;
-const LIST_TIMEOUT  = 100;
+const LIST_TIMEOUT  = 2000;
 //default network settings
 const DEF_TX_PORT	  = '9090';
 const DEF_TX_IP		  = '127.0.0.1';
@@ -164,7 +164,15 @@ instance.prototype.clientdatalabels = {
 	numberOfUsersInCall: 'Number of Users in Call',
 	activeSpeaker:'Active Speaker',
 	listIndexOffset:'Current List Index Offset',
-	numberOfSelectedUsers:'Number of users in Selection group'
+	numberOfSelectedUsers:'Number of users in Selection group',
+	numberOfVideoOn:'Number of participants with video on',
+	numberOfUnmuted:'Number of participants unmuted',
+	numberOfRaisedHands:'Number of participants with raised hands',
+	numberOfSpotlitUsers:'Number of spotlit participants',
+	numberOfPinnedUsers:'Number of pinned participants',
+	numberOfCohosts:'Number of Co-hosts and Hosts',
+	numberOfAttendees:'Number of attendees',
+	numberOfPanelists:'Number of panelists',
 };
 
 instance.prototype.update_user_variables_subset = function (attribute, source, export_variables = false) {
@@ -195,12 +203,12 @@ instance.prototype.export_variables = function() {
 
 instance.prototype.clear_user_data = function () {
 	this.init_variables(true, true);
-	this.export_variables();
 	this.user_data = {};
+	this.update_client_variables();
+	this.export_variables();
 	this.variable_data = {};
 	this.variable_data_delta = {};
 	this.variable_definitions = [];
-	this.zoomosc_client_data.numberOfSelectedUsers = 0;
 	//this.checkFeedbacks();
 };
 
@@ -401,25 +409,22 @@ instance.prototype.assign_user_gallery_position = function(zoomID, gallery_index
 	if (export_vars) self.export_variables();
 };
 
-instance.prototype.update_client_variables = function(export_vars = false) {
+instance.prototype.update_client_variables = function(client_variable_labels = undefined, export_vars = false) {
 	var self = this;
 	var clientVarVal=0;
 
-	for(let clientVar in self.clientdatalabels){
+	if (client_variable_labels == undefined) client_variable_labels = self.clientdatalabels;
+
+	for(let clientVar in client_variable_labels){
 		//ZoomOSC Version
 		switch(clientVar){
 			case 'listIndexOffset':
-				clientVarVal = self.zoomosc_client_data.listIndexOffset;
-				break;
 			case 'zoomOSCVersion':
 			case 'callStatus':
 			case 'numberOfTargets':
 			case 'numberOfUsersInCall':
 			case 'activeSpeaker':
 				clientVarVal=self.zoomosc_client_data[clientVar];
-				break;
-			case 'numberOfSelectedUsers':
-				clientVarVal = self.zoomosc_client_data.callStatus ? self.zoomosc_client_data[clientVar] : 0;
 				break;
 			case 'subscribeMode':
 				switch(self.zoomosc_client_data[clientVar]){
@@ -464,20 +469,46 @@ instance.prototype.update_client_variables = function(export_vars = false) {
 							break;
 						}
 					break;
-
+				case 'numberOfSelectedUsers':
+					clientVarVal = Object.values(self.user_data).filter(user => user.selected).length;
+					break;
+				case 'numberOfVideoOn':
+					clientVarVal = Object.values(self.user_data).filter(user => user.videoStatus).length;
+					break;
+				case 'numberOfUnmuted':
+					clientVarVal = Object.values(self.user_data).filter(user => user.audioStatus).length;
+					break;
+				case 'numberOfRaisedHands':
+					clientVarVal = Object.values(self.user_data).filter(user => user.handStatus).length;
+					break;
+				case 'numberOfSpotlitUsers':
+					clientVarVal = Object.values(self.user_data).filter(user => user.spotlightStatus).length;
+					break;
+				case 'numberOfPinnedUsers':
+					clientVarVal = Object.values(self.user_data).filter(user => user.pinStatus).length;
+					break;
+				case 'numberOfCohosts':
+					clientVarVal = Object.values(self.user_data).filter(user => user.role == 1 || user.role == 2).length;
+					break;
+				case 'numberOfAttendees':
+					clientVarVal = Object.values(self.user_data).filter(user => user.role == 5).length;
+					break;
+				case 'numberOfPanelists':
+					clientVarVal = Object.values(self.user_data).filter(user => user.role == 3).length;
+					break;
 				default:
 					break;
 
 			}
 		//self.setVariable('client_'+clientVar,clientVarVal);
-		self.updateVariable('client_'+clientVar, self.clientdatalabels[clientVar], clientVarVal);
+		self.updateVariable('client_'+clientVar, client_variable_labels[clientVar], clientVarVal);
 	}
 	if (export_vars) self.export_variables();
 };
 
 //Initialize variables
 instance.prototype.init_variables = function(export_vars = false, clear = false) {
-	this.debug("Running init_variables");
+	this.debug("Running init_variables" + clear ? " with clear parameter" : "");
 	var self = this;
 	//print list of users
 	// console.log("USERS: "+JSON.stringify(self.user_data));
@@ -500,13 +531,13 @@ instance.prototype.init_variables = function(export_vars = false, clear = false)
 		}
 	}
 
-	//add new variables from list of users
+	//clear all variables from list of users
 	if (clear) {
 		let user_data_values = Object.values(self.user_data);
 		if(user_data_values.length>0){
 			Object.values(self.user_data).forEach(user => 
 				self.setVariablesForUser(user,self.userSourceList,self.variablesToPublishList, false, clear));
-			console.log("Setting variables for", user_data_values.length, "participants");
+			self.debug("Clearing variables for", user_data_values.length, "participants");
 		}
 	}
 
@@ -1084,8 +1115,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					break;
 			}
 		}
-		self.zoomosc_client_data.numberOfSelectedUsers = Object.values(self.user_data).reduce(function(acc, user) { return user.selected + acc; }, 0);
-		self.setVariable('client_numberOfSelectedUsers', self.zoomosc_client_data.numberOfSelectedUsers);
+		self.update_client_variables({numberOfSelectedUsers: self.clientdatalabels.numberOfSelectedUsers}, true);
 		this.checkFeedbacks();
 	}
 
@@ -1472,27 +1502,32 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				case ZOSC.actions.PIN_GROUP.MESSAGES.ZOSC_MSG_PART_PIN.USER_ACTION:
 					console.log('pin: '+self.user_data[usrMsgUser]);
 					self.user_data[usrMsgUser].pinStatus=true;
+					self.update_client_variables({numberOfPinnedUsers: self.clientdatalabels.numberOfPinnedUsers}, true);
 					break;
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_ON.MESSAGE:
 					console.log('Spotlight on');
 					self.user_data[usrMsgUser].spotlightStatus=true;
 					//self.user_data[usrMsgUser].spotlightStatusText='On';
+					self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 					break;
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_OFF.MESSAGE:
 					console.log('Spotlight off');
 					self.user_data[usrMsgUser].spotlightStatus=false;
 					//self.user_data[usrMsgUser].spotlightStatusText='Off';
+					self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 					break;
 				//AV: VIDEO
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_VIDON.USER_ACTION:
 					console.log('vidstatus on: '+self.user_data[usrMsgUser]);
 					self.user_data[usrMsgUser].videoStatus=true;
 					//self.user_data[usrMsgUser].videoStatusText='On';
+					self.update_client_variables({numberOfVideoOn: self.clientdatalabels.numberOfVideoOn}, true);
 					break;
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_VIDOFF.USER_ACTION:
 					console.log("vidstatus OFF");
 					self.user_data[usrMsgUser].videoStatus=false;
 					//self.user_data[usrMsgUser].videoStatusText='Off';
+					self.update_client_variables({numberOfVideoOn: self.clientdatalabels.numberOfVideoOn}, true);
 					break;
 
 				//AV: AUDIO
@@ -1500,12 +1535,14 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					console.log('UNMUTE: ');
 					self.user_data[usrMsgUser].audioStatus=true;
 					//self.user_data[usrMsgUser].audioStatusText='On';
+					self.update_client_variables({numberOfUnmuted: self.clientdatalabels.numberOfUnmuted}, true);
 					break;
 
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_MUTE.USER_ACTION:
 					console.log("MUTE");
 					self.user_data[usrMsgUser].audioStatus=false;
 					//self.user_data[usrMsgUser].audioStatusText='Off';
+					self.update_client_variables({numberOfUnmuted: self.clientdatalabels.numberOfUnmuted}, true);
 					break;
 
 				//onlie status
@@ -1521,7 +1558,6 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					//self.user_data[usrMsgUser].onlineStatusText='Offline';
 					//only remove users with no target ID
 					if (self.user_data[usrMsgUser].index == -1) self.remove_variables_for_user(usrMsgUser);
-
 					break;
 					//add camera devices to users
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_CAMERA_DEVICE_LIST.MESSAGE:
@@ -1580,7 +1616,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						self.user_data[user].activeSpeaker=(self.user_data[user].zoomID==speakerZoomID); //boolean
 						//self.user_data[user].activeSpeakerText= self.user_data[user].activeSpeaker ? 'Active' : 'Inactive';
 					}
-
+					self.update_client_variables({activeSpeaker: self.clientdatalabels.activeSpeaker}, true);
 					break;
 
 					//Hand Raising
@@ -1588,12 +1624,14 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						console.log("Hand Raised");
 						self.user_data[usrMsgUser].handStatus=true;
 						//self.user_data[usrMsgUser].handStatusText='Up';
+						self.update_client_variables({numberOfRaisedHands: self.clientdatalabels.numberOfRaisedHands}, true);
 						break;
 
 					case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_HAND_LOWERED.MESSAGE:
 						console.log("hand lowered");
 						self.user_data[usrMsgUser].handStatus=false;
 						//self.user_data[usrMsgUser].handStatusText='Down';
+						self.update_client_variables({numberOfRaisedHands: self.clientdatalabels.numberOfRaisedHands}, true);
 						break;
 
 				default:
@@ -1612,7 +1650,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 		case 'pong':
 			parsePongRecvMsg(message.args);
 			self.update_client_variables();
-			console.log("PONG RECEIVED");
+			self.debug("PONG RECEIVED");
 			break;
 		case 'gallerySize' :
 		case 'galleryShape':
@@ -1774,6 +1812,7 @@ instance.prototype.init_ping = function() {
 
 		if (self.zoomosc_client_data.last_list != -1 && timesincelist > LIST_TIMEOUT) {
 			//finish parsing list output
+			self.update_client_variables();
 			self.export_variables();
 			self.actions();
 			self.status(self.STATUS_OK);
