@@ -28,9 +28,9 @@
  ARG_COUNT:
  IS_VALUE_SOURCE: //whether a feedback message contains a value
  IS_LIST_SOURCE: //whether a feedback message contains a list source
- LIST_SOURCE: //the name of a list source for a setter (should link to IS_LIST_SOURCE's message 
+ LIST_SOURCE: //the name of a list source for a setter (should link to IS_LIST_SOURCE's message
  LIST_GET: //the getter to retrieve a list
- IS_DUPEL: //the list source is a duple (ID, Name 
+ IS_DUPEL: //the list source is a duple (ID, Name
  VALUE_GET: //the getter to retrieve a current value
  VALUE_SOURCE: //the incoming message containing the value for this item
 
@@ -51,7 +51,7 @@
      STR_DEF string
 //endif
 
- : {x, ...   : x 
+ : {x, ...   : x
 
 
 //ifndef NS_INLINE
@@ -136,10 +136,10 @@ NS_INLINE ZOSCFullMessageMatch : {const char *message, const char *title, bool i
 "*/
 
 /**
- Create an action which will be run on the last part of an OSC (non user  message (/zoom/../ACTION 
+ Create an action which will be run on the last part of an OSC (non user  message (/zoom/../ACTION
 
- @param messagePart The OSC message part to be matched (case insensitive 
- @param title The title of the message (human readable 
+ @param messagePart The OSC message part to be matched (case insensitive
+ @param title The title of the message (human readable
  @param isPro An action that requires a pro license to function
  @param isNDI An Action that only functions with zoomNDI
  @param requireCoHost The hostMode required for the action to be run
@@ -159,7 +159,7 @@ NS_INLINE ZOSCLastPartMessageMatch : {const char *messagePart, const char* title
 //
 
 //else
- : {a, b, c, d, e, f, g  : {a, b, c, d, e, false, false, 1, f, g 
+ : {a, b, c, d, e, f, g  : {a, b, c, d, e, false, false, 1, f, g
 //endif
 
 
@@ -177,16 +177,16 @@ NS_INLINE ZOSCLastPartMessageMatch : {const char *messagePart, const char* title
 // ZOSCUserLastPartMessageMatch;
 "*/
 /**
- Create a struct for an action on the final part of a user OSC message (/zoom/../../PART 
+ Create a struct for an action on the final part of a user OSC message (/zoom/../../PART
 
- @param messagePart The OSC message part to be matched (case insensitive 
- @param title The title of the message (human readable 
+ @param messagePart The OSC message part to be matched (case insensitive
+ @param title The title of the message (human readable
  @param isPro An action that requires a pro license to function
  @param isNDI An Action that only functions with zoomNDI
  @param requireCoHost The hostMode required for the action to be run
  @param mustForward Whether the action must be forwarded (by chat or similar  to act on a remote user
- @param preferForward Whether the action prefers to forward to a remote user (but can act locally if required 
- @param maxGroupSize The maximum group size that the action can act on (or -1 for infinite 
+ @param preferForward Whether the action prefers to forward to a remote user (but can act locally if required
+ @param maxGroupSize The maximum group size that the action can act on (or -1 for infinite
  @param description The (human readable  description of the message
  @return A completed struct
  */
@@ -205,7 +205,7 @@ NS_INLINE ZOSCUserLastPartMessageMatch : {const char *messagePart, const char* t
     return m;
 //
 
- : {a, b, c, d, e, f, g, h, i, j, ...  : {a, b, c, d, e, f, g, h, i, j 
+ : {a, b, c, d, e, f, g, h, i, j, ...  : {a, b, c, d, e, f, g, h, i, j
 
 "*/
 
@@ -231,7 +231,7 @@ var keywords = {
  ZOSC_MSG_GROUP_PART_PANELISTS  : "panelists" ,
  ZOSC_MSG_GROUP_PART_ATTENDEES  : "attendees" ,
 
-//users takes multiple args similar to Except (below 
+//users takes multiple args similar to Except (below
  ZOSC_MSG_GROUP_PART_USERS  : "users" ,
 
 //except messages MUST end with Except
@@ -266,7 +266,7 @@ PIN_GROUP : { TITLE:"pins", ARGS: "", DESCRIPTION: "Select user to pin/upPin", M
  ZOSC_MSG_PART_TOGGLE_PIN2 : {USER_ACTION:"togglePin2", TITLE:"Toggle Pin screen 2", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Toggle Pin selected user from screen 2" }
 
 }},
-REMOTE_PIN_GROUP : { TITLE:"remote pins", ARGS: "userString:userToPin", DESCRIPTION: "Select user to pin/upPin on remote device", MESSAGES: {
+REMOTE_PIN_GROUP : { TITLE:"remote pins", ARGS: "string:Username to Pin", DESCRIPTION: "Select user to pin/upPin on remote device", MESSAGES: {
 //SCREEN 1 REMOTE PIN MESSAGES
 //**NOTE THAT REMOTE PIN MESSAGES SHOULD NOT FORWARD AS THEY NEED TO BE SWIZZLED LOCALLY BEFORE BEING SENT ON..**
  ZOSC_MSG_PART_REMOTE_PIN : {USER_ACTION:"remotePin", TITLE:"Pin screen 1 on remote client", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Pin a single user to screen 1, unpinning others first on a remote client. Takes one additional final string argument with the userName of the user to pin" },
@@ -309,17 +309,12 @@ AV_GROUP : { TITLE:"Audio/video actions", ARGS: "", DESCRIPTION: "Change audio/v
  ZOSC_MSG_MUTE_ALL : {MESSAGE:"/zoom/all/mute", TITLE:"Mute All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Mute all users (except self " }
 
 }},
-CHAT_GROUP : { TITLE:"Chat", ARGS: "string: message", DESCRIPTION: "Set chat to remote user", MESSAGES: {
+CHAT_GROUP : { TITLE:"Chat", ARGS: "string:Message to send", DESCRIPTION: "Set chat to remote user", MESSAGES: {
  ZOSC_MSG_PART_CHAT : {USER_ACTION:"chat", TITLE:"Send Chat Message", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Send chat message to selected user(s " },
-//<<<<<<< HEAD
- ZOSC_MSG_CHAT_ALL : {MESSAGE:"/zoom/all/chat", TITLE:"Chat All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Chat Everyone" }
-//I'm unclear what the below is here for..
-//=======
-// ZOSC_MSG_CHAT_ALL : {MESSAGE:"/zoom/chatAll", TITLE:"Chat All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Chat Everyone" }
-//>>>>>>> debf1b549ae29c10ac5b83df15000cbafb3f451f
+ ZOSC_MSG_CHAT_ALL : {MESSAGE:"/zoom/chatAll", TITLE:"Chat All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Chat Everyone" }
 
 }},
-REMOTE_CHAT_GROUP : { TITLE:"Remote chat", ARGS: "userString: targetUser, string: message", DESCRIPTION: "Send message to user from remote user", MESSAGES: {
+REMOTE_CHAT_GROUP : { TITLE:"Remote chat", ARGS: "string: Target User, string: Message to send", DESCRIPTION: "Send message to user from remote user", MESSAGES: {
  ZOSC_MSG_PART_REMOTE_CHAT : {USER_ACTION:"remoteChat", TITLE:"Send Chat Message from remote user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Send chat message to selected user(s  from remote client" }
 
 }},
@@ -329,7 +324,7 @@ HAND_GROUP : { TITLE:"Raise/lower hand actions", ARGS: "", DESCRIPTION: "raise/l
  ZOSC_MSG_PART_RAISEHAND : {USER_ACTION:"raiseHand", TITLE:"Raise Hand", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Raise selected user('s  hand(s " },
  ZOSC_MSG_PART_LOWERHAND : {USER_ACTION:"lowerHand", TITLE:"Lower Hand", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Lower selected user('s  hand(s " },
  ZOSC_MSG_PART_TOGGLE_HAND : {USER_ACTION:"toggleHand", TITLE:"Toggle Hand", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Toggle selected user('s  hand(s " },
- ZOSC_MSG_LOWER_ALL_HANDS : {MESSAGE:"/zoom/lowerAllHands", TITLE:"Lower all hands", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Lower all users hands" 
+ ZOSC_MSG_LOWER_ALL_HANDS : {MESSAGE:"/zoom/lowerAllHands", TITLE:"Lower all hands", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Lower all users hands"
 
 }
 
@@ -337,7 +332,6 @@ HAND_GROUP : { TITLE:"Raise/lower hand actions", ARGS: "", DESCRIPTION: "raise/l
 ROLE_GROUP : { TITLE:"Role Actions", ARGS: "", DESCRIPTION: "Change role for user", MESSAGES: {
 
 //role changed
- ZOSC_MSG_PART_RENAME : {USER_ACTION:"rename", TITLE:"Rename user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Rename the selected user" },
  ZOSC_MSG_PART_MAKE_HOST : {USER_ACTION:"makeHost", TITLE:"Make user host", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Make selected user host" },
  ZOSC_MSG_PART_MAKE_CO_HOST : {USER_ACTION:"makeCoHost", TITLE:"Make co-host", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Make selected user co-host" },
  ZOSC_MSG_PART_REVOKE_CO_HOST : {USER_ACTION:"revokeCoHost", TITLE:"Revoke Co-Host", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 0, DESCRIPTION: "Revoke co-host from selected user" },
@@ -347,13 +341,18 @@ ROLE_GROUP : { TITLE:"Role Actions", ARGS: "", DESCRIPTION: "Change role for use
  ZOSC_MSG_PART_EJECT : {USER_ACTION:"eject", TITLE:"Eject user(s ", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Eject selected user(s  from meeting" }
 
 }},
+RENAME_GROUP : { TITLE:"Rename Action", ARGS: "string:New Name", DESCRIPTION: "Change name (requires host or cohost)", MESSAGES: {
+
+ ZOSC_MSG_PART_RENAME : {USER_ACTION:"rename", TITLE:"Rename user", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_ForOtherUsers, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Rename the selected user" },
+
+}},
 BREAKOUT_GROUP : { TITLE:"Breakout Room Actions", ARGS: "", DESCRIPTION: "Breakout room actions", MESSAGES: {
 
  ZOSC_MSG_LIST_BREAKOUTS : {MESSAGE:"/zoom/listBreakouts", TITLE:"List breakout rooms", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "List all available breakout rooms" },
  ZOSC_MSG_LIST_CREATE_BREAKOUT : {MESSAGE:"/zoom/createBreakout", TITLE:"Create breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 1, DESCRIPTION: "Create new breakout room" }
 
 }},
-SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "int:screen", DESCRIPTION: "start/stop screenshare for user", MESSAGES: {
+SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "string:ID/name of screen or window", DESCRIPTION: "start/stop screenshare for user", MESSAGES: {
 //screenshare
  ZOSC_MSG_PART_SCREENSHARE : {USER_ACTION:"startScreenShare", TITLE:"Start screen share", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Start screen share for selected user and sent screen" },
 
@@ -375,7 +374,7 @@ SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "int:screen", DESCRIPTI
 
 
 }},
-VIEW_GROUP : { TITLE:"App actions", ARGS: "", DESCRIPTION: "Change app  state for user", MESSAGES: {
+VIEW_GROUP : { TITLE:"App actions", ARGS: "", DESCRIPTION: "Change app state for user", MESSAGES: {
 
 
 //general zoom control messages
@@ -408,7 +407,7 @@ VIEW_GROUP : { TITLE:"App actions", ARGS: "", DESCRIPTION: "Change app  state fo
  ZOSC_MSG_PART_SET_DISABLE_COMPUTER_SOUND_WHEN_SHARING : {USER_ACTION:"disableComputerSoundWhenSharing", TITLE:"Disable share computer sound when sharing", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Disable share computerSoundWhenSharing" }
 
 }},
-SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "list: options", DESCRIPTION: "Settings actions for user", MESSAGES: {
+SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "string:Device ID or Index", DESCRIPTION: "Settings actions for user", MESSAGES: {
 
  ZOSC_MSG_PART_LIST_MIC_DEVICES : {USER_ACTION:"listMicDevices", TITLE:"List mic devices", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "List mic devices for user(s " },
  ZOSC_MSG_PART_SET_MIC_DEVICE : {USER_ACTION:"setMicDevice", TITLE:"Set mic device", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Set mic device for user(s ", LIST_SOURCE: "micDevices", LIST_GET: "listMicDevices", VALUE_GET: "getMicDevice", VALUE_SOURCE: "micDevice", IS_DUPEL: true },
@@ -433,8 +432,6 @@ SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "list: options", DESCRIPTION: 
  ZOSC_MSG_PART_SET_VIDEO_FILTER : {USER_ACTION:"setVideoFilter", TITLE:"Set video filter", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Set video filter for user(s ", LIST_SOURCE: "videoFilters", LIST_GET: "listVideoFilters", VALUE_GET: "getVideoFilter", VALUE_SOURCE: "videoFilter" },
 */
 
-
- ZOSC_MSG_PART_SET_VIDEO_FILTER : {USER_ACTION:"setVideoFilter", TITLE:"Set video filter", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: 1, ARG_COUNT: 1, DESCRIPTION: "Set video filter for user(s ", LIST_SOURCE: "videoFilters", LIST_GET: "listVideoFilters", VALUE_GET: "getVideoFilter", VALUE_SOURCE: "videoFilter" },
  ZOSC_MSG_PART_GET_CAMERA_DEVICE : {USER_ACTION:"getCameraDevice", TITLE:"Get Camera Device", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Get current camera device for user(s " },
 
  ZOSC_MSG_PART_GET_MIC_DEVICE : {USER_ACTION:"getMicDevice", TITLE:"Get Mic device", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Get current mic device for user(s " },
@@ -447,11 +444,13 @@ SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "list: options", DESCRIPTION: 
 }},
 SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select users for batch actions", MESSAGES: {
 
-    ZOSC_MSG_PART_LIST_ADD_SELECTION : {INTERNAL_ACTION:"addSelection", TITLE:"Add to Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add user(s to selection group" },
+ ZOSC_MSG_PART_LIST_ADD_SELECTION : {INTERNAL_ACTION:"addSelection", TITLE:"Add to Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Add user(s to selection group" },
 
-    ZOSC_MSG_PART_LIST_REMOVE_SELECTION : {INTERNAL_ACTION:"removeSelection", TITLE:"Remove from Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from selection group" },
+ ZOSC_MSG_PART_LIST_REMOVE_SELECTION : {INTERNAL_ACTION:"removeSelection", TITLE:"Remove from Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from selection group" },
 
-    ZOSC_MSG_PART_LIST_TOGGLE_SELECTION : {INTERNAL_ACTION:"toggleSelection", TITLE:"Toggle Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
+ ZOSC_MSG_PART_LIST_TOGGLE_SELECTION : {INTERNAL_ACTION:"toggleSelection", TITLE:"Toggle Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
+
+ ZOSC_MSG_PART_LIST_SINGLE_SELECTION : {INTERNAL_ACTION:"singleSelection", TITLE:"Single Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user and toggles all other users off" },
 
     ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
    
@@ -475,6 +474,7 @@ FAVORITE_GROUP : { TITLE:"Favorites Actions", ARGS: "", DESCRIPTION: "Mark users
     ZOSC_MSG_PART_TOGGLE_FAVORITE : {INTERNAL_ACTION:"toggleFavorite", TITLE:"Toggle Favorite", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
 
     ZOSC_MSG_PART_CLEAR_FAVORITES : {INTERNAL_ACTION:"clearFavorites", TITLE:"Clear Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users from favorites" },
+ ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
 }},
 
 APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRIPTION: "Settings actions for user", MESSAGES: {
@@ -511,18 +511,22 @@ APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRI
 
 //meeting control actions
  ZOSC_MSG_LEAVE_MEETING  : {MESSAGE:"/zoom/leaveMeeting", TITLE:"Leave meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Leave Meeting" },
- ZOSC_MSG_END_MEETING  : {MESSAGE:"/zoom/endMeeting", TITLE:"End Meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "End Meeting For All" }
+ ZOSC_MSG_END_MEETING  : {MESSAGE:"/zoom/endMeeting", TITLE:"End Meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "End Meeting For All" },
+
 }},
 
+ISO_ACTION_GROUP : { TITLE:"ZoomISO Actions", ARGS: "int:Custom Output Number", DESCRIPTION: "ZoomISO Specific Actions", MESSAGES: {
+  ZOSC_MSG_OUTPUT_ISO : {USER_ACTION:"/zoom/outputISO", TITLE:"Output ISO", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Output ISO feeds" }
+}},
 
-JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: "string:Meeting Number, string:Meeting password, string:Display name", DESCRIPTION: "Join a meeting in progress", MESSAGES: {
+JM_ACTION_GROUP : { TITLE:"Join Meeting", ARGS: 'string:Meeting Number, string:Meeting Password, string:Display name', DESCRIPTION: "Join a meeting in progress", MESSAGES: {
 
  ZOSC_MSG_JOIN_MEETING : {MESSAGE:"/zoom/joinMeeting", TITLE:"Join Meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 3, DESCRIPTION: "Join Meeting" }
 
 }
 },
 
-WINDOW_FRAME_ACTION_GROUP : { TITLE:"Meeting window frame", ARGS: "int:x or width, int y or height", DESCRIPTION: "Set meeting window size and position", MESSAGES: {
+WINDOW_FRAME_ACTION_GROUP : { TITLE:"Meeting window frame", ARGS: "int:x or width, int:y or height", DESCRIPTION: "Set meeting window size and position", MESSAGES: {
 
  ZOSC_MSG_PART_SET_WINDOW_POSITION : {USER_ACTION:"setWindowPosition", TITLE:"Set Window Position", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window position" },
 
@@ -532,7 +536,7 @@ WINDOW_FRAME_ACTION_GROUP : { TITLE:"Meeting window frame", ARGS: "int:x or widt
 }
 }
 
-; 
+;
 
 
 
@@ -546,16 +550,16 @@ var outputFullMessages = {
  1 - string current zoomOSC version
  2 - the current subscribe mode
  3 - the current galTrack mode
- 4 - the status of the client (0 : not in call, 1 : call in progress 
+ 4 - the status of the client (0 : not in call, 1 : call in progress
  5 - the number of users in participant_list
  6 - the number of users on the call
  */
  ZOSC_MSG_SEND_PONG : {MESSAGE: "/zoomosc/pong", DESCRIPTION: "replying to a 'ping' message" },
 /**
  user output messages all take the following form for their initial arguments, they may then optionally have additional arguments following
- 0 - index in participant list (or -1 if not there 
+ 0 - index in participant list (or -1 if not there
  1 - the user's username
- 2 - the user's index in the gallery (or -1 if not there 
+ 2 - the user's index in the gallery (or -1 if not there
  3 - the user's zoom user ID
  */
  ZOSC_MSG_SEND_GALORDER : {MESSAGE: "/zoomosc/galleryOrder", DESCRIPTION: "sending the current gallery order" },
@@ -567,10 +571,10 @@ var outputFullMessages = {
  ZOSC_MSG_SEND_CHATCONTROL_GOODBYE : {MESSAGE: "/zoom/goodbye", TITLE: "Goodbye", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0,  DESCRIPTION: "controlled client alerting users that it can no longer be controlled" }
 
 
-//list message arguments are: (first 4 mirror normal emission 
+//list message arguments are: (first 4 mirror normal emission
 //0 - current index
 //1 - User name
-//2 - gallery index (or -1 if not there 
+//2 - gallery index (or -1 if not there
 //3 - zoomID
 
 //4 - total participant list size
@@ -588,7 +592,7 @@ var outputLastPartMessages = {
 //Following messages all send user info with the arguments
 //0 - current index
 //1 - User name
-//2 - gallery index (or -1 if not there 
+//2 - gallery index (or -1 if not there
 //3 - zoomID
 
  ZOSC_MSG_SEND_PART_LIST : {MESSAGE: "list", DESCRIPTION: "sending list of user status's" },

@@ -5,6 +5,18 @@ More information at: <a href='https://www.liminalet.com/zoomosc' target='_new'>l
 **Config**  
 Specify IP and port for send and receive to ZoomOSC
 
+**Suggested Default Port & IP Setup**
+
+Note: We recommend using the default port numbers below to get started, but other open ports may be used.
+* ZoomOSC Configuration (**ZoomOSC Pro Reccomended** for full functionality, but not required):
+  * ZoomOSC Transmission IP: Device with Companion
+  * ZoomOSC Transmission port: 1234
+  * ZoomOSC Receive port: 9090
+* Companion Module Configuration:
+  * Companion Instance: Target IP: Device with ZoomOSC
+  * Companion Instance: Target port: 9090
+  * Companion Instance: Receive port: 1234
+
 
 **User Variables**
 * Once subscribed, user variables will be populated as:
@@ -69,7 +81,7 @@ Specify IP and port for send and receive to ZoomOSC
   * Add Spotlit User
   * Un-spotlight User
   * Clear Spotlight
-*  **Audio/Video**
+* **Audio/Video**
   * Video On
   * Video Off
   * Mute Audio
