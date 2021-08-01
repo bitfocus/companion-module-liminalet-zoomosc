@@ -510,8 +510,8 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 
 //Initialize variables
 instance.prototype.init_variables = function(export_vars = false, clear = false) {
-	this.debug("Running init_variables" + clear ? " with clear parameter" : "");
 	var self = this;
+	self.debug("Running init_variables" + clear ? " with clear parameter" : "");
 	//print list of users
 	// console.log("USERS: "+JSON.stringify(self.user_data));
 	// self.log('debug',"USERS: "+JSON.stringify(self.user_data))
@@ -1533,7 +1533,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 					let userOnlineStatus= message.args[7].value;
 
 					if(userOnlineStatus==0 && message.args[0].value == -1){ //remove offline users without a target ID
-						this.debug("DELETE OFFLINE USER");
+						self.debug("DELETE OFFLINE USER");
 						
 						self.remove_variables_for_user(userZoomID);
 						delete self.user_data[userZoomID];
@@ -1715,7 +1715,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						break;
 
 				default:
-					this.debug("user message not matched: " + JSON.stringify(recvMsg) + " " + JSON.stringify(message.args));
+					self.debug("user message not matched: " + JSON.stringify(recvMsg) + " " + JSON.stringify(message.args));
 					break;
 		}
 
@@ -1788,7 +1788,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			break;
 
 		default:
-			this.debug("zoom message not matched: " + JSON.stringify(recvMsg) + " " + JSON.stringify(message.args));
+			self.debug("zoom message not matched: " + JSON.stringify(recvMsg) + " " + JSON.stringify(message.args));
 			break;
 
 	}
