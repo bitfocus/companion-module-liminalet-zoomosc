@@ -474,7 +474,7 @@ FAVORITE_GROUP : { TITLE:"Favorites Actions", ARGS: "", DESCRIPTION: "Mark users
     ZOSC_MSG_PART_TOGGLE_FAVORITE : {INTERNAL_ACTION:"toggleFavorite", TITLE:"Toggle Favorite", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
 
     ZOSC_MSG_PART_CLEAR_FAVORITES : {INTERNAL_ACTION:"clearFavorites", TITLE:"Clear Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users from favorites" },
- ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
+
 }},
 
 APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRIPTION: "Settings actions for user", MESSAGES: {

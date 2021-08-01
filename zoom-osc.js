@@ -131,6 +131,7 @@ instance.prototype.userSourceList= {
 	galleryIndex:    {varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
 	galleryPosition: {varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
 	listIndex:       {varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'},
+	favoriteIndex:   {varName:'favoriteIndex',    varString:'favoriteIndex',					varLabel:'Favorite Index'},
 	me:              {varName:'me',              varString:'me',                     varLabel:'Me'}};
 
 //variable name in user data, string to tag companion variable
@@ -225,6 +226,8 @@ instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, va
 			var thisSource=userSourceList[source];
 			if (thisSource.varName == 'listIndex') {
 				sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
+			} else if (thisSource.varName == 'favoriteIndex') {
+				sourceUser.favoriteIndex = self.favoritesList.indexOf(sourceUser.zoomID);
 			}
 
 			if (Array.isArray(sourceUser[thisSource.varName])) self.debug('found array var');
@@ -1969,7 +1972,7 @@ instance.prototype.init_presets = function () {
 			preset_label: "Select Favorites",
 			button_label: "\\nFavorite",
 			action: 'FAVORITE_GROUP',
-			message: 'ZOSC_MSG_PART_LIST_TOGGLE_FAVORITE',
+			message: 'ZOSC_MSG_PART_TOGGLE_FAVORITE',
 			prop:'favorite',
 			enabled_icon: ZOSC_ICONS.FAVORITE_ENABLED,
 			disabled_icon: ZOSC_ICONS.FAVORITE_DISABLED
