@@ -359,6 +359,7 @@ BREAKOUT_GROUP : { TITLE:"Breakout Room Actions", ARGS: "string:Breakout room na
  ZOSC_MSG_CLOSE_BREAKOUTS : {MESSAGE:"/zoom/closeBreakouts", TITLE:"Close breakout rooms", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Close breakout rooms" },
  ZOSC_MSG_DISTRIBUTE_BREAKOUTS_OF_SIZE : {MESSAGE:"/zoom/distributeBreakoutsOfSize", TITLE:"Distribute breakout room users", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 2, DESCRIPTION: "Randomly distribute users such that a certain number of users are in each room" },
  ZOSC_MSG_SPREAD_BREAKOUTS : {MESSAGE:"/zoom/spreadToBreakouts", TITLE:"Spread Users Across breakouts", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Round-Robin unassigned users into the smallest available room" },
+ ZOSC_MSG_DISTRIBUTE_BREAKOUTS_LIST : {MESSAGE:"/zoom/distributeBreakoutsList", TITLE:"Move specific users to specific rooms as a group", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Assign each user to each room based on indicies in the args" }
  ZOSC_MSG_DELETE_ALL_BREAKOUTS : {MESSAGE:"/zoom/deleteAllBreakouts", TITLE:"Delete All Breakouts", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Delete All Breakouts" },
  ZOSC_MSG_PART_SEND_TO_BO : {USER_ACTION:"sendToBreakout", TITLE:"Send to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Forward user to breakout room" },
  ZOSC_MSG_PART_REMOVE_FROM_BO : {USER_ACTION:"removeFromBreakout", TITLE:"Pull from breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Remove user from breakout room" },
@@ -367,7 +368,34 @@ BREAKOUT_GROUP : { TITLE:"Breakout Room Actions", ARGS: "string:Breakout room na
 
  ZOSC_MSG_PART_RETURN_TO_MAIN_MEETING : {USER_ACTION:"returnToMainMeeting", TITLE:"Return user to main meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "return user to main meeting" }
 
+ ZOSC_MSG_ADMIT_ALL : {MESSAGE:"/zoom/admitAll", TITLE:"Admit all users from waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "A macro to admit each user from the waiting room into the meeting" },
+ ZOSC_MSG_PART_ADMIT : {USER_ACTION:"admit", TITLE:"Admit user to meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Admit user from waiting room into the meeting" },
+ ZOSC_MSG_PART_SEND_TO_WAITING_ROOM : {USER_ACTION:"sendToWaitingRoom", TITLE:"Send user to waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Move user into the waiting room" },
+ ZOSC_MSG_MESSAGE_WAITING_ROOM : {MESSAGE:"/zoom/messageWaitingRoom", TITLE:"Send message to waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 1, DESCRIPTION: "Send a message to the waiting room participants" },
 
+}},
+BREAKOUT_BROADCAST_GROUP : { TITLE:"Broadcast to Breakout Rooms", ARGS: "string:Message to broadcast", DESCRIPTION: "Send the message string as a broadcast to all open breakout roomss", MESSAGES: {
+
+ ZOSC_MSG_BROADCAST_TO_BREAKOUTS : {MESSAGE:"/zoom/broadcastToBreakouts", TITLE:"Broadcast Message to All Breakouts", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 1, DESCRIPTION: "Send the message string as a broadcast to all open breakout rooms" },
+
+}},
+WAITING_ROOM_GROUP : { TITLE:"Waiting Room Group", ARGS: "int:Waiting Room User Index", DESCRIPTION: "Admit or send users to the waiting room", MESSAGES: {
+ ZOSC_MSG_ENABLE_WAITING_ROOM : {MESSAGE:"/zoom/enableWaitingRoom", TITLE:"Enable Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Enable Waiting Room" }
+
+ ZOSC_MSG_DISABLE_WAITING_ROOM : {MESSAGE:"/zoom/disableWaitingRoom", TITLE:"Disable Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Disable Waiting Room" }
+
+ ZOSC_MSG_ADMIT_ALL : {MESSAGE:"/zoom/admitAll", TITLE:"Admit all users in Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Admit all users in Waiting Room" }
+
+ ZOSC_MSG_PART_ADMIT : {USER_ACTION:"admit", TITLE:"Admit user to meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "admit user to meeting" }
+
+ ZOSC_MSG_PART_SEND_TO_WAITING_ROOM : {USER_ACTION:"sendToWaitingRoom", TITLE:"Send user to waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "send user to waiting room" }
+
+
+}},
+WEBINAR_GROUP : { TITLE:"Webinar Actions", ARGS: "", DESCRIPTION: "Webinar actions", MESSAGES: {
+ ZOSC_MSG_PART_ALLOW_TO_SPEAK : {USER_ACTION:"allowToSpeak", TITLE:"Allow webinar attendee to speak", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Allow webinar attendee to speak" },
+ ZOSC_MSG_PART_DISALLOW_TO_SPEAK : {USER_ACTION:"disallowToSpeak", TITLE:"Disallow webinar attendee to speak", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Stop allowing webinar attendee to speak" },
+ ZOSC_MSG_EJECT_ATTENDEES : {MESSAGE:"/zoom/ejectAttendees", TITLE:"Eject webinar attendees", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Remove all attendees from a webinar" },
 
 }},
 SCREENSHARE_GROUP : { TITLE:"Screenshare actions", ARGS: "string:ID/name of screen or window", DESCRIPTION: "start/stop screenshare for user", MESSAGES: {
@@ -474,15 +502,16 @@ APP_ACTION_GROUP : { TITLE:"General local Application Actions", ARGS: "", DESCRI
 
  ZOSC_MSG_SUBSCRIBE : {MESSAGE:"/zoom/subscribe", TITLE:"Subscribe", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Subscribe for updates" },
 
-
- ZOSC_MSG_GETORDER : {MESSAGE:"/zoom/getGalleryOrder", TITLE:"get the order", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "get the order" },
-
+ ZOSC_MSG_GETORDER : {MESSAGE:"/zoom/getGalleryOrder", TITLE:"get the order of gallery", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "get the order of the gallery view" },
+ ZOSC_MSG_GETPINORDER : {MESSAGE:"/zoom/getPinOrder", TITLE:"get the order of the pins", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "get the order of pinned users" },
+ ZOSC_MSG_GETSPOTORDER : {MESSAGE:"/zoom/getSpotOrder", TITLE:"get the order of the spots", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "get the order of spotlit users" },
 
  ZOSC_MSG_UPDATE : {MESSAGE:"/zoom/update", TITLE:"Update", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Update Targets List" },
 
  ZOSC_MSG_INCLUDE : {MESSAGE:"/zoom/include", TITLE:"Include", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Perform Include" },
 
  ZOSC_MSG_GALTRACK_MODE : {MESSAGE:"/zoom/galTrackMode",TITLE:"Set gallery tracking mode", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1,  DESCRIPTION: "Set Gallery Tracking Mode" },
+
 
  ZOSC_MSG_GALCOUNT : {MESSAGE:"/zoom/galCount",TITLE:"Get gallery count", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Get Gallery Cout" },
  ZOSC_MSG_LOAD : {MESSAGE:"/zoom/load", TITLE:"Load", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Load " },
@@ -546,6 +575,9 @@ var outputFullMessages = {
  2 - the user's index in the gallery (or -1 if not there 
  3 - the user's zoom user ID
  */
+ ZOSC_MSG_SEND_PIN1ORDER : {MESSAGE: "/zoomosc/pin1Order", DESCRIPTION: "sending the current pin screen one order" },
+ ZOSC_MSG_SEND_PIN2ORDER : {MESSAGE: "/zoomosc/pin2Order", DESCRIPTION: "sending the current pin screen two order" },
+ ZOSC_MSG_SEND_SPOT_ORDER : {MESSAGE: "/zoomosc/spotlightOrder", DESCRIPTION: "sending the current spotlight  order" },
  ZOSC_MSG_SEND_GALORDER : {MESSAGE: "/zoomosc/galleryOrder", DESCRIPTION: "sending the current gallery order" },
  ZOSC_MSG_SEND_GALCOUNT : {MESSAGE: "/zoomosc/galleryCount", DESCRIPTION: "sending the current gallery count" },
  ZOSC_MSG_SEND_GALSHAPE : {MESSAGE: "/zoomosc/galleryShape", DESCRIPTION: "sending the current gallery shape" },
@@ -554,6 +586,7 @@ var outputFullMessages = {
  ZOSC_MSG_SEND_CHATCONTROL_HELLO : {MESSAGE: "/zoom/hello", TITLE: "Hello", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0,  DESCRIPTION: "controlled client alerting users that it can be controlled" },
  ZOSC_MSG_SEND_CHATCONTROL_GOODBYE : {MESSAGE: "/zoom/goodbye", TITLE: "Goodbye", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0,  DESCRIPTION: "controlled client alerting users that it can no longer be controlled" },
  ZOSC_MSG_SEND_PART_LIST_BREAKOUTS : {MESSAGE: "listBreakouts", DESCRIPTION: "Sending List of Breakouts" },
+
 //list message arguments are: (first 4 mirror normal emission 
 //0 - current index
 //1 - User name
@@ -580,6 +613,9 @@ var outputLastPartMessages = {
 
  ZOSC_MSG_SEND_PART_LIST_BREAKOUTS : {MESSAGE: "listBreakouts", DESCRIPTION: "Sending List of Breakouts" },
  ZOSC_MSG_SEND_PART_WAITING_ROOM_USER_LIST : {MESSAGE: "waitingRoomUserList", DESCRIPTION: "Sending List of Users in Waiting Room" },
+ ZOSC_MSG_SEND_PART_JOINED_WAITING_ROOM : {MESSAGE: "joinedWaitingRoom", DESCRIPTION: "user has joined waiting room" },
+ ZOSC_MSG_SEND_PART_LEFT_WAITING_ROOM : {MESSAGE: "leftWaitingRoom", DESCRIPTION: "user has left waiting room" },
+
  ZOSC_MSG_SEND_PART_LIST : {MESSAGE: "list", DESCRIPTION: "sending list of user status's" },
  ZOSC_MSG_SEND_PART_CHAT : {MESSAGE: "chat", DESCRIPTION: "emitting a chat message received" },
 
