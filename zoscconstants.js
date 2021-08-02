@@ -359,14 +359,14 @@ BREAKOUT_GROUP : { TITLE:"Breakout Room Actions", ARGS: "string:Breakout room na
  ZOSC_MSG_CLOSE_BREAKOUTS : {MESSAGE:"/zoom/closeBreakouts", TITLE:"Close breakout rooms", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Close breakout rooms" },
  ZOSC_MSG_DISTRIBUTE_BREAKOUTS_OF_SIZE : {MESSAGE:"/zoom/distributeBreakoutsOfSize", TITLE:"Distribute breakout room users", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 2, DESCRIPTION: "Randomly distribute users such that a certain number of users are in each room" },
  ZOSC_MSG_SPREAD_BREAKOUTS : {MESSAGE:"/zoom/spreadToBreakouts", TITLE:"Spread Users Across breakouts", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Round-Robin unassigned users into the smallest available room" },
- ZOSC_MSG_DISTRIBUTE_BREAKOUTS_LIST : {MESSAGE:"/zoom/distributeBreakoutsList", TITLE:"Move specific users to specific rooms as a group", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Assign each user to each room based on indicies in the args" }
+ ZOSC_MSG_DISTRIBUTE_BREAKOUTS_LIST : {MESSAGE:"/zoom/distributeBreakoutsList", TITLE:"Move specific users to specific rooms as a group", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Assign each user to each room based on indicies in the args" },
  ZOSC_MSG_DELETE_ALL_BREAKOUTS : {MESSAGE:"/zoom/deleteAllBreakouts", TITLE:"Delete All Breakouts", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Delete All Breakouts" },
  ZOSC_MSG_PART_SEND_TO_BO : {USER_ACTION:"sendToBreakout", TITLE:"Send to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Forward user to breakout room" },
  ZOSC_MSG_PART_REMOVE_FROM_BO : {USER_ACTION:"removeFromBreakout", TITLE:"Pull from breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Remove user from breakout room" },
  ZOSC_MSG_PART_ASSIGN_TO_BO : {USER_ACTION:"assignToBreakout", TITLE:"Pre-assign user to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Preassign user to breakout" },
  ZOSC_MSG_PART_UNASSIGN_FROM_BO : {USER_ACTION:"unassignFromBreakout", TITLE:"Un-pre-assign user to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "un-Preassign user to breakout" },
 
- ZOSC_MSG_PART_RETURN_TO_MAIN_MEETING : {USER_ACTION:"returnToMainMeeting", TITLE:"Return user to main meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "return user to main meeting" }
+ ZOSC_MSG_PART_RETURN_TO_MAIN_MEETING : {USER_ACTION:"returnToMainMeeting", TITLE:"Return user to main meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "return user to main meeting" },
 
  ZOSC_MSG_ADMIT_ALL : {MESSAGE:"/zoom/admitAll", TITLE:"Admit all users from waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "A macro to admit each user from the waiting room into the meeting" },
  ZOSC_MSG_PART_ADMIT : {USER_ACTION:"admit", TITLE:"Admit user to meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Admit user from waiting room into the meeting" },
@@ -380,13 +380,13 @@ BREAKOUT_BROADCAST_GROUP : { TITLE:"Broadcast to Breakout Rooms", ARGS: "string:
 
 }},
 WAITING_ROOM_GROUP : { TITLE:"Waiting Room Group", ARGS: "int:Waiting Room User Index", DESCRIPTION: "Admit or send users to the waiting room", MESSAGES: {
- ZOSC_MSG_ENABLE_WAITING_ROOM : {MESSAGE:"/zoom/enableWaitingRoom", TITLE:"Enable Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Enable Waiting Room" }
+ ZOSC_MSG_ENABLE_WAITING_ROOM : {MESSAGE:"/zoom/enableWaitingRoom", TITLE:"Enable Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Enable Waiting Room" },
 
- ZOSC_MSG_DISABLE_WAITING_ROOM : {MESSAGE:"/zoom/disableWaitingRoom", TITLE:"Disable Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Disable Waiting Room" }
+ ZOSC_MSG_DISABLE_WAITING_ROOM : {MESSAGE:"/zoom/disableWaitingRoom", TITLE:"Disable Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Disable Waiting Room" },
 
- ZOSC_MSG_ADMIT_ALL : {MESSAGE:"/zoom/admitAll", TITLE:"Admit all users in Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Admit all users in Waiting Room" }
+ ZOSC_MSG_ADMIT_ALL : {MESSAGE:"/zoom/admitAll", TITLE:"Admit all users in Waiting Room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_FullHost, ARG_COUNT: 0, DESCRIPTION: "Admit all users in Waiting Room" },
 
- ZOSC_MSG_PART_ADMIT : {USER_ACTION:"admit", TITLE:"Admit user to meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "admit user to meeting" }
+ ZOSC_MSG_PART_ADMIT : {USER_ACTION:"admit", TITLE:"Admit user to meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "admit user to meeting" },
 
  ZOSC_MSG_PART_SEND_TO_WAITING_ROOM : {USER_ACTION:"sendToWaitingRoom", TITLE:"Send user to waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "send user to waiting room" }
 
