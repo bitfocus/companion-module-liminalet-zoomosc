@@ -17,6 +17,7 @@ var keywords = {
 
  ZOSC_MSG_TARGET_PART_SELECTION  :  "selection",
  ZOSC_MSG_TARGET_PART_LISTINDEX : "listIndex",
+ ZOSC_MSG_TARGET_PART_FAVORITES_INDEX : "favoritesIndex",
 
 };
 
@@ -37,6 +38,17 @@ SELECTION_GROUP : { TITLE:"Selection Actions", ARGS: "", DESCRIPTION: "Select us
 
  ZOSC_MSG_PART_LIST_CLEAR_SELECTION : {INTERNAL_ACTION:"clearSelection", TITLE:"Clear Selection", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users in selection group" },
 }},
+
+FAVORITES_GROUP : { TITLE:"Favorites Actions", ARGS: "", DESCRIPTION: "Mark users as favorites for stable targeting", MESSAGES: {
+
+ ZOSC_MSG_PART_ADD_FAVORITE : {INTERNAL_ACTION:"addFavorite", TITLE:"Add to Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Mark user as Favorite and create favorite ID" },
+
+ ZOSC_MSG_PART_REMOVE_FAVORITE : {INTERNAL_ACTION:"removeFavorite", TITLE:"Remove from Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Remove user(s from favorites" },
+
+ ZOSC_MSG_PART_TOGGLE_FAVORITE : {INTERNAL_ACTION:"toggleFavorite", TITLE:"Toggle Favorite", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Adds user if not present, removes user if already present" },
+
+ ZOSC_MSG_PART_CLEAR_FAVORITES : {INTERNAL_ACTION:"clearFavorites", TITLE:"Clear Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users from favorites" },
+}}
 };
 
 var outputLastPartMessages = {};

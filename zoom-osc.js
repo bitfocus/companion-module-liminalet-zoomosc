@@ -31,7 +31,7 @@ function instance(system, id, config) {
 	self.zoomosc_client_data.last_list					 = 0;
 	self.zoomosc_client_data.subscribeMode			 = 0;
 	self.zoomosc_client_data.galleryShape				 = [0,0];
-	self.zoomosc_client_data.oldgalleryShape		 = [0,0];
+	//self.zoomosc_client_data.oldgalleryShape		 = [0,0];
 	self.zoomosc_client_data.activeSpeaker			 = "None";
 	self.zoomosc_client_data.zoomOSCVersion			 = "Not Connected";
 	self.zoomosc_client_data.subscribeMode			 =	0;
@@ -45,6 +45,11 @@ function instance(system, id, config) {
 	self.variable_data_delta = {};
 	self.variable_definitions = [];
 
+	self.spotlit_users = [];
+	self.pin1_users = [];
+	self.pin2_users = [];
+	self.selected_users = [];
+	self.favorite_users = [];
 
 	self.disabled=false;
 	self.pingLoop={ };
@@ -129,6 +134,7 @@ instance.prototype.userSourceList= {
 	galleryIndex:    {varName:'galleryIndex',				varString:'galInd',						varLabel:'Gallery Index'},
 	galleryPosition: {varName:'galleryPosition',		 varString:'galPos',						varLabel:'Gallery Position'},
 	listIndex:       {varName:'listIndex',		 varString:'listIndex',						varLabel:'List Index'},
+	favoriteIndex:   {varName:'favoritesIndex',	 varString:'favoritesIndex',		    varLabel:'Favorites Index'},
 	me:              {varName:'me',              varString:'me',                     varLabel:'Me'}};
 
 //variable name in user data, string to tag companion variable
@@ -136,8 +142,8 @@ instance.prototype.variablesToPublishList={
 	index: {varName: 'index',						varString:'index',					 varLabel:"Target ID"},
 	userName: {varName: 'userName',						varString:'userName',					 varLabel:"User Name"},
 	galleryIndex: {varName: 'galleryIndex',				varString:'galIndex',					 varLabel:'Gallery Index'},
-	/*roleText: {varName: 'roleText',						varString:'role',							 varLabel:'Role'},
-	onlineStatusText: {varName: 'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
+	roleText: {varName: 'roleText',						varString:'role',							 varLabel:'Role'},
+	/*onlineStatusText: {varName: 'onlineStatusText',		varString:'onlineStatus',			 varLabel:'Online Status'},
 	videoStatusText: {varName: 'videoStatusText',		  varString:'videoStatus',			 varLabel:'Video Status'},
 	audioStatusText: {varName: 'audioStatusText',		  varString:'audioStatus',			 varLabel:'Audio Status'},
 	spotlightStatusText: {varName: 'spotlightStatusText', varString:'spotlightStatus',	 varLabel:'Spotlight Status'},
@@ -152,27 +158,6 @@ instance.prototype.variablesToPublishList={
 	micDevices: {varName: 'micDevices',         varString:'micDevices',        varLabel:"Microphone Device", isList:true},
 	speakerDevices: {varName: 'speakerDevices',     varString:'speakerDevices',    varLabel:"Speaker Device",    isList:true}
 	// backgrounds: {varName: 'backgrounds',        varString:'backgrounds',       varLabel:"Background",        isList:true}
-};
-
-//Client variable definitions
-instance.prototype.clientdatalabels = {
-	zoomOSCVersion:'ZoomOSC Version',
-	subscribeMode:'Subscribe Mode',
-	galTrackMode:'Gallery Tracking Mode',
-	callStatus :'Call Status',
-	numberOfTargets:'Number of Targets',
-	numberOfUsersInCall: 'Number of Users in Call',
-	activeSpeaker:'Active Speaker',
-	listIndexOffset:'Current List Index Offset',
-	numberOfSelectedUsers:'Number of users in Selection group',
-	numberOfVideoOn:'Number of participants with video on',
-	numberOfUnmuted:'Number of participants unmuted',
-	numberOfRaisedHands:'Number of participants with raised hands',
-	numberOfSpotlitUsers:'Number of spotlit participants',
-	numberOfPinnedUsers:'Number of pinned participants',
-	numberOfCohosts:'Number of Co-hosts and Hosts',
-	numberOfAttendees:'Number of attendees',
-	numberOfPanelists:'Number of panelists',
 };
 
 instance.prototype.update_user_variables_subset = function (attribute, source, export_variables = false) {
@@ -223,6 +208,8 @@ instance.prototype.setVariablesForUser = function(sourceUser, userSourceList, va
 			var thisSource=userSourceList[source];
 			if (thisSource.varName == 'listIndex') {
 				sourceUser.listIndex = (listIndex = Object.values(self.user_data).indexOf(sourceUser)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1;
+			} else if (thisSource.varName == 'favoritesIndex') {
+				sourceUser.favoritesIndex = (favoritesIndex = self.favorite_users.indexOf(sourceUser.zoomID)) >= 0 ? favoritesIndex : undefined;
 			}
 
 			if (Array.isArray(sourceUser[thisSource.varName])) self.debug('found array var');
@@ -409,6 +396,28 @@ instance.prototype.assign_user_gallery_position = function(zoomID, gallery_index
 	if (export_vars) self.export_variables();
 };
 
+//Client variable definitions
+instance.prototype.clientdatalabels = {
+	zoomOSCVersion:'ZoomOSC Version',
+	subscribeMode:'Subscribe Mode',
+	galTrackMode:'Gallery Tracking Mode',
+	callStatus :'Call Status',
+	numberOfTargets:'Number of Targets',
+	numberOfUsersInCall: 'Number of Users in Call',
+	activeSpeaker:'Active Speaker',
+	listIndexOffset:'Current List Index Offset',
+	numberOfSelectedUsers:'Number of users in Selection group',
+	numberOfFavoriteUsers:'Number of users in Favorites group',
+	numberOfVideoOn:'Number of participants with video on',
+	numberOfUnmuted:'Number of participants unmuted',
+	numberOfRaisedHands:'Number of participants with raised hands',
+	numberOfSpotlitUsers:'Number of spotlit participants',
+	numberOfPin1Users:'Number of pinned participants',
+	numberOfCohosts:'Number of Co-hosts and Hosts',
+	numberOfAttendees:'Number of attendees',
+	numberOfPanelists:'Number of panelists',
+};
+
 instance.prototype.update_client_variables = function(client_variable_labels = undefined, export_vars = false) {
 	var self = this;
 	var clientVarVal=0;
@@ -470,7 +479,16 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 						}
 					break;
 				case 'numberOfSelectedUsers':
-					clientVarVal = Object.values(self.user_data).filter(user => user.selected).length;
+					clientVarVal = self.selected_users.length;
+					break;
+				case 'numberOfFavoriteUsers':
+					clientVarVal = self.favorite_users.length;
+					break;
+				case 'numberOfSpotlitUsers':
+					clientVarVal = self.spotlit_users.length;
+					break;
+				case 'numberOfPin1Users':
+					clientVarVal = self.pin1_users.length;
 					break;
 				case 'numberOfVideoOn':
 					clientVarVal = Object.values(self.user_data).filter(user => user.videoStatus).length;
@@ -480,12 +498,6 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 					break;
 				case 'numberOfRaisedHands':
 					clientVarVal = Object.values(self.user_data).filter(user => user.handStatus).length;
-					break;
-				case 'numberOfSpotlitUsers':
-					clientVarVal = Object.values(self.user_data).filter(user => user.spotlightStatus).length;
-					break;
-				case 'numberOfPinnedUsers':
-					clientVarVal = Object.values(self.user_data).filter(user => user.pinStatus).length;
 					break;
 				case 'numberOfCohosts':
 					clientVarVal = Object.values(self.user_data).filter(user => user.role == 1 || user.role == 2).length;
@@ -509,7 +521,7 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 //Initialize variables
 instance.prototype.init_variables = function(export_vars = false, clear = false) {
 	var self = this;
-	self.debug("Running init_variables" + clear ? " with clear parameter" : "");
+	self.debug(clear ? "Running init_variables with clear parameter" : "Running init_variables");
 	//print list of users
 	// console.log("USERS: "+JSON.stringify(self.user_data));
 	// self.log('debug',"USERS: "+JSON.stringify(self.user_data))
@@ -646,6 +658,10 @@ var allInstanceActions=[];
 						 [ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION]:{
 							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION,
 							 label:'--Selection--'
+						 },
+						 [ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_INDEX]:{
+							id:ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_INDEX,
+							 label:'--Favorites Index--'
 						 },
 						["listIndex"]:{
 							id:"listIndex",
@@ -839,7 +855,6 @@ instance.prototype.action = function(action) {
 	//set target type
 	var TARGET_TYPE=null;
 	var userString=null;
-	var selectionZoomIDs = [];
 	// console.log("SWITCH: ",action.options);
 	switch(action.options.user){
 
@@ -859,24 +874,27 @@ instance.prototype.action = function(action) {
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
 			//add selected user to selection list
-				for (let user in self.user_data){
-					// user (zoomID) is NaN when user is offline. No user actions can target offline users.
-					if(self.user_data[user].selected && !isNaN(user)){
-						selectionZoomIDs.push(user);
-					}
-				}
-				if (selectionZoomIDs.length > 1) {  // multiple users selected
+				if (self.selected_users.length > 1) {  // multiple users selected
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
-					userString = selectionZoomIDs;
-				} else if (selectionZoomIDs.length == 1) {  // single user
+					userString = self.selected_users;
+				} else if (self.selected_users.length == 1) {  // single user
 					TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
-					userString = parseInt(selectionZoomIDs[0]);
+					userString = parseInt(self.selected_users[0]);
 				} else {
 					// no user is selected, so action should not be executed.
 					self.log('debug', "User action targeted selection group, but no online users are selected. No OSC message was sent.");
 					return;
 				}
-				//self.log('debug', "user selection ("+selectionZoomIDs.length + "): " + userString);
+				//self.log('debug', "user selection ("+self.selected_users.length + "): " + userString);
+				break;
+
+		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_INDEX:
+				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
+				//switch to this so we spoof a zoomID message
+				let this_index = parseInt(action.options.userString);
+				if (self.favorite_users.length > this_index) {
+					userString= parseInt(self.favorite_users[this_index]);
+				} else userString = -1;
 				break;
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
@@ -897,7 +915,7 @@ instance.prototype.action = function(action) {
 		case "listIndex":
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID;
 				//switch to this so we spoof a zoomID message
-				var index = parseInt(action.options.userString);
+				let index = parseInt(action.options.userString);
 				index += self.zoomosc_client_data.listIndexOffset;
 
 				var users = Object.keys(self.user_data);
@@ -970,9 +988,9 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	}
 	else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_PART_ME){
 
-	} else if(TARGET_TYPE==ZOSC.keywords.ZOSC_MSG_GROUP_PART_USERS+'/'+ZOSC.keywords.ZOSC_MSG_TARGET_PART_ZOOMID) {
-		selectionZoomIDs.forEach(id => args.push({type:'i',value:parseInt(id)}));
-		//self.log('debug', "selectionZoomIDs: " + selectionZoomIDs + ", args: " + JSON.stringify(args))
+	} else if(Array.isArray(userString)) { //covers selection and favorites
+		userString.forEach(id => args.push({type:'i',value:parseInt(id)}));
+		self.debug("userString array: " + userString + ", args: " + JSON.stringify(args));
 	}
 	else{
 		args.push({type:'s',value:userString});
@@ -1012,9 +1030,16 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	}
 	//TODO: finding a user needs to be a function as this code is repeated 3 times
 	else if('INTERNAL_ACTION' in thisMsg){  // Selection Actions
-		selectedUser=null;
-		if(thisMsg.INTERNAL_ACTION!="clearSelection") {
+		let selectedUser=null;
+		if(!thisMsg.INTERNAL_ACTION.includes("clear")) {
 				switch (TARGET_TYPE){
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_INDEX:
+						//switch to this so we spoof a zoomID message
+						let this_index = parseInt(userString);
+						if (self.favorite_users.length > this_index) {
+							selectedUser= parseInt(self.favorite_users[this_index]);
+						}
+						break;
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 					//look for user with target position in userstring
 					for (let user in self.user_data){
@@ -1082,33 +1107,31 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				}
 	}
 }
+	if (action.action == 'SELECTION_GROUP') {
 		if (thisMsg.INTERNAL_ACTION == "clearSelection") {
-			for (let user in self.user_data){
-				self.user_data[user].selected = false;
-			}
+			self.selected_users = [];	
 			//self.log('debug',"Clear selection");
 		}
 		if (isNaN(selectedUser)) {
 			self.log("debug", "Unable to select " + TARGET_TYPE + " " + userString + ": offline users cannot be selected.");
 		} else if (self.user_data[selectedUser] != undefined) {
+			selectedUser = parseInt(selectedUser);
 			switch(thisMsg.INTERNAL_ACTION){
 				case "addSelection":
-					self.user_data[selectedUser].selected = true;
+					if (self.selected_users.indexOf(selectedUser) === -1) self.selected_users.push(selectedUser);
 					//self.log('debug', "Add selection to " + self.user_data[selectedUser].userName);
 					break;
 				case "removeSelection":
-					self.user_data[selectedUser].selected = false;
+					if ((this_index = self.selected_users.indexOf(selectedUser)) !== -1) self.selected_users.splice(this_index, 1);
 					//self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName);
 					break;
 				case "toggleSelection":
-					self.user_data[selectedUser].selected = !(self.user_data[selectedUser].selected);
+					if ((this_index = self.selected_users.indexOf(selectedUser)) !== -1) self.selected_users.splice(this_index, 1);
+					else self.selected_users.push(selectedUser);
 					//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName);
 					break;
 				case "singleSelection":
-					for (let user in self.user_data){
-						self.user_data[user].selected = false;
-					}
-					self.user_data[selectedUser].selected = true;
+					self.selected_users = [selectedUser];
 					//self.log('debug',"Single selection " + self.user_data[selectedUser].userName);
 					break;
 				default:
@@ -1117,30 +1140,67 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		}
 		self.update_client_variables({numberOfSelectedUsers: self.clientdatalabels.numberOfSelectedUsers}, true);
 		this.checkFeedbacks();
+		return;
+	} else if (action.action == 'FAVORITES_GROUP') {
+		if (thisMsg.INTERNAL_ACTION == "clearFavorites") {
+			self.favorite_users = [];	
+			//self.log('debug',"Clear selection");
+		}
+		if (isNaN(selectedUser)) {
+			self.log("debug", "Unable to favorite " + TARGET_TYPE + " " + userString + ": offline users cannot be used with favorites.");
+		} else if (self.user_data[selectedUser] != undefined) {
+			selectedUser = parseInt(selectedUser);
+			switch(thisMsg.INTERNAL_ACTION){
+				case "addFavorite":
+					if (self.favorite_users.indexOf(selectedUser) === -1) self.favorite_users.push(selectedUser);
+					//self.log('debug', "Add favorite to " + self.user_data[selectedUser].userName);
+					break;
+				case "removeFavorite":
+					if ((this_index = self.favorite_users.indexOf(selectedUser)) !== -1) self.favorite_users.splice(this_index, 1);
+					//self.log('debug',"Remove favorite from " + self.user_data[selectedUser].userName);
+					break;
+				case "toggleFavorite":
+					if ((this_index = self.favorite_users.indexOf(selectedUser)) !== -1) self.favorite_users.splice(this_index, 1);
+					else self.favorite_users.push(selectedUser);
+					//self.log('debug',"Toggle favorite " + self.user_data[selectedUser].userName);
+					break;
+				default:
+					break;
+			}
+		}
+		self.update_client_variables({numberOfFavoriteUsers: self.clientdatalabels.numberOfFavoriteUsers}, false);
+		self.update_user_variables_subset(self.variablesToPublishList, {favoriteIndex: self.userSourceList.favoriteIndex}, true);
+		this.checkFeedbacks();
+		return;
 	}
+}
 
 };
 ////END ACTIONS
 
+instance.prototype.userStatusProperties= [
+
+	{id:'role',			   label:'User Role'},
+	{id:'onlineStatus',	   label:'Online Status'},
+	{id:'videoStatus',	   label:'Video Status'},
+	{id:'audioStatus',	   label:'Audio Status'},
+	{id:'spotlightStatus', label:'Spotlight Status'},
+	{id:'activeSpeaker',   label:'Active Speaker Status'},
+	{id:'handStatus',	   label:'Hand Raised Status'},
+	{id:'selected',		   label:'Selected'},
+	{id:'favorite',        label:'Favorite'},
+	{id:'cameraDevice',    label:'Current Camera Device'},
+	{id:'micDevice',       label:'Current Mic Device'},
+	{id:'speakerDevice',   label:'Current Speaker Device'}
+
+];
+
 //Feedback defnitions
 instance.prototype.init_feedbacks = function(){
 	var self = this;
-	var userStatusProperties= [
-
-			{id:'role',					label:'User Role'},
-			{id:'onlineStatus',	label:'Online Status'},
-			{id:'videoStatus',	 label:'Video Status'},
-			{id:'audioStatus',	 label:'Audio Status'},
-			{id:'spotlightStatus', label:'Spotlight Status'},
-			{id:'activeSpeaker', label:'Active Speaker Status'},
-			{id:'handStatus',		label:'Hand Raised Status'},
-			{id:'selected',		label:'Selected'},
-			{id:'cameraDevice',label:'Current Camera Device'},
-			{id:'micDevice',label:'Current Mic Device'},
-			{id:'speakerDevice',label:'Current Speaker Device'}
-
-	];
-
+	let feedback_user_list = self.userList;
+	//targeting feedbacks on the selection group is not supported
+	delete feedback_user_list[ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION];
 	var feedbacks={};
 		feedbacks.user_status_fb={
 			type: 'boolean',
@@ -1154,8 +1214,8 @@ instance.prototype.init_feedbacks = function(){
 					type:'dropdown',
 					label:'User',
 					id:'user',
-					choices:this.userList,
-					default:this.userList.me.id,
+					choices:self.userList,
+					default:self.userList.me.id,
 					minChoicesForSearch: 0
 				},
 				{
@@ -1168,8 +1228,8 @@ instance.prototype.init_feedbacks = function(){
 					type:'dropdown',
 					label:'Property',
 					id:'prop',
-					choices:userStatusProperties,
-					default:userStatusProperties[1].id,
+					choices:self.userStatusProperties,
+					default:self.userStatusProperties[1].id,
 					minChoicesForSearch: 0
 				},
 				{
@@ -1190,7 +1250,17 @@ instance.prototype.init_feedbacks = function(){
 				var sourceUser;
 				switch(opts.user){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION:
+						self.debug("Feedbacks targeting the selection group are not supported.");
 						return; // not supported
+
+					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_INDEX:
+						//switch to this so we spoof a zoomID message
+						let this_index = parseInt(opts.userString);
+						if (self.favorite_users.length > this_index) {
+							sourceUser= parseInt(self.favorite_users[this_index]);
+						}
+						break;
+
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_TARGET:
 
 					//look for user with target position in userstring
@@ -1382,12 +1452,16 @@ if(!self.disabled){
 				//participantCount: msgArgs[4].value,
 				//listCount:				msgArgs[5].value,
 				role:						  msgArgs[6].value,
+				get roleText() { return ['None','For Users','Always','Full'][this.role]; },
 				onlineStatus:		  Boolean(msgArgs[7].value),
 				videoStatus:			Boolean(msgArgs[8].value),
 				audioStatus:			Boolean(msgArgs[9].value),
-				spotlightStatus:  false,
+				get spotlightStatus() { return self.spotlit_users.includes(this.zoomID); },
+				get pin1Status() { return self.pin1_users.includes(this.zoomID); },
+				get pin2Status() { return self.pin2_users.includes(this.zoomID); },
+				get selected() { return self.selected_users.includes(this.zoomID); },
+				get favorite() { return self.favorite_users.includes(this.zoomID); },
 				activeSpeaker:		false,
-				selected: false,
 				handStatus:			  false,
 				cameraDevices:		[],
 				micDevices:       [],
@@ -1452,6 +1526,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			// console.log("user/me MESSAGE RECEIVED");
 			// Info: sending OSC message /zoomosc/me/videoOff -1 "squirrel" 1 16780288
 			var usrMsgUser=message.args[3].value;
+			var usrMsgUsername = message.args[1].value;
 			//type of user message
 			switch(usrMsgTypePart){
 				//List Received
@@ -1511,19 +1586,25 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				case ZOSC.actions.PIN_GROUP.MESSAGES.ZOSC_MSG_PART_PIN.USER_ACTION:
 					console.log('pin: '+self.user_data[usrMsgUser]);
 					self.user_data[usrMsgUser].pinStatus=true;
-					self.update_client_variables({numberOfPinnedUsers: self.clientdatalabels.numberOfPinnedUsers}, true);
+					self.update_client_variables({numberOfPin1Users: self.clientdatalabels.numberOfPin1Users}, true);
 					break;
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_ON.MESSAGE:
-					console.log('Spotlight on');
-					self.user_data[usrMsgUser].spotlightStatus=true;
-					//self.user_data[usrMsgUser].spotlightStatusText='On';
-					self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
+					if (self.spotlit_users.indexOf(usrMsgUser) === -1) {
+						self.debug('Spotlight on for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
+						//self.user_data[usrMsgUser].spotlightStatus=true;
+						//self.user_data[usrMsgUser].spotlightStatusText='On';
+						self.spotlit_users.push(usrMsgUser);
+						self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
+					} else self.debug('Spotlight **already** on for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
 					break;
 				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_OFF.MESSAGE:
-					console.log('Spotlight off');
-					self.user_data[usrMsgUser].spotlightStatus=false;
-					//self.user_data[usrMsgUser].spotlightStatusText='Off';
-					self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
+					if ((this_index = self.spotlit_users.indexOf(usrMsgUser)) !== -1) {
+						self.debug('Spotlight off for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
+						//self.user_data[usrMsgUser].spotlightStatus=false;
+						//self.user_data[usrMsgUser].spotlightStatusText='Off';
+						self.spotlit_users.splice(this_index, 1);
+						self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
+					} else self.debug('Spotlight **already** off for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
 					break;
 				//AV: VIDEO
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_VIDON.USER_ACTION:
@@ -1656,7 +1737,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 		case 'pong':
 			parsePongRecvMsg(message.args);
 			self.update_client_variables();
-			self.debug("PONG RECEIVED");
+			//self.debug("Pong received");
 			break;
 		case 'gallerySize' :
 		case 'galleryShape':
@@ -1800,9 +1881,14 @@ instance.prototype.init_ping = function() {
 			self.zoomosc_client_data.callStatus					=	0;
 			self.zoomosc_client_data.numberOfTargets		 =	0;
 			self.zoomosc_client_data.numberOfUsersInCall =	0;
-			self.zoomosc_client_data.numberOfSelectedUsers = 0;
+			self.spotlit_users = [];
+			self.pin1_users = [];
+			self.pin2_users = [];
+			self.selected_users = [];
+			self.favorite_users = [];
 			self.status(self.STATUS_ERROR, "Not Connected");
 			self.clear_user_data();
+			self.debug("Lost connection with ZoomOSC");
 		}
 
 		//Set status to OK if ping is responded within limit
@@ -1814,6 +1900,7 @@ instance.prototype.init_ping = function() {
 				self.init_send_subscribe();
 			}
 			self.status(self.STATUS_OK);
+			self.debug("Successfully connected with ZoomOSC");
 		}
 
 		if (self.zoomosc_client_data.last_list != -1 && timesincelist > LIST_TIMEOUT) {
@@ -1897,8 +1984,8 @@ instance.prototype.init_presets = function () {
 		"Select Favorites": {
 			preset_label: "Select Favorites",
 			button_label: "\\nFavorite",
-			action: 'FAVORITE_GROUP',
-			message: 'ZOSC_MSG_PART_LIST_TOGGLE_FAVORITE',
+			action: 'FAVORITES_GROUP',
+			message: 'ZOSC_MSG_PART_TOGGLE_FAVORITE',
 			prop:'favorite',
 			enabled_icon: ZOSC_ICONS.FAVORITE_ENABLED,
 			disabled_icon: ZOSC_ICONS.FAVORITE_DISABLED
