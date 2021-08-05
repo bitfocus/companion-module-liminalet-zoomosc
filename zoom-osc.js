@@ -1143,12 +1143,18 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		return;
 	} else if (action.action == 'FAVORITES_GROUP') {
 		if (thisMsg.INTERNAL_ACTION == "clearFavorites") {
-			self.favorite_users = [];	
+			self.favorite_users = [];
 			//self.log('debug',"Clear selection");
 		}
 		if (isNaN(selectedUser)) {
 			self.log("debug", "Unable to favorite " + TARGET_TYPE + " " + userString + ": offline users cannot be used with favorites.");
 		} else if (self.user_data[selectedUser] != undefined) {
+			if (self.favorite_users.length > 1 && (thisMsg.INTERNAL_ACTION == "removeFavorite" || thisMsg.INTERNAL_ACTION == "toggleFavorite" )) {
+				self.setVariablesForUser(
+					self.user_data[self.favorite_users[self.favorite_users.length -1]],
+					{favoriteIndex: self.userSourceList.favoriteIndex}, 
+					self.variablesToPublishList, false, true);
+			}
 			selectedUser = parseInt(selectedUser);
 			switch(thisMsg.INTERNAL_ACTION){
 				case "addFavorite":
@@ -1888,7 +1894,7 @@ instance.prototype.init_ping = function() {
 			self.favorite_users = [];
 			self.status(self.STATUS_ERROR, "Not Connected");
 			self.clear_user_data();
-			self.debug("Lost connection with ZoomOSC");
+			self.debug("No connection with ZoomOSC");
 		}
 
 		//Set status to OK if ping is responded within limit
@@ -1898,9 +1904,10 @@ instance.prototype.init_ping = function() {
 			if (self.currentStatus == self.STATUS_ERROR) {
 				//self.system.emit('osc_send', self.config.host, self.config.port, '/zoom/list');
 				self.init_send_subscribe();
+				self.debug("Successfully connected with ZoomOSC");
 			}
 			self.status(self.STATUS_OK);
-			self.debug("Successfully connected with ZoomOSC");
+			
 		}
 
 		if (self.zoomosc_client_data.last_list != -1 && timesincelist > LIST_TIMEOUT) {
