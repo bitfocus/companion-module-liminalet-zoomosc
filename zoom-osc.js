@@ -1143,18 +1143,22 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		return;
 	} else if (action.action == 'FAVORITES_GROUP') {
 		if (thisMsg.INTERNAL_ACTION == "clearFavorites") {
+			self.favorite_users.forEach((_,index,__) => {
+				self.favorite_users[index] = 'clear_'+index;
+				self.setVariablesForUser(
+					{	galleryIndex: undefined,
+						galleryPosition: undefined,
+						userName: undefined,
+						zoomID: self.favorite_users[index]},
+					{favoriteIndex: self.userSourceList.favoriteIndex}, 
+					self.variablesToPublishList, false, true);
+			});
 			self.favorite_users = [];
-			//self.log('debug',"Clear selection");
+			//self.log('debug',"Clear favorites");
 		}
 		if (isNaN(selectedUser)) {
 			self.log("debug", "Unable to favorite " + TARGET_TYPE + " " + userString + ": offline users cannot be used with favorites.");
 		} else if (self.user_data[selectedUser] != undefined) {
-			if (self.favorite_users.length > 1 && (thisMsg.INTERNAL_ACTION == "removeFavorite" || thisMsg.INTERNAL_ACTION == "toggleFavorite" )) {
-				self.setVariablesForUser(
-					self.user_data[self.favorite_users[self.favorite_users.length -1]],
-					{favoriteIndex: self.userSourceList.favoriteIndex}, 
-					self.variablesToPublishList, false, true);
-			}
 			selectedUser = parseInt(selectedUser);
 			switch(thisMsg.INTERNAL_ACTION){
 				case "addFavorite":
@@ -1172,6 +1176,17 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					break;
 				default:
 					break;
+			}
+			if (self.favorite_users.indexOf(selectedUser) == -1 && (thisMsg.INTERNAL_ACTION == "removeFavorite" || thisMsg.INTERNAL_ACTION == "toggleFavorite")) {
+				let this_index = self.favorite_users.push('clear') - 1;
+				self.setVariablesForUser(
+					{	galleryIndex: undefined,
+						galleryPosition: undefined,
+						userName: undefined,
+						zoomID: 'clear'},
+					{favoriteIndex: self.userSourceList.favoriteIndex}, 
+					self.variablesToPublishList, false, true);
+				self.favorite_users.splice(this_index, 1);
 			}
 		}
 		self.update_client_variables({numberOfFavoriteUsers: self.clientdatalabels.numberOfFavoriteUsers}, false);
