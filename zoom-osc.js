@@ -416,6 +416,8 @@ instance.prototype.clientdatalabels = {
 	numberOfCohosts:'Number of Co-hosts and Hosts',
 	numberOfAttendees:'Number of attendees',
 	numberOfPanelists:'Number of panelists',
+	selectedUsersList:'A list of all usernames currently selected',
+	favoriteUsersList:'A list of all usernames currently favorited',
 };
 
 instance.prototype.update_client_variables = function(client_variable_labels = undefined, export_vars = false) {
@@ -483,6 +485,12 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 					break;
 				case 'numberOfFavoriteUsers':
 					clientVarVal = self.favorite_users.length;
+					break;
+				case 'selectedUsersList':
+					clientVarVal = self.selected_users.map(zoomID => this.user_data[zoomID] != undefined ? this.user_data[zoomID].userName : '').join(', ');
+					break;
+				case 'favoriteUsersList':
+					clientVarVal = self.favorite_users.map(zoomID => this.user_data[zoomID].userName).join(', ');
 					break;
 				case 'numberOfSpotlitUsers':
 					clientVarVal = self.spotlit_users.length;
@@ -1192,7 +1200,9 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					break;
 			}
 		}
-		self.update_client_variables({numberOfSelectedUsers: self.clientdatalabels.numberOfSelectedUsers}, true);
+		self.update_client_variables({
+			numberOfSelectedUsers: self.clientdatalabels.numberOfSelectedUsers,
+			selectedUsersList: self.clientdatalabels.selectedUsersList}, true);
 		this.checkFeedbacks();
 		return;
 	} else if (action.action == 'FAVORITES_GROUP') {
@@ -1247,8 +1257,10 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 				self.favorite_users.splice(this_index, 1);
 			}
 		}
-		self.update_client_variables({numberOfFavoriteUsers: self.clientdatalabels.numberOfFavoriteUsers}, false);
-		self.update_user_variables_subset(self.variablesToPublishList, {favoriteIndex: self.userSourceList.favoriteIndex}, true);
+		self.update_user_variables_subset(self.variablesToPublishList, {favoriteIndex: self.userSourceList.favoriteIndex}, false);
+		self.update_client_variables({
+			numberOfFavoriteUsers: self.clientdatalabels.numberOfFavoriteUsers,
+			favoriteUsersList: self.clientdatalabels.favoriteUsersList}, true);
 		this.checkFeedbacks();
 		return;
 	}
