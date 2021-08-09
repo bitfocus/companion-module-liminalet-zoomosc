@@ -1108,9 +1108,63 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	}
 }
 	if (action.action == 'SELECTION_GROUP') {
-		if (thisMsg.INTERNAL_ACTION == "clearSelection") {
-			self.selected_users = [];	
-			//self.log('debug',"Clear selection");
+		if (!["addSelection", "removeSelection", "toggleSelection", "singleSelection"].includes(thisMsg.INTERNAL_ACTION)) {
+			switch(thisMsg.INTERNAL_ACTION){
+				case "clearSelection":
+					self.selected_users = [];	
+					//self.log('debug',"Clear selection");
+					break;
+				case 'addUnmutedToSelection':
+					self.selected_users.push(
+						...Object.values(self.user_data)
+						.filter(user => user.audioStatus && self.selected_users.indexOf(user.zoomID) === -1)
+						.map(user => user.zoomID));
+					break;
+				case 'addVideoOnToSelection':
+					self.selected_users.push(
+						...Object.values(self.user_data)
+						.filter(user => user.videoStatus && self.selected_users.indexOf(user.zoomID) === -1)
+						.map(user => user.zoomID));
+					break;
+				case 'addSpotlitToSelection':
+					self.selected_users.push(
+						...self.spotlit_users
+						.filter(zoomID => self.selected_users.indexOf(zoomID) === -1));
+					break;
+				case 'addPin1ToSelection':
+					self.selected_users.push(
+						...self.pin1_users
+						.filter(zoomID => self.selected_users.indexOf(zoomID) === -1));
+					break;
+				case 'addRaisedHandToSelection':
+					self.selected_users.push(
+						...Object.values(self.user_data)
+						.filter(user => user.handStatus && self.selected_users.indexOf(user.zoomID) === -1)
+						.map(user => user.zoomID));
+					break;
+				case 'addHostsToSelection':
+					self.selected_users.push(
+						...Object.values(self.user_data)
+						.filter(user => (user.role == 1 || user.role == 2) && self.selected_users.indexOf(user.zoomID) === -1)
+						.map(user => user.zoomID));
+					break;
+				case 'addFavoritesSelection':
+					self.selected_users.push(
+						...self.favorite_users
+						.filter(zoomID => self.selected_users.indexOf(zoomID) === -1));
+					break;
+				case 'addAttendeesToSelection':
+					self.selected_users.push(
+						...Object.values(self.user_data)
+						.filter(user => user.role == 5 && self.selected_users.indexOf(user.zoomID) === -1)
+						.map(user => user.zoomID));
+					break;
+				case 'addParticipantsToSelection':
+					clientVarVal = Object.values(self.user_data).filter(user => user.role == 3).length;
+					break;
+				default:
+					break;
+			}
 		}
 		if (isNaN(selectedUser)) {
 			self.log("debug", "Unable to select " + TARGET_TYPE + " " + userString + ": offline users cannot be selected.");
@@ -1155,6 +1209,10 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			});
 			self.favorite_users = [];
 			//self.log('debug',"Clear favorites");
+		} else if (thisMsg.INTERNAL_ACTION == "addSelectionToFavorites") {
+			self.favorite_users.push(
+				...self.selected_users
+				.filter(zoomID => self.favorite_users.indexOf(zoomID) === -1));
 		}
 		if (isNaN(selectedUser)) {
 			self.log("debug", "Unable to favorite " + TARGET_TYPE + " " + userString + ": offline users cannot be used with favorites.");
