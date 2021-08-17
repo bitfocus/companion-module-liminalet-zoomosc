@@ -707,7 +707,7 @@ var allInstanceActions=[];
 		}
 		var newGroup={};
 		//app action group has different interface
-		if(userActionGroup=='APP_ACTION_GROUP'){
+		if(userActionGroup=='APP_ACTION_GROUP' || userActionGroup=='CUSTOM_OSC_GROUP'){
 			newGroup={
 				id:		 thisGroup.TITLE,
 				label:	thisGroup.TITLE,
@@ -797,6 +797,15 @@ var allInstanceActions=[];
 					max:1000,
 					default:1
 				});
+					break;
+
+				case 'args':
+					newGroup.options.push({
+						type: 'textinput',
+						label: args[arg].name,
+						id: args[arg].name,
+						default: "/zoom/ping"
+					});
 					break;
 
 				default:
@@ -985,6 +994,53 @@ instance.prototype.action = function(action) {
 	}
 }
 
+function pushCustomOSCArgs() {
+	let arguments = action.options.args.replace(/“/g, '"').replace(/”/g, '"').split(' ');
+	let arg;
+
+	if (arguments.length) {
+		if (args == undefined) args = [];
+	}
+
+	for (let i = 0; i < arguments.length; i++) {
+		if (arguments[i].length == 0)
+			continue;   
+		if (isNaN(arguments[i])) {
+			let str_arg = arguments[i];
+			if (str_arg.startsWith("\"")) {  //a quoted string..
+				while (!arguments[i].endsWith("\"")) {
+					i++;
+					str_arg += " "+arguments[i];
+				}
+			}
+			arg = {
+				type: 's',
+				value: str_arg.replace(/"/g, '').replace(/'/g, '')
+			};
+			args.push(arg);
+		}
+		else if (arguments[i].indexOf('.') > -1) {
+			arg = {
+				type: 'f',
+				value: parseFloat(arguments[i])
+			};
+			args.push(arg);
+		}
+		else {
+			arg = {
+				type: 'i',
+				value: parseInt(arguments[i])
+			};
+			args.push(arg);
+		}
+	}
+}
+
+if (action.action == 'CUSTOM_OSC_GROUP') {
+	path = action.options.Path;
+	pushCustomOSCArgs();
+}
+
 //handle user actions
 if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	var targetType = TARGET_TYPE;
@@ -1004,6 +1060,11 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		args.push({type:'s',value:userString});
 	}
 
+	if (action.action == 'CUSTOM_OSC_WITH_USER_GROUP') {
+		path = path + action.options.Path;
+		pushCustomOSCArgs();
+	}
+
 
 	pushOscArgs();
 
@@ -1017,7 +1078,8 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	}
 //General action messages just use the first part of the path
 	else if('MESSAGE' in thisMsg||'GENERAL_ACTION' in thisMsg){
-		if('MESSAGE' in thisMsg){
+		if (path != undefined) {}
+		else if('MESSAGE' in thisMsg){
 			path = thisMsg.MESSAGE;
 		}
 		else if ('GENERAL_ACTION' in thisMsg){
@@ -1025,7 +1087,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		}
 
 //if there are no args to be sent just send the path
-	if(thisMsg.ARG_COUNT<1){
+	if(thisMsg.ARG_COUNT<1 || args == undefined){
 		console.log("Sending OSC: "+path+" "+args);
 		self.system.emit('osc_send', self.config.host, self.config.port, path);
 		}
