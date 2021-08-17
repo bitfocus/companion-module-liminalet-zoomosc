@@ -2156,11 +2156,17 @@ instance.prototype.init_presets = function () {
 		};
 
 	var preset_target_types = {
-			"Gallery" : {
+			"GalleryPosition" : {
 				preset_label: "Gallery Position (macOS only)",
 				getButtonNumber: function (x, y) {return x+","+y;},
 				var_string: "galPos",
 				user_string: "galleryPosition"
+			},
+			"GalleryIndex" : {
+				preset_label: "Gallery Index",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "galInd",
+				user_string: "galIndex"
 			},
 			"ListIndex" : {
 				preset_label: "List Index",
