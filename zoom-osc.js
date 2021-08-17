@@ -2180,6 +2180,12 @@ instance.prototype.init_presets = function () {
 				var_string: "tgtID",
 				user_string: "targetID"
 			},
+			"FavoritesIndex" : {
+				preset_label: "Favorites Index",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "favoritesIndex",
+				user_string: "favoritesIndex"
+			},
 		};
 	
 		var remove_instance_identifiers = function (obj) {
