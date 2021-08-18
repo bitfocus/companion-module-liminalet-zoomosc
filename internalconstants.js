@@ -15,9 +15,21 @@ var enums = {};
 
 var keywords = {
 
- ZOSC_MSG_TARGET_PART_SELECTION  :  "selection",
- ZOSC_MSG_TARGET_PART_LISTINDEX : "listIndex",
+ ZOSC_MSG_TARGET_PART_LIST_INDEX :      "listIndex",
+
+ ZOSC_MSG_TARGET_PART_FAVORITES_GROUP : "favoritesGroup",
  ZOSC_MSG_TARGET_PART_FAVORITES_INDEX : "favoritesIndex",
+
+ ZOSC_MSG_TARGET_PART_SELECTION_GROUP : "selection",
+ ZOSC_MSG_TARGET_PART_SELECTION_INDEX : "selectionIndex",
+
+ ZOSC_MSG_TARGET_PART_SPOTLIGHT_INDEX : "spotlightIndex",
+ ZOSC_MSG_TARGET_PART_SPOTLIGHT_GROUP : "spotlightGroup",
+
+ ZOSC_MSG_TARGET_PART_PIN1_INDEX :      "pin1Index",
+ ZOSC_MSG_TARGET_PART_PIN1_GROUP :      "pin1Group",
+
+ ZOSC_MSG_TARGET_PART_PIN2_GROUP :      "pin2Group",
 
 };
 
