@@ -1411,12 +1411,10 @@ instance.prototype.init_feedbacks = function(){
 	var self = this;
 	let feedback_user_list = self.userList;
 	//targeting feedbacks on the selection group is not supported
-	feedback_user_list = feedback_user_list.filter(item => {
-		return ![ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_GROUP,
-		         ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION_GROUP,
-		         ZOSC.keywords.ZOSC_MSG_TARGET_PART_SPOTLIGHT_GROUP,
-		         ZOSC.keywords.ZOSC_MSG_TARGET_PART_PIN1_GROUP]
-		       .includes(item); });
+	delete feedback_user_list[ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_GROUP];
+	delete feedback_user_list[ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION_GROUP];
+	delete feedback_user_list[ZOSC.keywords.ZOSC_MSG_TARGET_PART_SPOTLIGHT_GROUP];
+	delete feedback_user_list[ZOSC.keywords.ZOSC_MSG_TARGET_PART_PIN1_GROUP];
 	var feedbacks={};
 		feedbacks.user_status_fb={
 			type: 'boolean',
@@ -2296,6 +2294,24 @@ instance.prototype.init_presets = function () {
 				getButtonNumber: function (x, y) {return (x*7)+y;},
 				var_string: "favoritesIndex",
 				user_string: "favoritesIndex"
+			},
+			"SelectionIndex" : {
+				preset_label: "Selection Index",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "selectionIndex",
+				user_string: "selectionIndex"
+			},
+			"SpotlightIndex" : {
+				preset_label: "Spotlight Index",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "spotlightIndex",
+				user_string: "spotlightIndex"
+			},
+			"Pin1Index" : {
+				preset_label: "Spotlight Index",
+				getButtonNumber: function (x, y) {return (x*7)+y;},
+				var_string: "pin1Index",
+				user_string: "pin1Index"
 			},
 		};
 	
