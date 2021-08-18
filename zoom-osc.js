@@ -1823,12 +1823,12 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 
 				//user status messages
 				//pins
-				case ZOSC.actions.PIN_GROUP.MESSAGES.ZOSC_MSG_PART_PIN.USER_ACTION:
+				/*case ZOSC.actions.PIN_GROUP.MESSAGES.ZOSC_MSG_PART_PIN.USER_ACTION:
 					console.log('pin: '+self.user_data[usrMsgUser]);
 					self.user_data[usrMsgUser].pinStatus=true;
 					self.update_client_variables({numberOfPin1Users: self.clientdatalabels.numberOfPin1Users}, true);
-					break;
-				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_ON.MESSAGE:
+					break;*/
+				/*case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_ON.MESSAGE:
 					if (self.spotlit_users.indexOf(usrMsgUser) === -1) {
 						self.debug('Spotlight on for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
 						//self.user_data[usrMsgUser].spotlightStatus=true;
@@ -1836,8 +1836,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						self.spotlit_users.push(usrMsgUser);
 						self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 					} else self.debug('Spotlight **already** on for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
-					break;
-				case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_OFF.MESSAGE:
+					break;*/
+				/*case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_OFF.MESSAGE:
 					if ((this_index = self.spotlit_users.indexOf(usrMsgUser)) !== -1) {
 						self.debug('Spotlight off for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
 						//self.user_data[usrMsgUser].spotlightStatus=false;
@@ -1845,7 +1845,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 						self.spotlit_users.splice(this_index, 1);
 						self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 					} else self.debug('Spotlight **already** off for user ' + usrMsgUser + ' (' + usrMsgUsername + ')');
-					break;
+					break;*/
 				//AV: VIDEO
 				case ZOSC.actions.AV_GROUP.MESSAGES.ZOSC_MSG_PART_VIDON.USER_ACTION:
 					console.log('vidstatus on: '+self.user_data[usrMsgUser]);
@@ -2031,6 +2031,32 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			console.log('List Cleared message received');
 			if (self.zoomosc_client_data.callStatus) self.status(self.STATUS_WARNING, "Refreshing Participant List");
 			self.clear_user_data();
+			break;
+
+		case 'pin1Order':
+			self.pin1_users=new UserArray();
+			for(let user in message.args){
+				self.pin1_users.push(message.args[user].value);
+			}
+			self.update_client_variables({numberOfPin1Users: self.clientdatalabels.numberOfPin1Users}, true);
+			self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.pin1Index]);
+			break;
+
+		case 'pin2Order':
+			self.pin2_users=new UserArray();
+			for(let user in message.args){
+				self.pin2_users.push(message.args[user].value);
+			}
+			self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.pin2Index]);
+			break;
+
+		case 'spotlightOrder':
+			self.spotlit_users=new UserArray();
+			for(let user in message.args){
+				self.spotlit_users.push(message.args[user].value);
+			}
+			self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
+			self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.spotlightIndex]);
 			break;
 
 		default:
