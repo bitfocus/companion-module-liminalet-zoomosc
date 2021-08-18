@@ -69,11 +69,11 @@ var enums = {
 // ZOSCSubscribeMode;
 
 // enum {
-    GalleryTrackModeTargetIndex : 0,
-    GalleryTrackModeZoomID : 1,
-    GalleryTrackModeTargetIndexList : 2,
-    GalleryTrackModeZoomIDList : 3,
-// ZOSCGalleryTrackMode;
+    ParticipantReportingModeTargetIndex : 0,
+    ParticipantReportingModeZoomID : 1,
+    ParticipantReportingModeTargetIndexList : 2,
+    ParticipantReportingModeZoomIDList : 3,
+// ZOSCParticipantReportingMode;
 
 
 // enum {
@@ -309,7 +309,8 @@ AV_GROUP : { TITLE:"Audio/video actions", ARGS: "", DESCRIPTION: "Change audio/v
  ZOSC_MSG_UNMUTE_ALL : {MESSAGE:"/zoom/all/unMute", TITLE:"UnMute all", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always,ARG_COUNT: 0, DESCRIPTION: "UnMute All users (except self " },
  ZOSC_MSG_ENABLE_USERS_CAN_UNMUTE : {MESSAGE:"/zoom/enableUsersUnmute", TITLE:"Enable users unMute", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Enable users can unmute" },
  ZOSC_MSG_DISABLE_USERS_CAN_UNMUTE : {MESSAGE:"/zoom/disableUsersUnmute", TITLE:"Disable users unMute", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "Disable users can unmute" },
- ZOSC_MSG_MUTE_ALL : {MESSAGE:"/zoom/all/mute", TITLE:"Mute All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Mute all users (except self " }
+ ZOSC_MSG_MUTE_ALL : {MESSAGE:"/zoom/all/mute", TITLE:"Mute All", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Mute all users (except self " },
+
 
 }},
 CHAT_GROUP : { TITLE:"Chat", ARGS: "string:Message to send", DESCRIPTION: "Set chat to remote user", MESSAGES: {
@@ -364,9 +365,10 @@ BREAKOUT_GROUP : { TITLE:"Breakout Room Actions", ARGS: "string:Breakout room na
  ZOSC_MSG_PART_SEND_TO_BO : {USER_ACTION:"sendToBreakout", TITLE:"Send to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Forward user to breakout room" },
  ZOSC_MSG_PART_REMOVE_FROM_BO : {USER_ACTION:"removeFromBreakout", TITLE:"Pull from breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Remove user from breakout room" },
  ZOSC_MSG_PART_ASSIGN_TO_BO : {USER_ACTION:"assignToBreakout", TITLE:"Pre-assign user to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "Preassign user to breakout" },
- ZOSC_MSG_PART_UNASSIGN_FROM_BO : {USER_ACTION:"unassignFromBreakout", TITLE:"Un-pre-assign user to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "un-Preassign user to breakout" },
-
- ZOSC_MSG_PART_RETURN_TO_MAIN_MEETING : {USER_ACTION:"returnToMainMeeting", TITLE:"Return user to main meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "return user to main meeting" },
+ ZOSC_MSG_PART_UNASSIGN_FROM_BO : {USER_ACTION:"unassignFromBreakout", TITLE:"un-Pre-assign user to breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "un-Preassign user to breakout" },
+ ZOSC_MSG_PART_RETURN_TO_MAIN_MEETING : {USER_ACTION:"returnToMainMeeting", TITLE:"return user to main meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 1, DESCRIPTION: "return user to main meeting" },
+ ZOSC_MSG_JOIN_BREAKOUT : {MESSAGE:"/zoom/joinBreakout", TITLE:"Join Breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Join a breakout room" },
+ ZOSC_MSG_LEAVE_BREAKOUT : {MESSAGE:"/zoom/leaveBreakout", TITLE:"Leave Breakout room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Leave a breakout room" },
 
  ZOSC_MSG_ADMIT_ALL : {MESSAGE:"/zoom/admitAll", TITLE:"Admit all users from waiting room", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, ARG_COUNT: 0, DESCRIPTION: "A macro to admit each user from the waiting room into the meeting" },
  ZOSC_MSG_PART_ADMIT : {USER_ACTION:"admit", TITLE:"Admit user to meeting", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Always, MUST_FORWARD: false, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Admit user from waiting room into the meeting" },
@@ -448,10 +450,42 @@ VIEW_GROUP : { TITLE:"App actions", ARGS: "", DESCRIPTION: "Change app state for
  ZOSC_MSG_PART_SET_ENABLE_OPTIMIZE_VIDEO : {USER_ACTION:"enableOptimizeVideo", TITLE:"Enable Optimized Share for Video", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Enable video playback optimization when sharing" },
  ZOSC_MSG_PART_SET_DISABLE_OPTIMIZE_VIDEO : {USER_ACTION:"disableOptimizeVideo", TITLE:"Disable Optimized Share for Video", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Disable video playback optimization when sharing" },
 
+
+ ZOSC_MSG_PART_SET_ENABLE_USERNAME_LABELS : {USER_ACTION:"enableUsernameLabels", TITLE:"Enable Username labels on video", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Enable username labels on videos" },
+ ZOSC_MSG_PART_SET_DISABLE_USERNAME_LABELS : {USER_ACTION:"disableUsernameLabels", TITLE:"Disable Username labels on video", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Disable username labels on videos" },
+
+
+
  ZOSC_MSG_PART_SET_ENABLE_COMPUTER_SOUND_WHEN_SHARING : {USER_ACTION:"enableComputerSoundWhenSharing", TITLE:"Enable share computer sound when sharing", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Enable share computerSoundWhenSharing" },
 
- ZOSC_MSG_PART_SET_DISABLE_COMPUTER_SOUND_WHEN_SHARING : {USER_ACTION:"disableComputerSoundWhenSharing", TITLE:"Disable share computer sound when sharing", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Disable share computerSoundWhenSharing" }
+ ZOSC_MSG_PART_SET_DISABLE_COMPUTER_SOUND_WHEN_SHARING : {USER_ACTION:"disableComputerSoundWhenSharing", TITLE:"Disable share computer sound when sharing", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Disable share computerSoundWhenSharing" },
 
+ ZOSC_MSG_ISO_ENABLE_CLEAN_OUTPUTS : {MESSAGE:"/zoom/enableCleanOutputs", TITLE:"Enable clean ISO outputs", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable clean ISO outputs" },
+ ZOSC_MSG_ISO_DISABLE_CLEAN_OUTPUTS : {MESSAGE:"/zoom/disableCleanOutputs", TITLE:"Disable clean ISO outputs", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Disable clean ISO outputs" },
+
+ ZOSC_MSG_ISO_ENABLE_NDI : {MESSAGE:"/zoom/enableNDI", TITLE:"Enable NDI for ISO output", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable NDI for ISO output" },
+ ZOSC_MSG_ISO_DISABLE_NDI : {MESSAGE:"/zoom/disableNDI", TITLE:"Disable NDI for ISO output", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Disable NDI for ISO output" },
+
+ ZOSC_MSG_ISO_ENABLE_SYPHON : {MESSAGE:"/zoom/enableSyphon", TITLE:"Enable Syphon for ISO output", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable Syphon for ISO output" },
+ ZOSC_MSG_ISO_DISABLE_SYPHON : {MESSAGE:"/zoom/disableSyphon", TITLE:"Disable Syphon for ISO output", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Disable Syphon for ISO output" },
+
+ ZOSC_MSG_ISO_PREFIX : {MESSAGE:"/zoom/setISOPrefix", TITLE:"Set ISO feed prefix", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Set ISO name prefix" },
+
+ ZOSC_MSG_SET_ISO_SIZE : {MESSAGE:"/zoom/setISOSize", TITLE:"Set ISO feed size", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 2, DESCRIPTION: "Set ISO feed size - include output number or 0 for default" },
+
+ ZOSC_MSG_SET_ISO_COUNT : {MESSAGE:"/zoom/setISOCount", TITLE:"Set ISO feed count", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 1, DESCRIPTION: "Set ISO feed count" },
+
+ ZOSC_MSG_ISO_ENABLE_GAL_LABEL_USERNAME : {MESSAGE:"/zoom/enableGalleryOutputUsername", TITLE:"Enable gallery ISO output label for username", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable gallery ISO output label for username" },
+ ZOSC_MSG_ISO_DISABLE_GAL_LABEL_USERNAME : {MESSAGE:"/zoom/disableGalleryOutputUsername", TITLE:"Disable gallery ISO output label for username", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION:"Disable gallery ISO output label for username" },
+
+ ZOSC_MSG_ISO_ENABLE_GAL_LABEL_ZOOMID : {MESSAGE:"/zoom/enableGalleryOutputZoomID", TITLE:"Enable gallery ISO output label for zoomID", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable gallery ISO output label for zoomID" },
+ ZOSC_MSG_ISO_DISABLE_GAL_LABEL_ZOOMID : {MESSAGE:"/zoom/disableGalleryOutputZoomID", TITLE:"Disable gallery ISO output label for zoomID", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION:"Disable gallery ISO output label for zoomID" },
+
+ ZOSC_MSG_ISO_ENABLE_GAL_LABEL_TARGETID : {MESSAGE:"/zoom/enableGalleryOutputTargetID", TITLE:"Enable gallery ISO output label for target ID", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable gallery ISO output label for target ID" },
+ ZOSC_MSG_ISO_DISABLE_GAL_LABEL_TARGETID : {MESSAGE:"/zoom/disableGalleryOutputTargetID", TITLE:"Disable gallery ISO output label for targetID", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION:"Disable gallery ISO output label for targetID" },
+
+ ZOSC_MSG_ISO_ENABLE_GAL_LABEL_GALINDEX : {MESSAGE:"/zoom/enableGalleryOutputGalIndex", TITLE:"Enable gallery ISO output label for galleryIndex", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION: "Enable gallery ISO output label for galleryIndex" },
+ ZOSC_MSG_ISO_DISABLE_GAL_LABEL_GALINDEX : {MESSAGE:"/zoom/disableGalleryOutputGalIndex", TITLE:"Disable gallery ISO output label for galleryIndex", ISPRO: false, ISNDI: true, REQUIRE_HOST: enums.Host_Mode_None, ARG_COUNT: 0, DESCRIPTION:"Disable gallery ISO output label for gallery Index" },
 }},
 SETTINGS_GROUP : { TITLE:"Settings action", ARGS: "string:Device ID or Index", DESCRIPTION: "Settings actions for user", MESSAGES: {
 
@@ -544,6 +578,8 @@ WINDOW_FRAME_ACTION_GROUP : { TITLE:"Meeting window frame", ARGS: "int:x or widt
  ZOSC_MSG_PART_SET_WINDOW_POSITION : {USER_ACTION:"setWindowPosition", TITLE:"Set Window Position", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window position" },
 
  ZOSC_MSG_PART_SET_WINDOW_SIZE : {USER_ACTION:"setWindowSize", TITLE:"Set Window Size", ISPRO: true, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 2, DESCRIPTION: "Set meeting window size" }
+
+
 
 }
 }
@@ -640,7 +676,8 @@ var outputLastPartMessages = {
 
  ZOSC_MSG_SEND_PART_USERNAME_CHANGED : {MESSAGE: "userNameChanged", DESCRIPTION: "notification that user's username has changed" },
 
-
+ ZOSC_MSG_SEND_PART_IS_SPEAKING : {MESSAGE: "isSpeaking", DESCRIPTION: "notification that user is speaking" },
+ ZOSC_MSG_SEND_PART_STOPPED_SPEAKING : {MESSAGE: "stoppedSpeaking", DESCRIPTION: "notification that user stopped speaking" },
  ZOSC_MSG_SEND_PART_CAMERA_DEVICE_LIST : {MESSAGE: "cameraDevices", IS_LIST_SOURCE: true, DESCRIPTION: "List of available camera devices for user" },
  ZOSC_MSG_SEND_PART_MIC_DEVICE_LIST : {MESSAGE: "micDevices", IS_LIST_SOURCE: true, DESCRIPTION: "List of available mic devices for user" },
  ZOSC_MSG_SEND_PART_SPEAKER_DEVICE_LIST : {MESSAGE: "speakerDevices", IS_LIST_SOURCE: true, DESCRIPTION: "List of available speaker devices for user" },
@@ -658,6 +695,8 @@ var outputLastPartMessages = {
 
  ZOSC_MSG_SEND_PART_MIC_VOLUME : {MESSAGE: "micVolume", DESCRIPTION: "The current mic volume for user", IS_VALUE_SOURCE: true },
  ZOSC_MSG_SEND_PART_SPEAKER_VOLUME : {MESSAGE: "speakerVolume", DESCRIPTION: "The current speaker volume for user", IS_VALUE_SOURCE: true }
+
+
 
 
 

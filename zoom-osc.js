@@ -74,7 +74,7 @@ instance.prototype.init_send_subscribe= function() {
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE,
 		{type: 'f', value: parseFloat(self.config.subscribeMode)}
 	);
-	//set gallery track mode
+	//set participant reporting mode
 	self.system.emit('osc_send',
 		self.config.host,				self.config.port,
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
@@ -105,7 +105,7 @@ instance.prototype.updateConfig = function(config) {
 			ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE,
 			 {type: 'f', value: parseFloat(self.config.subscribeMode)}
 		);
-		//set gallery track mode
+		//set participant reporting mode
 		self.system.emit('osc_send',
 			self.config.host,				self.config.port,
 			ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
@@ -468,11 +468,11 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 				case 'participantReportingMode':
 					switch(self.zoomosc_client_data[clientVar]){
 
-						case ZOSC.enums.GalleryTrackModeTargetIndex:
+						case ZOSC.enums.ParticipantReportingModeTargetIndex:
 							clientVarVal='Target Index';
 							break;
 
-						case ZOSC.enums.GalleryTrackModeZoomID:
+						case ZOSC.enums.ParticipantReportingModeZoomID:
 							clientVarVal='ZoomID';
 							break;
 
@@ -621,11 +621,11 @@ instance.prototype.config_fields = function() {
 			id:	 'participantReportingMode',
 			label: 'Participant Reporting Mode ---ZOOMID MODE REQUIRED FOR MOST FEATURES---',
 			choices:[
-				{id: ZOSC.enums.GalleryTrackModeTargetIndex, label: 'Target Index'},
-				{id: ZOSC.enums.GalleryTrackModeZoomID,			label: 'ZoomID'			}
+				{id: ZOSC.enums.ParticipantReportingModeTargetIndex, label: 'Target Index'},
+				{id: ZOSC.enums.ParticipantReportingModeZoomID,			label: 'ZoomID'			}
 
 			],
-			default: ZOSC.enums.GalleryTrackModeZoomID
+			default: ZOSC.enums.ParticipantReportingModeZoomID
 		}
 	];
 };
@@ -1994,7 +1994,7 @@ instance.prototype.init_ping = function() {
 				self.config.host,				self.config.port,
 				ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE, {type: 'f', value: parseFloat(self.config.subscribeMode)}
 			);
-			//set gallery track mode
+			//set participant reporting mode
 			self.system.emit('osc_send',
 				self.config.host,				self.config.port,
 				ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE, {type: 'f', value: parseFloat(self.config.participantReportingMode)}
