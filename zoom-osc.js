@@ -78,7 +78,7 @@ instance.prototype.init_send_subscribe= function() {
 	self.system.emit('osc_send',
 		self.config.host,				self.config.port,
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
-		{type: 'i', value: parseInt(self.config.galTrackMode)}
+		{type: 'i', value: parseInt(self.config.participantReportingMode)}
 	);
 
 };
@@ -109,7 +109,7 @@ instance.prototype.updateConfig = function(config) {
 		self.system.emit('osc_send',
 			self.config.host,				self.config.port,
 			ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
-			{type: 'i', value: parseInt(self.config.galTrackMode)}
+			{type: 'i', value: parseInt(self.config.participantReportingMode)}
 		);
 };
 
@@ -400,7 +400,7 @@ instance.prototype.assign_user_gallery_position = function(zoomID, gallery_index
 instance.prototype.clientdatalabels = {
 	zoomOSCVersion:'ZoomOSC Version',
 	subscribeMode:'Subscribe Mode',
-	galTrackMode:'Gallery Tracking Mode',
+	participantReportingMode:'Participant Reporting Mode',
 	callStatus :'Call Status',
 	numberOfTargets:'Number of Targets',
 	numberOfUsersInCall: 'Number of Users in Call',
@@ -465,7 +465,7 @@ instance.prototype.update_client_variables = function(client_variable_labels = u
 					}
 				break;
 
-				case 'galTrackMode':
+				case 'participantReportingMode':
 					switch(self.zoomosc_client_data[clientVar]){
 
 						case ZOSC.enums.GalleryTrackModeTargetIndex:
@@ -618,8 +618,8 @@ instance.prototype.config_fields = function() {
 		},
 		{
 			type: 'dropdown',
-			id:	 'galTrackMode',
-			label: 'Gallery Tracking Mode ---ZOOMID MODE REQUIRED FOR GALLERY TRACKING FEATURES---',
+			id:	 'participantReportingMode',
+			label: 'Participant Reporting Mode ---ZOOMID MODE REQUIRED FOR MOST FEATURES---',
 			choices:[
 				{id: ZOSC.enums.GalleryTrackModeTargetIndex, label: 'Target Index'},
 				{id: ZOSC.enums.GalleryTrackModeZoomID,			label: 'ZoomID'			}
@@ -689,7 +689,6 @@ var allInstanceActions=[];
 			this.userList[self.user_data[user].userName]=this_user;
 		}
 	}
-
 
 //user actions
 	var userActions=[];
@@ -1998,7 +1997,7 @@ instance.prototype.init_ping = function() {
 			//set gallery track mode
 			self.system.emit('osc_send',
 				self.config.host,				self.config.port,
-				ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE, {type: 'f', value: parseFloat(self.config.galTrackMode)}
+				ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE, {type: 'f', value: parseFloat(self.config.participantReportingMode)}
 			);
 
 		}
