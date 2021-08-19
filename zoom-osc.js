@@ -1239,7 +1239,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		if (!["addSelection", "removeSelection", "toggleSelection", "singleSelection"].includes(thisMsg.INTERNAL_ACTION)) {
 			switch(thisMsg.INTERNAL_ACTION){
 				case "clearSelection":
-					self.selected_users = [];	
+					self.selected_users = new UserArray();	
 					//self.log('debug',"Clear selection");
 					break;
 				case 'addUnmutedToSelection':
@@ -1328,16 +1328,15 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	} else if (action.action == 'FAVORITES_GROUP') {
 		if (thisMsg.INTERNAL_ACTION == "clearFavorites") {
 			self.favorite_users.forEach((_,index,__) => {
-				self.favorite_users[index] = 'clear_'+index;
 				self.setVariablesForUser(
 					{	galleryIndex: undefined,
 						galleryPosition: undefined,
 						userName: undefined,
-						zoomID: self.favorite_users[index]},
+						favoritesIndex: index},
 					{favoriteIndex: self.userSourceList.favoriteIndex}, 
 					self.variablesToPublishList, false, true);
 			});
-			self.favorite_users = [];
+			self.favorite_users = new UserArray();
 			//self.log('debug',"Clear favorites");
 		} else if (thisMsg.INTERNAL_ACTION == "addSelectionToFavorites") {
 			self.favorite_users.push(
@@ -1366,15 +1365,13 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					break;
 			}
 			if (self.favorite_users.indexOf(selectedUser) == -1 && (thisMsg.INTERNAL_ACTION == "removeFavorite" || thisMsg.INTERNAL_ACTION == "toggleFavorite")) {
-				let this_index = self.favorite_users.push('clear') - 1;
 				self.setVariablesForUser(
 					{	galleryIndex: undefined,
 						galleryPosition: undefined,
 						userName: undefined,
-						zoomID: 'clear'},
+						favoritesIndex: self.favorite_users.length},
 					{favoriteIndex: self.userSourceList.favoriteIndex}, 
 					self.variablesToPublishList, false, true);
-				self.favorite_users.splice(this_index, 1);
 			}
 		}
 		self.update_user_variables_subset(self.variablesToPublishList, {favoriteIndex: self.userSourceList.favoriteIndex}, false);
