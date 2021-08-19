@@ -2265,48 +2265,56 @@ instance.prototype.init_presets = function () {
 			"GalleryPosition" : {
 				preset_label: "Gallery Position (macOS only)",
 				getButtonNumber: function (x, y) {return x+","+y;},
+				row_count: 7, column_count: 7,
 				var_string: "galPos",
 				user_string: "galleryPosition"
 			},
 			"GalleryIndex" : {
 				preset_label: "Gallery Index",
 				getButtonNumber: function (x, y) {return (x*7)+y;},
+				row_count: 7, column_count: 7,
 				var_string: "galInd",
 				user_string: "galIndex"
 			},
 			"ListIndex" : {
 				preset_label: "List Index",
 				getButtonNumber: function (x, y) {return (x*7)+y;},
+				row_count: 7, column_count: 7,
 				var_string: "listIndex",
 				user_string: "listIndex"
 			},
 			"TargetID" : {
 				preset_label: "Target ID",
 				getButtonNumber: function (x, y) {return (x*7)+y;},
+				row_count: 7, column_count: 7,
 				var_string: "tgtID",
 				user_string: "targetID"
 			},
 			"FavoritesIndex" : {
 				preset_label: "Favorites Index",
 				getButtonNumber: function (x, y) {return (x*7)+y;},
+				row_count: 7, column_count: 7,
 				var_string: "favoritesIndex",
 				user_string: "favoritesIndex"
 			},
 			"SelectionIndex" : {
 				preset_label: "Selection Index",
 				getButtonNumber: function (x, y) {return (x*7)+y;},
+				row_count: 7, column_count: 7,
 				var_string: "selectionIndex",
 				user_string: "selectionIndex"
 			},
 			"SpotlightIndex" : {
 				preset_label: "Spotlight Index",
 				getButtonNumber: function (x, y) {return (x*7)+y;},
+				row_count: 9, column_count: 1,
 				var_string: "spotlightIndex",
 				user_string: "spotlightIndex"
 			},
 			"Pin1Index" : {
-				preset_label: "Spotlight Index",
-				getButtonNumber: function (x, y) {return (x*7)+y;},
+				preset_label: "Pin Screen 1 Index",
+				getButtonNumber: function (x, y) {return x+y;},
+				row_count: 9, column_count: 1,
 				var_string: "pin1Index",
 				user_string: "pin1Index"
 			},
@@ -2323,8 +2331,8 @@ instance.prototype.init_presets = function () {
 
 for(const [targetType_short, targetType] of Object.entries(preset_target_types)) {
 	for(const [preset_action_short, preset_action] of Object.entries(preset_actions)) {
-		for(let x=0;x<7;x++){
-			for(let y=0;y<7;y++){
+		for(let x=0;x<targetType.column_count;x++){
+			for(let y=0;y<targetType.row_count;y++){
 				presets.push({
 					category: preset_action.preset_label+" by "+targetType.preset_label,
 					label: preset_action.preset_label+" by "+targetType.preset_label+" ("+targetType.getButtonNumber(x,y)+")",
