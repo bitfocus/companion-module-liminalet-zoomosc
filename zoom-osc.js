@@ -71,16 +71,16 @@ function instance(system, id, config) {
  * Class for ZoomID-based arrays with mutation utilities.
  */
 class UserArray extends Array {
-	constructor(...args) {
+	/*constructor(...args) {
 		super(...args);
 		//this.prev_array = undefined;
-	}
+	}*/
 	clear() { this.length = 0; }
-	add(element) { if (!this.includes(element)) this.push(selectedUser); }
+	add(element) { if (!this.includes(element)) this.push(element); }
 	remove(element) { if (this.includes(element)) this.splice(this.indexOf(element), 1); }
 	toggle(element) {
 		if (this.includes(element)) this.remove(element);
-		else self.favorite_users.add(selectedUser);
+		else this.add(element);
 	}
 	replaceAll(elements) {
 		this.prev_array = [...this];
@@ -850,7 +850,7 @@ instance.prototype.actions = function(system) {
 				});
 					break;
 
-				case 'args':
+				case 'path':
 					newGroup.options.push({
 						type: 'textinput',
 						label: args[arg].name,
@@ -1066,7 +1066,7 @@ instance.prototype.action = function(action) {
 }
 
 function pushCustomOSCArgs() {
-	let arguments = action.options.args.replace(/“/g, '"').replace(/”/g, '"').split(' ');
+	let arguments = action.options.Arguments.replace(/“/g, '"').replace(/”/g, '"').split(' ');
 	let arg;
 
 	if (arguments.length) {
@@ -1239,7 +1239,16 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 		if (!["addSelection", "removeSelection", "toggleSelection", "singleSelection"].includes(thisMsg.INTERNAL_ACTION)) {
 			switch(thisMsg.INTERNAL_ACTION){
 				case "clearSelection":
-					self.selected_users = new UserArray();	
+					self.selected_users.forEach((_,index,__) => {
+						self.setVariablesForUser(
+							{	galleryIndex: undefined,
+								galleryPosition: undefined,
+								userName: undefined,
+								selectionIndex: index},
+							{selectionIndex: self.userSourceList.selectionIndex}, 
+							self.variablesToPublishList, false, true);
+					});
+					self.favorite_users = new UserArray();
 					//self.log('debug',"Clear selection");
 					break;
 				case 'addUnmutedToSelection':
@@ -1300,26 +1309,35 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			selectedUser = parseInt(selectedUser);
 			switch(thisMsg.INTERNAL_ACTION){
 				case "addSelection":
-					if (self.selected_users.indexOf(selectedUser) === -1) self.selected_users.push(selectedUser);
+					self.selected_users.add(selectedUser);
 					//self.log('debug', "Add selection to " + self.user_data[selectedUser].userName);
 					break;
 				case "removeSelection":
-					if ((this_index = self.selected_users.indexOf(selectedUser)) !== -1) self.selected_users.splice(this_index, 1);
+					self.selected_users.remove(selectedUser);
 					//self.log('debug',"Remove selection from " + self.user_data[selectedUser].userName);
 					break;
 				case "toggleSelection":
-					if ((this_index = self.selected_users.indexOf(selectedUser)) !== -1) self.selected_users.splice(this_index, 1);
-					else self.selected_users.push(selectedUser);
+					self.selected_users.toggle(selectedUser);
 					//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName);
 					break;
 				case "singleSelection":
-					self.selected_users = [selectedUser];
+					self.selected_users.replaceAll([selectedUser]);
 					//self.log('debug',"Single selection " + self.user_data[selectedUser].userName);
 					break;
 				default:
 					break;
 			}
+			if (self.selected_users.indexOf(selectedUser) == -1 && (thisMsg.INTERNAL_ACTION == "removeSelection" || thisMsg.INTERNAL_ACTION == "toggleSelection")) {
+				self.setVariablesForUser(
+					{	galleryIndex: undefined,
+						galleryPosition: undefined,
+						userName: undefined,
+						selectionIndex: self.selected_users.length},
+					{selectionIndex: self.userSourceList.selectionIndex}, 
+					self.variablesToPublishList, false, true);
+			}
 		}
+		self.update_user_variables_subset(self.variablesToPublishList, {selectionIndex: self.userSourceList.selectionIndex}, false);
 		self.update_client_variables({
 			numberOfSelectedUsers: self.clientdatalabels.numberOfSelectedUsers,
 			selectedUsersList: self.clientdatalabels.selectedUsersList}, true);
@@ -1349,17 +1367,13 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 			selectedUser = parseInt(selectedUser);
 			switch(thisMsg.INTERNAL_ACTION){
 				case "addFavorite":
-					if (self.favorite_users.indexOf(selectedUser) === -1) self.favorite_users.push(selectedUser);
-					//self.log('debug', "Add favorite to " + self.user_data[selectedUser].userName);
+					self.favorite_users.add(selectedUser); 
 					break;
 				case "removeFavorite":
-					if ((this_index = self.favorite_users.indexOf(selectedUser)) !== -1) self.favorite_users.splice(this_index, 1);
-					//self.log('debug',"Remove favorite from " + self.user_data[selectedUser].userName);
+					self.favorite_users.remove(selectedUser); 
 					break;
 				case "toggleFavorite":
-					if ((this_index = self.favorite_users.indexOf(selectedUser)) !== -1) self.favorite_users.splice(this_index, 1);
-					else self.favorite_users.push(selectedUser);
-					//self.log('debug',"Toggle favorite " + self.user_data[selectedUser].userName);
+					self.favorite_users.toggle(selectedUser); 
 					break;
 				default:
 					break;
@@ -1702,7 +1716,7 @@ if(!self.disabled){
 				speakerDevices:   [],
 				backgrounds:      [],
 				me: Boolean(isMe) ? true : null,
-				get listIndex() {return Object.keys(self.user_data).indexOf(this.zoomID) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1; }
+				get listIndex() {return (listIndex = Object.keys(self.user_data).indexOf(this.zoomID)) >= 0 ? self.zoomosc_client_data.listIndexOffset + listIndex : -1; }
 			};
 			/*var roleTextVals=[
 				'None','For Users','Always','Full'
@@ -2050,8 +2064,8 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			for(let user in message.args){
 				self.spotlit_users.push(message.args[user].value);
 			}
-			self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 			self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.spotlightIndex]);
+			self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 			break;
 
 		default:

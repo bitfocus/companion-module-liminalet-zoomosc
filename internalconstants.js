@@ -82,12 +82,12 @@ FAVORITES_GROUP : { TITLE:"Favorites Actions", ARGS: "", DESCRIPTION: "Mark user
  ZOSC_MSG_PART_CLEAR_FAVORITES : {INTERNAL_ACTION:"clearFavorites", TITLE:"Clear Favorites", ISPRO: false, ISNDI: false, REQUIRE_HOST: enums.Host_Mode_None, MUST_FORWARD: true, PREFER_FORWARD: false, GROUP_SIZE: -1, ARG_COUNT: 0, DESCRIPTION: "Clear all users from favorites" },
 }},
 
-CUSTOM_OSC_GROUP : { TITLE:"Custom OSC Message", ARGS: "string:Path,args:Arguments", DESCRIPTION: "Send a custom OSC message", MESSAGES: {
+CUSTOM_OSC_GROUP : { TITLE:"Custom OSC Message", ARGS: "path:Path,string:Arguments", DESCRIPTION: "Send a custom OSC message", MESSAGES: {
 
  ZOSC_MSG_PART_SEND_OSC : {GENERAL_ACTION:"sendOSC", TITLE:"Send OSC Message", DESCRIPTION: "Send a custom OSC message" },
 }},
 
-CUSTOM_OSC_WITH_USER_GROUP : { TITLE:"Custom OSC Message with User", ARGS: "string:Path,args:Arguments", DESCRIPTION: "Send a custom OSC message with User", MESSAGES: {
+CUSTOM_OSC_WITH_USER_GROUP : { TITLE:"Custom OSC Message with User", ARGS: "path:Path,string:Arguments", DESCRIPTION: "Send a custom OSC message with User", MESSAGES: {
 
  ZOSC_MSG_PART_SEND_OSC_WITH_USER : {GENERAL_ACTION:"sendOSCWithUser", TITLE:"Send OSC Message with User", DESCRIPTION: "Send a custom OSC message with User" },
 }}
