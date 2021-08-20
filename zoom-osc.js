@@ -107,7 +107,16 @@ instance.prototype.init_send_subscribe= function() {
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
 		{type: 'i', value: parseInt(self.config.participantReportingMode)}
 	);
-
+	//get spotlight order
+	self.system.emit('osc_send',
+		self.config.host,				self.config.port,
+		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GETSPOTORDER.MESSAGE
+	);
+	//get pin order
+	self.system.emit('osc_send',
+		self.config.host,				self.config.port,
+		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GETPINORDER.MESSAGE
+	);
 };
 
 instance.GetUpgradeScripts = function() {
@@ -202,7 +211,7 @@ instance.prototype.updateVariable = function(thisName, thisLabel, thisValue, thi
 
 	if (!self.variable_definitions.some(e => e.name === thisName)) {
 
-		console.log("Adding def: "+JSON.stringify(thisDefinition));
+		self.log("Adding def: "+JSON.stringify(thisDefinition)+", current value: "+thisValue);
 		self.variable_definitions.push(thisDefinition);
 	}
 	self.variable_data_delta[thisName] = thisValue;
@@ -1248,7 +1257,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 							{selectionIndex: self.userSourceList.selectionIndex}, 
 							self.variablesToPublishList, false, true);
 					});
-					self.favorite_users = new UserArray();
+					self.selected_users = new UserArray();
 					//self.log('debug',"Clear selection");
 					break;
 				case 'addUnmutedToSelection':
@@ -1321,7 +1330,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 					//self.log('debug',"Toggle selection " + self.user_data[selectedUser].userName);
 					break;
 				case "singleSelection":
-					self.selected_users.replaceAll([selectedUser]);
+					self.selected_users.replaceAll(selectedUser);
 					//self.log('debug',"Single selection " + self.user_data[selectedUser].userName);
 					break;
 				default:
@@ -1477,14 +1486,6 @@ instance.prototype.init_feedbacks = function(){
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION_GROUP:
 						self.debug("Feedbacks targeting the selection group are not supported.");
 						return; // not supported
-
-					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_FAVORITES_INDEX:
-						//switch to this so we spoof a zoomID message
-						let this_index = parseInt(opts.userString);
-						if (self.favorite_users.length > this_index) {
-							sourceUser= parseInt(self.favorite_users[this_index]);
-						}
-						break;
 
 					case ZOSC.keywords.ZOSC_MSG_TARGET_PART_SELECTION_INDEX:
 						sourceUser = self.selected_users.get(opts.userString);
@@ -1834,7 +1835,7 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 				//pins
 				/*case ZOSC.actions.PIN_GROUP.MESSAGES.ZOSC_MSG_PART_PIN.USER_ACTION:
 					console.log('pin: '+self.user_data[usrMsgUser]);
-					self.user_data[usrMsgUser].pinStatus=true;
+					self.user_data[usrMsgUser].pin1Status=true;
 					self.update_client_variables({numberOfPin1Users: self.clientdatalabels.numberOfPin1Users}, true);
 					break;*/
 				/*case ZOSC.outputLastPartMessages.ZOSC_MSG_SEND_PART_SPOTLIGHT_ON.MESSAGE:
@@ -2043,12 +2044,23 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			break;
 
 		case 'pin1Order':
-			self.pin1_users=new UserArray();
-			for(let user in message.args){
-				self.pin1_users.push(message.args[user].value);
+			let new_pin1_users=new UserArray();
+			for (let index = 0; index < Math.max(self.pin1_users.length, message.args.length); index++) {
+				if (message.args[index] != undefined) {
+					new_pin1_users.push(message.args[index].value);
+				} else {
+					self.setVariablesForUser({
+						galleryIndex: undefined,
+						galleryPosition: undefined,
+						userName: undefined,
+						pin1Index: index},
+					{pin1Index: self.userSourceList.pin1Index}, 
+					self.variablesToPublishList, false, true);	
+				}
 			}
-			self.update_client_variables({numberOfPin1Users: self.clientdatalabels.numberOfPin1Users}, true);
+			self.pin1_users = new_pin1_users;
 			self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.pin1Index]);
+			self.update_client_variables({numberOfPin1Users: self.clientdatalabels.numberOfPin1Users}, true);
 			break;
 
 		case 'pin2Order':
@@ -2060,10 +2072,21 @@ if(zoomPart==ZOSC.keywords.ZOSC_MSG_PART_ZOOMOSC){
 			break;
 
 		case 'spotlightOrder':
-			self.spotlit_users=new UserArray();
-			for(let user in message.args){
-				self.spotlit_users.push(message.args[user].value);
+			let new_spotlit_users=new UserArray();
+			for (let index = 0; index < Math.max(self.spotlit_users.length, message.args.length); index++) {
+				if (message.args[index] != undefined) {
+					new_spotlit_users.push(message.args[index].value);
+				} else {
+					self.setVariablesForUser({
+						galleryIndex: undefined,
+						galleryPosition: undefined,
+						userName: undefined,
+						spotlightIndex: index},
+					{spotlightIndex: self.userSourceList.spotlightIndex}, 
+					self.variablesToPublishList, false, true);	
+				}
 			}
+			self.spotlit_users = new_spotlit_users;
 			self.update_user_variables_subset(self.variablesToPublishList, [self.userSourceList.spotlightIndex]);
 			self.update_client_variables({numberOfSpotlitUsers: self.clientdatalabels.numberOfSpotlitUsers}, true);
 			break;
@@ -2202,7 +2225,7 @@ instance.prototype.init_presets = function () {
 
 	var preset_actions = {
 		"Audio": {
-			preset_label: "Audio",
+			preset_label: "Toggle audio",
 			button_label: "\\nAudio",
 			action: 'AV_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_MUTE',
@@ -2211,7 +2234,7 @@ instance.prototype.init_presets = function () {
 			disabled_icon: ZOSC_ICONS.MIC_DISABLED
 			},
 		"Video": {
-			preset_label: "Video",
+			preset_label: "Toggle video",
 			button_label: "\\nVideo",
 			action: 'AV_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_VIDEO',
@@ -2220,7 +2243,7 @@ instance.prototype.init_presets = function () {
 			disabled_icon: ZOSC_ICONS.CAMERA_DISABLED
 			},
 		"Spotlight": {
-			preset_label: "Spotlight",
+			preset_label: "Toggle spotlight",
 			button_label: "\\nSpotlight",
 			action: 'SPOTLIGHT_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_SPOT',
@@ -2229,21 +2252,12 @@ instance.prototype.init_presets = function () {
 			disabled_icon: ZOSC_ICONS.SPOTLIGHT_DISABLED
 			},
 		"Pin": {
-			preset_label: "Pin",
+			preset_label: "Toggle pin",
 			button_label: "\\nPin",
 			action: 'PIN_GROUP',
 			message: 'ZOSC_MSG_PART_TOGGLE_PIN',
-			prop:'videoStatus', //TODO: change to pinStatus when implemented
+			prop:'pin1Status',
 			enabled_icon: ZOSC_ICONS.PIN_ENABLED,
-			disabled_icon: null
-			},
-		"Single Selection": {
-			preset_label: "Single Selection",
-			button_label: "",
-			action: 'SELECTION_GROUP',
-			message: 'ZOSC_MSG_PART_LIST_SINGLE_SELECTION',
-			prop:'selected',
-			enabled_icon: null,
 			disabled_icon: null
 			},
 		"Multiple Selection": {
@@ -2251,6 +2265,15 @@ instance.prototype.init_presets = function () {
 			button_label: "",
 			action: 'SELECTION_GROUP',
 			message: 'ZOSC_MSG_PART_LIST_TOGGLE_SELECTION',
+			prop:'selected',
+			enabled_icon: null,
+			disabled_icon: null
+			},
+		"Single Selection": {
+			preset_label: "Single Selection",
+			button_label: "",
+			action: 'SELECTION_GROUP',
+			message: 'ZOSC_MSG_PART_LIST_SINGLE_SELECTION',
 			prop:'selected',
 			enabled_icon: null,
 			disabled_icon: null
