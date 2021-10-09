@@ -1743,8 +1743,8 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 
 		var local_path_options = [
 			targetType_short+" "+preset_action_short,
-			'* '+preset_action_short,
-			targetType_short+' *', '*'];
+			'_ '+preset_action_short,
+			targetType_short+' _', '_'];
 
 		for (let local_path of local_path_options) {
 			if (fs.existsSync(local_path = path.resolve(__dirname,'presets/'+local_path+'.companionconfig'))) {
