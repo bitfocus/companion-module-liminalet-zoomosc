@@ -536,7 +536,7 @@ var allInstanceActions=[];
 							default:'me'
 						},
 						{
-							type:'textinput',
+							type:'textwithvariables',
 							label:'User Identifier',
 							id:'userString'
 						}
