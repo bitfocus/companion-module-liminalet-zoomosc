@@ -697,6 +697,11 @@ instance.prototype.action = function(action) {
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME:
 				TARGET_TYPE=ZOSC.keywords.ZOSC_MSG_TARGET_PART_USERNAME;
 				userString=action.options.userString;
+				if (userString.includes('$(')) {
+					system.emit('variable_parse', userString, function (parsedUserString) {
+						userString = parsedUserString
+					})
+				}
 				break;
 
 		case ZOSC.keywords.ZOSC_MSG_TARGET_PART_GALLERY_POSITION:
