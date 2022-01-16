@@ -1,6 +1,6 @@
 {
 	"name": "liminalet-zoomosc",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"main": "zoom-osc.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
@@ -10,5 +10,6 @@
 	"product": "ZoomOSC",
 	"shortname": "zoomosc",
 	"description": "zoomOSC plugin for companion ",
-	"keywords":["zoom"]
+	"keywords":["zoom"],
+	"license": "MIT"
 }
