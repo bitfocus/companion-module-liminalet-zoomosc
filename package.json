@@ -13,5 +13,14 @@
 	"keywords": [
 		"zoom"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"homepage": "https://github.com/bitfocus/companion-module-liminalet-zoomosc#readme",
+	"bugs": {
+		"url": "https://github.com/bitfocus/companion-module-liminalet-zoomosc/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-liminalet-zoomosc.git"
+	},
+	"api_version": "1.0.0"
 }
