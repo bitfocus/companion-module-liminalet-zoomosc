@@ -52,13 +52,13 @@ function instance(system, id, config) {
 	self.init_presets();
 
 //Subscribe to ZoomOSC
-	self.system.emit('osc_send',
+	self.oscSend(
 		self.config.host,				self.config.port,
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE,
 		 {type: 'f', value: parseFloat(self.config.subscribeMode)}
 	);
 	//set gallery track mode
-	self.system.emit('osc_send',
+	self.oscSend(
 		self.config.host,				self.config.port,
 		ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
 		{type: 'i', value: parseInt(self.config.galTrackMode)}
@@ -84,13 +84,13 @@ instance.prototype.updateConfig = function(config) {
 	self.init_presets();
 	self.actions();
 	//Subscribe to ZoomOSC
-		self.system.emit('osc_send',
+		self.oscSend(
 			self.config.host,				self.config.port,
 			ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE,
 			 {type: 'f', value: parseFloat(self.config.subscribeMode)}
 		);
 		//set gallery track mode
-		self.system.emit('osc_send',
+		self.oscSend(
 			self.config.host,				self.config.port,
 			ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE,
 			{type: 'i', value: parseInt(self.config.galTrackMode)}
@@ -620,7 +620,7 @@ var allInstanceActions=[];
 			}
 		]
 	};
-	self.system.emit('instance_actions', self.id,allInstanceActions);
+	self.setActions(allInstanceActions);
 
 };
 
@@ -796,7 +796,7 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 	console.log(path);
 	console.log(JSON.stringify(args));
 
-	self.system.emit('osc_send', self.config.host, self.config.port, path, args);
+	self.oscSend( self.config.host, self.config.port, path, args);
 
 	}
 //General action messages just use the first part of the path
@@ -811,13 +811,13 @@ if('USER_ACTION' in thisMsg && action.user!=ZOSC.keywords.ZOSC_MSG_PART_ME ){
 //if there are no args to be sent just send the path
 	if(thisMsg.ARG_COUNT<1){
 		console.log("Sending OSC: "+path+" "+args);
-		self.system.emit('osc_send', self.config.host, self.config.port, path);
+		self.oscSend( self.config.host, self.config.port, path);
 		}
 	else{
 		//push arguments and send full message
 		// console.log(JSON.stringify(args));
 		pushOscArgs();
-		self.system.emit('osc_send', self.config.host, self.config.port, path, args);
+		self.oscSend( self.config.host, self.config.port, path, args);
 		}
 	}
 	//TODO: finding a user needs to be a function as this code is repeated 3 times
@@ -1510,15 +1510,15 @@ console.log(message.address.toString());
 instance.prototype.init_ping = function() {
 	var self = this;
 	function pingOSC(){
-		self.system.emit('osc_send', self.config.host, self.config.port, ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_PING.MESSAGE);
+		self.oscSend( self.config.host, self.config.port, ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_PING.MESSAGE);
 		if(self.zoomosc_client_data.subscribeMode<1){
 			//set subscribe mode
-			self.system.emit('osc_send',
+			self.oscSend(
 				self.config.host,				self.config.port,
 				ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_SUBSCRIBE.MESSAGE, {type: 'f', value: parseFloat(self.config.subscribeMode)}
 			);
 			//set gallery track mode
-			self.system.emit('osc_send',
+			self.oscSend(
 				self.config.host,				self.config.port,
 				ZOSC.actions.APP_ACTION_GROUP.MESSAGES.ZOSC_MSG_GALTRACK_MODE.MESSAGE, {type: 'f', value: parseFloat(self.config.galTrackMode)}
 			);
