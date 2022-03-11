@@ -2,7 +2,7 @@
 var instance_skel = require('../../instance_skel');
 var OSC 					= require('osc');
 //API file
-var ZOSC=require('./zoscconstants.js');
+var ZOSC=require('./internalconstants.js');
 //Icons file
 var ZOSC_ICONS=require('./zoscicons.js');
 var debug;
