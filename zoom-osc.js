@@ -45,9 +45,7 @@ function instance(system, id, config) {
 	self.pingLoop={ };
 	// super-constructor
 	instance_skel.apply(this, arguments);
-	Object.assign(this, {
-		...feedbacks
-	});
+	
 	self.actions(); // export actions
 	self.init_presets();
 
