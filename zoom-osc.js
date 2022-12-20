@@ -1762,6 +1762,7 @@ for(const [targetType_short, targetType] of Object.entries(preset_target_types))
 		}
 	}
 }
+	try {
 console.log("DEBUG Finding custom presets", fs.readdirSync(path.resolve(__dirname,'presets/')));
 fs.readdirSync(path.resolve(__dirname,'presets/')).forEach(file => {
 	if(path.basename(file).startsWith("Custom")) {
@@ -1779,7 +1780,9 @@ fs.readdirSync(path.resolve(__dirname,'presets/')).forEach(file => {
 		}
 	}
 });
-
+	} catch (e) {
+		// Ignore
+	}
 
 self.setPresetDefinitions(presets);
 };
